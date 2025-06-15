@@ -4,9 +4,15 @@
   "private": true,
   "dependencies": {
     "@capacitor/android": "^7.3.0",
+    "@capacitor/app": "^7.0.0",
     "@capacitor/cli": "^7.3.0",
     "@capacitor/core": "^7.3.0",
+    "@capacitor/haptics": "^7.0.0",
     "@capacitor/ios": "^7.3.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/push-notifications": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
     "@clerk/clerk-react": "^5.32.0",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
@@ -18,18 +24,32 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "axios": "^1.6.2",
+    "date-fns": "^3.0.6",
     "lucide-react": "^0.515.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-router-dom": "^6.20.1",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zustand": "^4.4.7"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "ionic:build": "npm run build",
+    "ionic:serve": "npm run start",
+    "cap:sync": "npx cap sync",
+    "cap:run:android": "npx cap run android",
+    "cap:run:ios": "npx cap run ios",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:build": "npm run build && npx cap sync",
+    "dev": "npm run start",
+    "dev:mobile": "npm run cap:sync && npm run start"
   },
   "eslintConfig": {
     "extends": [

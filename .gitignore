@@ -11,6 +11,7 @@
 # production
 /build
 /dist
+/www
 
 # misc
 .DS_Store
@@ -49,3 +50,39 @@ jspm_packages/
 .idea/
 *.swp
 *.swo
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# ESLint cache
+.eslintcache
+
+# Prettier cache
+.prettiercache
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Apple files
+.DS_Store?
+
+# Temporary folders
+tmp/
+temp/
+
+# Environment variables
+.env.backup

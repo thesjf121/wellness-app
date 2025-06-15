@@ -2,13 +2,33 @@
 
 export interface User {
   id: string;
+  clerkId: string;
   email: string;
   firstName: string;
   lastName: string;
   role: 'super_admin' | 'team_sponsor' | 'member';
   profilePicture?: string;
+  profile: UserProfile;
+  goals: UserGoals;
+  trainingCompleted: boolean;
+  eligibilityDate: Date | null;
+  groupMemberships: string[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UserProfile {
+  dateOfBirth?: Date;
+  height?: number;
+  weight?: number;
+  activityLevel: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active';
+  primaryGoals: ('weight_loss' | 'fitness' | 'nutrition' | 'social')[];
+}
+
+export interface UserGoals {
+  dailySteps: number;
+  dailyCalories?: number;
+  weeklyWeightLoss?: number;
 }
 
 export interface Group {

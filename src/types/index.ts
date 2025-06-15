@@ -45,11 +45,62 @@ export interface Group {
 export interface StepData {
   id: string;
   userId: string;
-  date: string;
-  steps: number;
+  date: string; // YYYY-MM-DD format
+  stepCount: number;
   goal: number;
+  distance?: number; // in meters
+  activeMinutes?: number;
+  calories?: number;
+  source: 'healthkit' | 'googlefit' | 'manual' | 'web';
   synced: boolean;
   createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StepGoal {
+  id: string;
+  userId: string;
+  dailyStepGoal: number;
+  weeklyStepGoal?: number;
+  monthlyStepGoal?: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StepAchievement {
+  id: string;
+  userId: string;
+  type: 'daily_goal' | 'weekly_goal' | 'monthly_goal' | 'streak' | 'milestone';
+  title: string;
+  description: string;
+  targetValue: number;
+  currentValue: number;
+  isCompleted: boolean;
+  completedAt?: Date;
+  createdAt: Date;
+}
+
+export interface StepStreak {
+  id: string;
+  userId: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveDate: Date;
+  isActive: boolean;
+}
+
+export interface StepSummary {
+  today: number;
+  yesterday: number;
+  thisWeek: number;
+  lastWeek: number;
+  thisMonth: number;
+  lastMonth: number;
+  average7Days: number;
+  average30Days: number;
+  totalSteps: number;
+  goalAchievementRate: number; // percentage
 }
 
 export interface FoodEntry {

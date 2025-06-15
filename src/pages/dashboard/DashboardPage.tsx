@@ -1,18 +1,60 @@
 import React, { useEffect } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { useHealthStore } from '../../store/healthStore';
+import { healthService } from '../../services/healthService';
+import { formatSteps } from '../../utils/helpers';
 import { ROUTES } from '../../utils/constants';
 
 const DashboardPage: React.FC = () => {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+  
+  const {
+    todaysSteps,
+    stepGoal,
+    todaysCalories,
+    calorieGoal,
+    setStepData,
+    setStepGoal,
+    updateTodaysSteps
+  } = useHealthStore();
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       navigate(ROUTES.LOGIN);
     }
   }, [isSignedIn, isLoaded, navigate]);
+
+  useEffect(() => {
+    if (user && isSignedIn) {
+      loadDashboardData();
+    }
+  }, [user, isSignedIn]);
+
+  const loadDashboardData = async () => {
+    if (!user) return;
+
+    try {
+      // Load today's steps
+      const steps = await healthService.getTodaysSteps();
+      updateTodaysSteps(steps);
+
+      // Load step goal
+      const goal = await healthService.getStepGoal(user.id);
+      if (goal) {
+        setStepGoal(goal);
+      }
+
+      // Load recent step data
+      const stepHistory = await healthService.getStepsHistory(7);
+      setStepData(stepHistory);
+
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  };
 
   if (!isLoaded) {
     return (
@@ -49,8 +91,22 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm text-gray-600">Today's Steps</p>
-              <p className="text-2xl font-bold text-blue-600">0</p>
-              <p className="text-xs text-gray-500">Goal: 8,000</p>
+              <p className="text-2xl font-bold text-blue-600">{formatSteps(todaysSteps)}</p>
+              <p className="text-xs text-gray-500">
+                Goal: {stepGoal ? formatSteps(stepGoal.dailyStepGoal) : '8,000'}
+              </p>
+              {stepGoal && (
+                <div className="mt-1">
+                  <div className="w-full bg-gray-200 rounded-full h-1">
+                    <div 
+                      className="bg-blue-600 h-1 rounded-full" 
+                      style={{ 
+                        width: `${Math.min((todaysSteps / stepGoal.dailyStepGoal) * 100, 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -100,14 +156,23 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold mb-3">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg text-left transition-colors">
-              Log Food Entry
+            <button 
+              onClick={() => navigate(ROUTES.FOOD_JOURNAL)}
+              className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg text-left transition-colors"
+            >
+              📝 Log Food Entry
             </button>
-            <button className="w-full bg-green-50 hover:bg-green-100 text-green-700 py-2 px-4 rounded-lg text-left transition-colors">
-              View Step History
+            <button 
+              onClick={() => navigate(ROUTES.STEP_COUNTER)}
+              className="w-full bg-green-50 hover:bg-green-100 text-green-700 py-2 px-4 rounded-lg text-left transition-colors"
+            >
+              👟 View Step Tracker
             </button>
-            <button className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 py-2 px-4 rounded-lg text-left transition-colors">
-              Continue Training
+            <button 
+              onClick={() => navigate(ROUTES.TRAINING)}
+              className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 py-2 px-4 rounded-lg text-left transition-colors"
+            >
+              🎓 Continue Training
             </button>
           </div>
         </div>

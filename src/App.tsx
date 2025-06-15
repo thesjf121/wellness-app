@@ -8,6 +8,7 @@ import { ROUTES } from './utils/constants';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import AuthPage from './pages/auth/AuthPage';
+import StepsPage from './pages/steps/StepsPage';
 
 // Get Clerk publishable key from environment
 const clerkPubKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
@@ -26,6 +27,7 @@ function App() {
             <Route path={ROUTES.LOGIN} element={<AuthPage mode="login" />} />
             <Route path={ROUTES.REGISTER} element={<AuthPage mode="register" />} />
             <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+            <Route path={ROUTES.STEP_COUNTER} element={<StepsPage />} />
             {/* Add more routes as components are created */}
           </Routes>
         </Layout>

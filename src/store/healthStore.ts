@@ -1,12 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { StepData, FoodEntry } from '../types';
+import { StepData, FoodEntry, StepGoal, StepSummary, StepStreak, StepAchievement } from '../types';
 
 interface HealthState {
   // Step tracking
   stepData: StepData[];
   todaysSteps: number;
-  stepGoal: number;
+  stepGoal: StepGoal | null;
+  stepSummary: StepSummary | null;
+  stepStreak: StepStreak | null;
+  stepAchievements: StepAchievement[];
   isHealthKitAvailable: boolean;
   isGoogleFitAvailable: boolean;
   healthPermissionsGranted: boolean;
@@ -19,6 +22,8 @@ interface HealthState {
   // Loading states
   isLoadingSteps: boolean;
   isLoadingFood: boolean;
+  isLoadingStepSummary: boolean;
+  isLoadingStepGoal: boolean;
   
   // Error states
   stepError: string | null;
@@ -29,12 +34,19 @@ interface HealthActions {
   // Step actions
   setStepData: (data: StepData[]) => void;
   addStepEntry: (entry: StepData) => void;
+  updateStepEntry: (id: string, updates: Partial<StepData>) => void;
+  deleteStepEntry: (id: string) => void;
   updateTodaysSteps: (steps: number) => void;
-  setStepGoal: (goal: number) => void;
+  setStepGoal: (goal: StepGoal | null) => void;
+  setStepSummary: (summary: StepSummary | null) => void;
+  setStepStreak: (streak: StepStreak | null) => void;
+  setStepAchievements: (achievements: StepAchievement[]) => void;
   setHealthKitAvailable: (available: boolean) => void;
   setGoogleFitAvailable: (available: boolean) => void;
   setHealthPermissions: (granted: boolean) => void;
   setStepLoading: (loading: boolean) => void;
+  setStepGoalLoading: (loading: boolean) => void;
+  setStepSummaryLoading: (loading: boolean) => void;
   setStepError: (error: string | null) => void;
 
   // Food actions
@@ -60,7 +72,10 @@ export const useHealthStore = create<HealthStore>()(
       // Initial state
       stepData: [],
       todaysSteps: 0,
-      stepGoal: 8000,
+      stepGoal: null,
+      stepSummary: null,
+      stepStreak: null,
+      stepAchievements: [],
       isHealthKitAvailable: false,
       isGoogleFitAvailable: false,
       healthPermissionsGranted: false,
@@ -71,6 +86,8 @@ export const useHealthStore = create<HealthStore>()(
       
       isLoadingSteps: false,
       isLoadingFood: false,
+      isLoadingStepSummary: false,
+      isLoadingStepGoal: false,
       stepError: null,
       foodError: null,
 
@@ -90,11 +107,52 @@ export const useHealthStore = create<HealthStore>()(
         } else {
           set({ stepData: [...currentData, entry] });
         }
+
+        // Update today's steps if the entry is for today
+        const today = new Date().toISOString().split('T')[0];
+        if (entry.date === today) {
+          set({ todaysSteps: entry.stepCount });
+        }
+      },
+
+      updateStepEntry: (id, updates) => {
+        const currentData = get().stepData;
+        const updatedData = currentData.map(entry =>
+          entry.id === id ? { ...entry, ...updates } : entry
+        );
+        set({ stepData: updatedData });
+
+        // Update today's steps if the updated entry is for today
+        const today = new Date().toISOString().split('T')[0];
+        const updatedEntry = updatedData.find(entry => entry.id === id);
+        if (updatedEntry && updatedEntry.date === today) {
+          set({ todaysSteps: updatedEntry.stepCount });
+        }
+      },
+
+      deleteStepEntry: (id) => {
+        const currentData = get().stepData;
+        const entryToDelete = currentData.find(entry => entry.id === id);
+        const filteredData = currentData.filter(entry => entry.id !== id);
+        set({ stepData: filteredData });
+
+        // Update today's steps if the deleted entry was for today
+        const today = new Date().toISOString().split('T')[0];
+        if (entryToDelete && entryToDelete.date === today) {
+          const todayEntry = filteredData.find(entry => entry.date === today);
+          set({ todaysSteps: todayEntry?.stepCount || 0 });
+        }
       },
 
       updateTodaysSteps: (todaysSteps) => set({ todaysSteps }),
 
       setStepGoal: (stepGoal) => set({ stepGoal }),
+
+      setStepSummary: (stepSummary) => set({ stepSummary }),
+
+      setStepStreak: (stepStreak) => set({ stepStreak }),
+
+      setStepAchievements: (stepAchievements) => set({ stepAchievements }),
 
       setHealthKitAvailable: (isHealthKitAvailable) => set({ isHealthKitAvailable }),
 
@@ -103,6 +161,10 @@ export const useHealthStore = create<HealthStore>()(
       setHealthPermissions: (healthPermissionsGranted) => set({ healthPermissionsGranted }),
 
       setStepLoading: (isLoadingSteps) => set({ isLoadingSteps }),
+
+      setStepGoalLoading: (isLoadingStepGoal) => set({ isLoadingStepGoal }),
+
+      setStepSummaryLoading: (isLoadingStepSummary) => set({ isLoadingStepSummary }),
 
       setStepError: (stepError) => set({ stepError }),
 
@@ -186,6 +248,9 @@ export const useHealthStore = create<HealthStore>()(
       partialize: (state) => ({
         stepData: state.stepData,
         stepGoal: state.stepGoal,
+        stepSummary: state.stepSummary,
+        stepStreak: state.stepStreak,
+        stepAchievements: state.stepAchievements,
         foodEntries: state.foodEntries,
         calorieGoal: state.calorieGoal,
         healthPermissionsGranted: state.healthPermissionsGranted,

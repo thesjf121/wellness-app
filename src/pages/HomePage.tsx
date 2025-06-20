@@ -1,19 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
 import { ROUTES } from '../utils/constants';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
-
-  const handleGetStarted = () => {
-    if (isSignedIn) {
-      navigate(ROUTES.DASHBOARD);
-    } else {
-      navigate(ROUTES.REGISTER);
-    }
-  };
 
   return (
     <div className="text-center py-12">
@@ -59,20 +49,23 @@ const HomePage: React.FC = () => {
       
       <div className="space-x-4">
         <button 
-          onClick={handleGetStarted}
+          onClick={() => navigate(ROUTES.WELCOME)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
         >
-          {isSignedIn ? 'Go to Dashboard' : 'Get Started'}
+          Get Started
         </button>
-        
-        {!isSignedIn && (
-          <button 
-            onClick={() => navigate(ROUTES.LOGIN)}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-          >
-            Sign In
-          </button>
-        )}
+        <button 
+          onClick={() => navigate(ROUTES.DASHBOARD)}
+          className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+        >
+          Dashboard
+        </button>
+        <button 
+          onClick={() => navigate(ROUTES.STEP_COUNTER)}
+          className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+        >
+          Try Step Tracker
+        </button>
       </div>
     </div>
   );

@@ -11,11 +11,31 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#1f2937",
-      showSpinner: false
+      showSpinner: false,
+      androidScaleType: "CENTER_CROP",
+      splashFullScreen: true,
+      splashImmersive: true
     },
     StatusBar: {
-      style: 'DEFAULT'
+      style: 'DEFAULT',
+      backgroundColor: '#1f2937'
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"]
     }
+  },
+  ios: {
+    contentInset: "automatic",
+    limitsNavigationBarChanges: false,
+    allowsLinkPreview: true
+  },
+  android: {
+    buildOptions: {
+      keystorePath: undefined,
+      keystoreAlias: undefined
+    },
+    allowMixedContent: false,
+    webContentsDebuggingEnabled: false
   }
 };
 

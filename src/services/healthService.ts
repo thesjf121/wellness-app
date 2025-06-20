@@ -1,336 +1,564 @@
-import { Capacitor } from '@capacitor/core';
-import { StepData, StepGoal, StepSummary, StepStreak, StepAchievement } from '../types';
-import { apiService } from './api';
-import { getDateString, getDaysAgo } from '../utils/helpers';
+// Health data service for step tracking and wellness metrics
 
-export interface HealthKitData {
-  steps: number;
-  distance?: number;
-  activeMinutes?: number;
-  calories?: number;
-  date: string;
+import { Capacitor } from '@capacitor/core';
+import { 
+  StepEntry, 
+  StepGoal, 
+  StepStats, 
+  StepSyncStatus,
+  HealthPermissions,
+  CreateStepEntryRequest,
+  GetStepHistoryResponse,
+  StepDataSource
+} from '../types/steps';
+import { errorService } from './errorService';
+import { healthKitService } from './healthKitService';
+import { googleFitService } from './googleFitService';
+import { notificationService } from './notificationService';
+
+// Import the health plugin
+let CapacitorHealth: any;
+try {
+  const { CapacitorHealth: Health } = require('capacitor-health');
+  CapacitorHealth = Health;
+} catch (error) {
+  console.warn('Health plugin not available:', error);
 }
 
-export interface StepEntryRequest {
-  date: string;
-  stepCount: number;
-  distance?: number;
-  activeMinutes?: number;
-  calories?: number;
-  source?: 'manual' | 'healthkit' | 'googlefit' | 'web';
+interface HealthServiceConfig {
+  autoSync: boolean;
+  syncInterval: number; // minutes
+  enableNotifications: boolean;
 }
 
 class HealthService {
-  private isNative: boolean;
+  private config: HealthServiceConfig = {
+    autoSync: true,
+    syncInterval: 60, // 1 hour
+    enableNotifications: true
+  };
 
-  constructor() {
-    this.isNative = Capacitor.isNativePlatform();
-  }
+  private syncInterval?: NodeJS.Timeout;
+  private isInitialized = false;
 
-  // Platform availability checks
-  async isHealthKitAvailable(): Promise<boolean> {
-    if (!this.isNative) return false;
-    
+  /**
+   * Initialize the health service
+   */
+  async initialize(): Promise<void> {
     try {
-      // This will be implemented when HealthKit plugin is added
-      return Capacitor.getPlatform() === 'ios';
-    } catch (error) {
-      console.error('Error checking HealthKit availability:', error);
-      return false;
-    }
-  }
+      if (this.isInitialized) return;
 
-  async isGoogleFitAvailable(): Promise<boolean> {
-    if (!this.isNative) return false;
-    
-    try {
-      // This will be implemented when Google Fit plugin is added
-      return Capacitor.getPlatform() === 'android';
-    } catch (error) {
-      console.error('Error checking Google Fit availability:', error);
-      return false;
-    }
-  }
+      // Initialize notification service
+      await notificationService.initialize();
 
-  async requestPermissions(): Promise<boolean> {
-    try {
-      if (Capacitor.getPlatform() === 'ios') {
-        return await this.requestHealthKitPermissions();
-      } else if (Capacitor.getPlatform() === 'android') {
-        return await this.requestGoogleFitPermissions();
+      // Check if we're on a supported platform
+      if (!Capacitor.isNativePlatform()) {
+        console.log('Health service: Running on web, using mock data');
+        this.isInitialized = true;
+        return;
       }
-      return true; // Web platform doesn't need permissions
-    } catch (error) {
-      console.error('Error requesting health permissions:', error);
-      return false;
-    }
-  }
 
-  private async requestHealthKitPermissions(): Promise<boolean> {
-    // TODO: Implement HealthKit permission request
-    // This requires @capacitor-community/healthkit plugin
-    return true; // Placeholder
-  }
-
-  private async requestGoogleFitPermissions(): Promise<boolean> {
-    // TODO: Implement Google Fit permission request
-    // This requires @capacitor-community/google-fit plugin
-    return true; // Placeholder
-  }
-
-  // Step data retrieval
-  async getTodaysSteps(): Promise<number> {
-    try {
-      const today = getDateString(new Date());
-      const stepData = await this.getStepDataForDate(today);
-      return stepData?.stepCount || 0;
-    } catch (error) {
-      console.error('Error getting today\'s steps:', error);
-      return 0;
-    }
-  }
-
-  async getStepDataForDate(date: string): Promise<StepData | null> {
-    try {
-      const response = await apiService.get<StepData>(`/steps/daily/${date}`);
-      return response.success && response.data ? response.data : null;
-    } catch (error) {
-      console.error('Error getting step data for date:', error);
-      return null;
-    }
-  }
-
-  async getStepsHistory(days: number = 7): Promise<StepData[]> {
-    try {
-      const response = await apiService.get<StepData[]>(`/steps/history/${days}`);
-      return response.success && response.data ? response.data : [];
-    } catch (error) {
-      console.error('Error getting steps history:', error);
-      return [];
-    }
-  }
-
-  // Manual step entry
-  async addStepEntry(stepEntry: StepEntryRequest): Promise<StepData | null> {
-    try {
-      const entryData = {
-        ...stepEntry,
-        source: stepEntry.source || 'manual',
-        synced: true
-      };
-
-      const response = await apiService.post<StepData>('/steps/entries', entryData);
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      throw new Error(response.error || 'Failed to add step entry');
-    } catch (error) {
-      console.error('Error adding step entry:', error);
-      throw error;
-    }
-  }
-
-  async updateStepEntry(id: string, updates: Partial<StepEntryRequest>): Promise<StepData | null> {
-    try {
-      const response = await apiService.put<StepData>(`/steps/entries/${id}`, updates);
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      throw new Error(response.error || 'Failed to update step entry');
-    } catch (error) {
-      console.error('Error updating step entry:', error);
-      throw error;
-    }
-  }
-
-  async deleteStepEntry(id: string): Promise<boolean> {
-    try {
-      const response = await apiService.delete(`/steps/entries/${id}`);
-      return response.success;
-    } catch (error) {
-      console.error('Error deleting step entry:', error);
-      return false;
-    }
-  }
-
-  // Step goals management
-  async getStepGoal(userId: string): Promise<StepGoal | null> {
-    try {
-      const response = await apiService.get<StepGoal>(`/users/${userId}/step-goal`);
-      return response.success && response.data ? response.data : null;
-    } catch (error) {
-      console.error('Error getting step goal:', error);
-      return null;
-    }
-  }
-
-  async setStepGoal(userId: string, dailyStepGoal: number): Promise<StepGoal | null> {
-    try {
-      const goalData = {
-        dailyStepGoal,
-        weeklyStepGoal: dailyStepGoal * 7,
-        monthlyStepGoal: dailyStepGoal * 30,
-        isActive: true
-      };
-
-      const response = await apiService.post<StepGoal>(`/users/${userId}/step-goal`, goalData);
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      throw new Error(response.error || 'Failed to set step goal');
-    } catch (error) {
-      console.error('Error setting step goal:', error);
-      throw error;
-    }
-  }
-
-  // Step summary and analytics
-  async getStepSummary(userId: string): Promise<StepSummary | null> {
-    try {
-      const response = await apiService.get<StepSummary>(`/users/${userId}/step-summary`);
-      return response.success && response.data ? response.data : null;
-    } catch (error) {
-      console.error('Error getting step summary:', error);
-      return null;
-    }
-  }
-
-  // Step streaks
-  async getStepStreak(userId: string): Promise<StepStreak | null> {
-    try {
-      const response = await apiService.get<StepStreak>(`/users/${userId}/step-streak`);
-      return response.success && response.data ? response.data : null;
-    } catch (error) {
-      console.error('Error getting step streak:', error);
-      return null;
-    }
-  }
-
-  // Achievements
-  async getStepAchievements(userId: string): Promise<StepAchievement[]> {
-    try {
-      const response = await apiService.get<StepAchievement[]>(`/users/${userId}/step-achievements`);
-      return response.success && response.data ? response.data : [];
-    } catch (error) {
-      console.error('Error getting step achievements:', error);
-      return [];
-    }
-  }
-
-  // Background sync (for native platforms)
-  async syncStepsFromHealthPlatform(): Promise<HealthKitData[]> {
-    try {
-      const syncData: HealthKitData[] = [];
-      
-      if (Capacitor.getPlatform() === 'ios') {
-        // Get last 7 days of data from HealthKit
-        for (let i = 0; i < 7; i++) {
-          const date = new Date();
-          date.setDate(date.getDate() - i);
-          const dateString = getDateString(date);
-          
-          const steps = await this.getHealthKitSteps(date);
-          syncData.push({
-            steps,
-            date: dateString
-          });
-        }
-      } else if (Capacitor.getPlatform() === 'android') {
-        // Get last 7 days of data from Google Fit
-        for (let i = 0; i < 7; i++) {
-          const date = new Date();
-          date.setDate(date.getDate() - i);
-          const dateString = getDateString(date);
-          
-          const steps = await this.getGoogleFitSteps(date);
-          syncData.push({
-            steps,
-            date: dateString
-          });
+      // Initialize the health plugin if available
+      if (CapacitorHealth) {
+        await this.requestPermissions();
+        
+        if (this.config.autoSync) {
+          this.startAutoSync();
         }
       }
-      
-      // Sync each day's data to server
-      for (const dayData of syncData) {
-        await this.syncStepsToServer(dayData);
-      }
-      
-      return syncData;
+
+      this.isInitialized = true;
+      errorService.logInfo('Health service initialized successfully');
     } catch (error) {
-      console.error('Error syncing steps from health platform:', error);
+      errorService.logError(error as Error, { context: 'HealthService.initialize' });
+      throw error;
+    }
+  }
+
+  /**
+   * Request health data permissions
+   */
+  async requestPermissions(): Promise<HealthPermissions> {
+    try {
+      const platform = Capacitor.getPlatform();
+      
+      // Use platform-specific services
+      if (platform === 'ios' && healthKitService.isHealthKitAvailable()) {
+        return await healthKitService.requestHealthKitPermissions();
+      } else if (platform === 'android' && googleFitService.isGoogleFitAvailable()) {
+        return await googleFitService.requestGoogleFitPermissions();
+      }
+
+      // Fallback for web or unsupported platforms
+      return {
+        granted: false,
+        stepsRead: false,
+        distanceRead: false,
+        activeEnergyRead: false,
+        requestedAt: new Date()
+      };
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'HealthService.requestPermissions' });
+      
+      return {
+        granted: false,
+        stepsRead: false,
+        distanceRead: false,
+        activeEnergyRead: false,
+        requestedAt: new Date(),
+        deniedAt: new Date()
+      };
+    }
+  }
+
+  /**
+   * Get step data for a date range
+   */
+  async getStepData(startDate: Date, endDate: Date): Promise<StepEntry[]> {
+    try {
+      const platform = Capacitor.getPlatform();
+      
+      // Use platform-specific services
+      if (platform === 'ios' && healthKitService.isHealthKitAvailable()) {
+        return await healthKitService.getStepCount(startDate, endDate);
+      } else if (platform === 'android' && googleFitService.isGoogleFitAvailable()) {
+        return await googleFitService.getStepCount(startDate, endDate);
+      } else {
+        // Return mock data for web/development
+        return this.generateMockStepData(startDate, endDate);
+      }
+    } catch (error) {
+      errorService.logError(error as Error, { 
+        context: 'HealthService.getStepData',
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      });
+
+      // Fallback to localStorage data
+      return this.getLocalStepData(startDate, endDate);
+    }
+  }
+
+  /**
+   * Add manual step entry
+   */
+  async addManualStepEntry(entry: CreateStepEntryRequest): Promise<StepEntry> {
+    try {
+      const stepEntry: StepEntry = {
+        id: `${entry.date}_manual_${Date.now()}`,
+        userId: 'current_user',
+        date: entry.date,
+        stepCount: entry.stepCount,
+        distance: entry.distance,
+        activeMinutes: entry.activeMinutes,
+        caloriesBurned: entry.caloriesBurned,
+        source: 'manual',
+        synced: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deviceInfo: {
+          platform: Capacitor.getPlatform() as 'ios' | 'android' | 'web',
+        },
+        hourlyData: entry.hourlyData
+      };
+
+      // Save to localStorage
+      await this.saveStepEntryLocally(stepEntry);
+
+      // TODO: Sync to backend
+      // await this.syncStepEntry(stepEntry);
+
+      return stepEntry;
+    } catch (error) {
+      errorService.logError(error as Error, { 
+        context: 'HealthService.addManualStepEntry',
+        entry 
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Set daily step goal
+   */
+  async setDailyStepGoal(target: number): Promise<StepGoal> {
+    try {
+      const goal: StepGoal = {
+        id: `goal_${Date.now()}`,
+        userId: 'current_user',
+        dailyTarget: target,
+        startDate: new Date(),
+        isActive: true,
+        createdAt: new Date()
+      };
+
+      // Save to localStorage
+      localStorage.setItem('step_goal', JSON.stringify(goal));
+
+      return goal;
+    } catch (error) {
+      errorService.logError(error as Error, { 
+        context: 'HealthService.setDailyStepGoal',
+        target 
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get current step goal
+   */
+  async getCurrentStepGoal(): Promise<StepGoal | null> {
+    try {
+      const stored = localStorage.getItem('step_goal');
+      if (!stored) return null;
+
+      return JSON.parse(stored) as StepGoal;
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'HealthService.getCurrentStepGoal' });
+      return null;
+    }
+  }
+
+  /**
+   * Get step statistics
+   */
+  async getStepStats(): Promise<StepStats> {
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30); // Last 30 days
+
+      const stepData = await this.getStepData(startDate, endDate);
+      const goal = await this.getCurrentStepGoal();
+
+      const totalSteps = stepData.reduce((sum, entry) => sum + entry.stepCount, 0);
+      const averageDailySteps = Math.round(totalSteps / stepData.length);
+      const goalsReached = goal ? stepData.filter(entry => entry.stepCount >= goal.dailyTarget).length : 0;
+
+      // Calculate streaks
+      const { currentStreak, longestStreak } = this.calculateStepStreaks(stepData, goal?.dailyTarget || 8000);
+
+      // Weekly stats
+      const thisWeekData = stepData.filter(entry => {
+        const entryDate = new Date(entry.date);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return entryDate >= weekAgo;
+      });
+      const thisWeekSteps = thisWeekData.reduce((sum, entry) => sum + entry.stepCount, 0);
+
+      // Last week stats
+      const lastWeekStart = new Date();
+      lastWeekStart.setDate(lastWeekStart.getDate() - 14);
+      const lastWeekEnd = new Date();
+      lastWeekEnd.setDate(lastWeekEnd.getDate() - 7);
+      
+      const lastWeekData = stepData.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= lastWeekStart && entryDate < lastWeekEnd;
+      });
+      const lastWeekSteps = lastWeekData.reduce((sum, entry) => sum + entry.stepCount, 0);
+
+      const weeklyChange = lastWeekSteps > 0 ? ((thisWeekSteps - lastWeekSteps) / lastWeekSteps) * 100 : 0;
+
+      return {
+        userId: 'current_user',
+        totalSteps,
+        averageDailySteps,
+        currentStreak,
+        longestStreak,
+        goalsReached,
+        totalGoals: stepData.length,
+        activeDays: stepData.filter(entry => entry.stepCount > 0).length,
+        lastSyncDate: new Date(),
+        thisWeekSteps,
+        lastWeekSteps,
+        weeklyChange: Math.round(weeklyChange),
+        thisMonthSteps: totalSteps,
+        lastMonthSteps: 0, // TODO: Calculate
+        monthlyChange: 0
+      };
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'HealthService.getStepStats' });
+      throw error;
+    }
+  }
+
+  /**
+   * Start automatic health data sync
+   */
+  private startAutoSync(): void {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval);
+    }
+
+    this.syncInterval = setInterval(async () => {
+      try {
+        await this.syncHealthData();
+      } catch (error) {
+        errorService.logError(error as Error, { context: 'HealthService.autoSync' });
+      }
+    }, this.config.syncInterval * 60 * 1000);
+  }
+
+  /**
+   * Sync health data from device
+   */
+  async syncHealthData(): Promise<void> {
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7); // Last 7 days
+
+      const stepData = await this.getStepData(startDate, endDate);
+      
+      // Save to local storage
+      for (const entry of stepData) {
+        await this.saveStepEntryLocally(entry);
+      }
+
+      // Check for achievements
+      await this.checkForAchievements(stepData);
+
+      errorService.logInfo('Health data sync completed', { 
+        entriesCount: stepData.length,
+        dateRange: `${startDate.toISOString()} to ${endDate.toISOString()}`
+      });
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'HealthService.syncHealthData' });
+    }
+  }
+
+  /**
+   * Generate mock step data for development/web
+   */
+  private generateMockStepData(startDate: Date, endDate: Date): StepEntry[] {
+    const entries: StepEntry[] = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const baseSteps = 6000 + Math.random() * 8000; // 6k-14k steps
+      const steps = Math.round(baseSteps);
+      
+      entries.push({
+        id: `mock_${currentDate.toISOString().split('T')[0]}`,
+        userId: 'current_user',
+        date: currentDate.toISOString().split('T')[0],
+        stepCount: steps,
+        distance: steps * 0.7, // Rough conversion to meters
+        activeMinutes: Math.round(steps / 100), // Rough conversion
+        caloriesBurned: Math.round(steps * 0.04), // Rough conversion
+        source: 'device',
+        synced: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deviceInfo: {
+          platform: 'web'
+        }
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return entries;
+  }
+
+  /**
+   * Get data source based on platform
+   */
+  private getDataSource(): StepDataSource {
+    const platform = Capacitor.getPlatform();
+    switch (platform) {
+      case 'ios':
+        return 'healthkit';
+      case 'android':
+        return 'googlefit';
+      default:
+        return 'device';
+    }
+  }
+
+  /**
+   * Save step entry to local storage
+   */
+  private async saveStepEntryLocally(entry: StepEntry): Promise<void> {
+    try {
+      const storageKey = 'step_entries';
+      const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      
+      // Update or add entry
+      const index = existing.findIndex((e: StepEntry) => e.date === entry.date && e.source === entry.source);
+      if (index >= 0) {
+        existing[index] = entry;
+      } else {
+        existing.push(entry);
+      }
+
+      // Keep only last 90 days
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 90);
+      const filtered = existing.filter((e: StepEntry) => new Date(e.date) >= cutoffDate);
+
+      localStorage.setItem(storageKey, JSON.stringify(filtered));
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'HealthService.saveStepEntryLocally' });
+    }
+  }
+
+  /**
+   * Get step data from local storage
+   */
+  private getLocalStepData(startDate: Date, endDate: Date): StepEntry[] {
+    try {
+      const stored = localStorage.getItem('step_entries');
+      if (!stored) return [];
+
+      const entries: StepEntry[] = JSON.parse(stored);
+      
+      return entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= startDate && entryDate <= endDate;
+      });
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'HealthService.getLocalStepData' });
       return [];
     }
   }
 
-  private async getHealthKitSteps(date: Date): Promise<number> {
-    // TODO: Implement actual HealthKit integration
-    // For now, return realistic mock data
-    const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
-    const base = 6000 + (dayOfYear % 4000); // Vary between 6k-10k
-    return Math.floor(base + (Math.random() * 2000));
+  /**
+   * Calculate step streaks
+   */
+  private calculateStepStreaks(stepData: StepEntry[], goalSteps: number): { currentStreak: number; longestStreak: number } {
+    if (stepData.length === 0) return { currentStreak: 0, longestStreak: 0 };
+
+    // Sort by date
+    const sorted = stepData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+
+    // Check current streak from most recent date
+    for (let i = 0; i < sorted.length; i++) {
+      if (sorted[i].stepCount >= goalSteps) {
+        if (i === 0 || this.isConsecutiveDay(sorted[i-1].date, sorted[i].date)) {
+          currentStreak++;
+          tempStreak++;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    // Find longest streak
+    tempStreak = 0;
+    for (const entry of sorted) {
+      if (entry.stepCount >= goalSteps) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 0;
+      }
+    }
+
+    return { currentStreak, longestStreak };
   }
 
-  private async getGoogleFitSteps(date: Date): Promise<number> {
-    // TODO: Implement actual Google Fit integration
-    // For now, return realistic mock data
-    const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
-    const base = 5500 + (dayOfYear % 4500); // Vary between 5.5k-10k
-    return Math.floor(base + (Math.random() * 2000));
+  /**
+   * Check if two dates are consecutive days
+   */
+  private isConsecutiveDay(date1: string, date2: string): boolean {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    const diffTime = Math.abs(d1.getTime() - d2.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays === 1;
   }
 
-  async syncStepsToServer(stepData: HealthKitData): Promise<boolean> {
+  /**
+   * Check for achievements and send notifications
+   */
+  private async checkForAchievements(stepData: StepEntry[]): Promise<void> {
     try {
-      const entryData: StepEntryRequest = {
-        date: stepData.date,
-        stepCount: stepData.steps,
-        distance: stepData.distance,
-        activeMinutes: stepData.activeMinutes,
-        calories: stepData.calories,
-        source: Capacitor.getPlatform() === 'ios' ? 'healthkit' : 
-                Capacitor.getPlatform() === 'android' ? 'googlefit' : 'web'
-      };
+      // Get current goal
+      const goal = await this.getCurrentStepGoal();
+      if (!goal) return;
 
-      const response = await apiService.post('/steps/sync', entryData);
-      return response.success;
+      // Get today's data
+      const today = new Date().toISOString().split('T')[0];
+      const todayEntry = stepData.find(entry => entry.date === today);
+      if (!todayEntry) return;
+
+      // Check if goal was reached today
+      if (todayEntry.stepCount >= goal.dailyTarget) {
+        const achievementKey = `goal_reached_${today}`;
+        const alreadyNotified = localStorage.getItem(achievementKey);
+        
+        if (!alreadyNotified) {
+          await notificationService.sendGoalReachedNotification(todayEntry.stepCount, goal.dailyTarget);
+          localStorage.setItem(achievementKey, 'true');
+        }
+      }
+
+      // Check for streak milestones
+      const stats = await this.getStepStats();
+      const streakKey = `streak_milestone_${stats.currentStreak}`;
+      const streakNotified = localStorage.getItem(streakKey);
+      
+      if (!streakNotified && stats.currentStreak > 0) {
+        await notificationService.sendStreakMilestoneNotification(stats.currentStreak);
+        localStorage.setItem(streakKey, 'true');
+      }
+
+      // Check for personal best
+      const personalBestKey = 'personal_best_steps';
+      const previousBest = parseInt(localStorage.getItem(personalBestKey) || '0');
+      
+      if (todayEntry.stepCount > previousBest && previousBest > 0) {
+        await notificationService.sendPersonalBestNotification(todayEntry.stepCount, previousBest);
+        localStorage.setItem(personalBestKey, todayEntry.stepCount.toString());
+      } else if (previousBest === 0) {
+        // Set initial personal best without notification
+        localStorage.setItem(personalBestKey, todayEntry.stepCount.toString());
+      }
+
+      // Check for weekly summary (on Sundays)
+      const dayOfWeek = new Date().getDay();
+      if (dayOfWeek === 0) { // Sunday
+        const weeklySummaryKey = `weekly_summary_${today}`;
+        const summaryNotified = localStorage.getItem(weeklySummaryKey);
+        
+        if (!summaryNotified) {
+          // Calculate weekly stats
+          const weekData = stepData.slice(-7);
+          const totalSteps = weekData.reduce((sum, entry) => sum + entry.stepCount, 0);
+          const avgSteps = Math.round(totalSteps / weekData.length);
+          const goalsReached = weekData.filter(entry => entry.stepCount >= goal.dailyTarget).length;
+          
+          await notificationService.sendWeeklySummaryNotification(totalSteps, avgSteps, goalsReached);
+          localStorage.setItem(weeklySummaryKey, 'true');
+        }
+      }
     } catch (error) {
-      console.error('Error syncing steps to server:', error);
-      return false;
+      errorService.logError(error as Error, { context: 'HealthService.checkForAchievements' });
     }
   }
 
-  // Utility methods
-  calculateCaloriesFromSteps(steps: number, weightKg: number = 70): number {
-    // Rough calculation: 0.04 calories per step per kg of body weight
-    return Math.round(steps * 0.04 * weightKg);
-  }
-
-  calculateDistanceFromSteps(steps: number, strideLength: number = 0.762): number {
-    // Default stride length is average for adults (0.762 meters)
-    return steps * strideLength;
-  }
-
-  getStepGoalProgress(steps: number, goal: number): number {
-    return Math.min((steps / goal) * 100, 100);
-  }
-
-  isGoalAchieved(steps: number, goal: number): boolean {
-    return steps >= goal;
-  }
-
-  // Validation methods
-  validateStepCount(steps: number): boolean {
-    return steps >= 0 && steps <= 100000; // Reasonable daily step limit
-  }
-
-  validateStepGoal(goal: number): boolean {
-    return goal >= 1000 && goal <= 50000; // Reasonable goal range
+  /**
+   * Cleanup and stop services
+   */
+  destroy(): void {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval);
+    }
+    this.isInitialized = false;
   }
 }
 
+// Create singleton instance
 export const healthService = new HealthService();
+
+export default healthService;

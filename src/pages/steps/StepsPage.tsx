@@ -1,131 +1,245 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, useUser } from '@clerk/clerk-react';
-import { useHealthStore } from '../../store/healthStore';
+import { useMockAuth } from '../../context/MockAuthContext';
+import { StepHistoryView } from '../../components/steps/StepHistoryView';
 import { healthService } from '../../services/healthService';
-import { formatSteps, formatDate, getDateString } from '../../utils/helpers';
-import { HEALTH_GOALS } from '../../utils/constants';
+import { NotificationHistory } from '../../components/notifications/NotificationHistory';
+import { NotificationPreferences } from '../../components/notifications/NotificationPreferences';
+
+type ViewMode = 'today' | 'history' | 'notifications';
 
 const StepsPage: React.FC = () => {
-  const { isSignedIn } = useAuth();
-  const { user } = useUser();
-  const {
-    stepData,
-    todaysSteps,
-    stepGoal,
-    stepSummary,
-    stepStreak,
-    isLoadingSteps,
-    stepError,
-    setStepData,
-    setStepGoal,
-    setStepSummary,
-    setStepStreak,
-    setStepLoading,
-    setStepError,
-    addStepEntry
-  } = useHealthStore();
-
-  const [showManualEntry, setShowManualEntry] = useState(false);
+  const { user, isSignedIn } = useMockAuth();
+  const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [manualSteps, setManualSteps] = useState('');
-  const [manualDate, setManualDate] = useState(getDateString(new Date()));
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [stepList, setStepList] = useState<Array<{id: string, steps: number, date: string}>>([]);
+  const [todaySteps, setTodaySteps] = useState(0);
+  const [goal, setGoal] = useState(8000);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [showNotificationPrefs, setShowNotificationPrefs] = useState(false);
 
+  // Load from localStorage on mount
   useEffect(() => {
-    if (user) {
-      loadStepData();
+    const saved = localStorage.getItem('wellness-steps');
+    if (saved) {
+      setStepList(JSON.parse(saved));
     }
-  }, [user]);
+    initializeHealthService();
+  }, []);
 
-  const loadStepData = async () => {
-    if (!user) return;
+  // Save to localStorage whenever stepList changes
+  useEffect(() => {
+    localStorage.setItem('wellness-steps', JSON.stringify(stepList));
+  }, [stepList]);
 
-    setStepLoading(true);
-    setStepError(null);
-
+  const initializeHealthService = async () => {
     try {
-      // Load step history
-      const history = await healthService.getStepsHistory(30);
-      setStepData(history);
-
-      // Load step goal
-      const goal = await healthService.getStepGoal(user.id);
-      setStepGoal(goal);
-
-      // Load step summary
-      const summary = await healthService.getStepSummary(user.id);
-      setStepSummary(summary);
-
-      // Load step streak
-      const streak = await healthService.getStepStreak(user.id);
-      setStepStreak(streak);
-
+      await healthService.initialize();
+      const permissions = await healthService.requestPermissions();
+      setPermissionsGranted(permissions.granted);
+      
+      if (permissions.granted) {
+        await loadTodaySteps();
+        await loadGoal();
+      }
     } catch (error) {
-      console.error('Error loading step data:', error);
-      setStepError('Failed to load step data. Please try again.');
-    } finally {
-      setStepLoading(false);
+      console.error('Failed to initialize health service:', error);
     }
   };
 
-  const handleManualStepEntry = async () => {
-    if (!user || !manualSteps) return;
-
-    const stepCount = parseInt(manualSteps);
-    if (!healthService.validateStepCount(stepCount)) {
-      setStepError('Please enter a valid step count (0-100,000)');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setStepError(null);
-
+  const loadTodaySteps = async () => {
     try {
-      const newEntry = await healthService.addStepEntry({
-        date: manualDate,
-        stepCount,
-        source: 'manual'
-      });
+      const today = new Date();
+      const stepData = await healthService.getStepData(today, today);
+      if (stepData.length > 0) {
+        setTodaySteps(stepData[0].stepCount);
+      }
+    } catch (error) {
+      console.error('Failed to load today steps:', error);
+    }
+  };
 
-      if (newEntry) {
-        addStepEntry(newEntry);
-        setManualSteps('');
-        setShowManualEntry(false);
+  const loadGoal = async () => {
+    try {
+      const currentGoal = await healthService.getCurrentStepGoal();
+      if (currentGoal) {
+        setGoal(currentGoal.dailyTarget);
+      }
+    } catch (error) {
+      console.error('Failed to load goal:', error);
+    }
+  };
+
+  const handleAddSteps = async () => {
+    if (manualSteps) {
+      const steps = parseInt(manualSteps);
+      const newEntry = {
+        id: Date.now().toString(),
+        steps: steps,
+        date: new Date().toLocaleDateString()
+      };
+      
+      setStepList([...stepList, newEntry]);
+      setManualSteps('');
+      
+      // Add to health service as well
+      try {
+        await healthService.addManualStepEntry({
+          date: new Date().toISOString().split('T')[0],
+          stepCount: steps,
+          source: 'manual'
+        });
+        await loadTodaySteps(); // Refresh today's count
+        alert(`Added ${steps} steps!`);
+      } catch (error) {
+        console.error('Failed to add manual steps:', error);
+        alert(`Added ${steps} steps locally!`);
+      }
+    }
+  };
+
+  const handleSetGoal = async () => {
+    try {
+      await healthService.setDailyStepGoal(goal);
+      alert(`Goal set to ${goal.toLocaleString()} steps!`);
+    } catch (error) {
+      console.error('Failed to set goal:', error);
+      alert('Failed to set goal. Please try again.');
+    }
+  };
+
+  const requestPermissions = async () => {
+    try {
+      const permissions = await healthService.requestPermissions();
+      setPermissionsGranted(permissions.granted);
+      
+      if (permissions.granted) {
+        await loadTodaySteps();
+        await loadGoal();
+      }
+    } catch (error) {
+      console.error('Failed to request permissions:', error);
+    }
+  };
+
+  const renderTodayView = () => (
+    <div className="space-y-6">
+      {/* Today's Steps Card */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-900">Today's Steps</h2>
+          {!permissionsGranted && (
+            <button
+              onClick={requestPermissions}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+            >
+              Grant Permissions
+            </button>
+          )}
+        </div>
         
-        // Reload data to get updated summary
-        await loadStepData();
-      }
-    } catch (error) {
-      console.error('Error adding step entry:', error);
-      setStepError('Failed to add step entry. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoalUpdate = async (newGoal: number) => {
-    if (!user) return;
-
-    try {
-      const updatedGoal = await healthService.setStepGoal(user.id, newGoal);
-      if (updatedGoal) {
-        setStepGoal(updatedGoal);
-      }
-    } catch (error) {
-      console.error('Error updating step goal:', error);
-      setStepError('Failed to update step goal. Please try again.');
-    }
-  };
-
-  const currentGoal = stepGoal?.dailyStepGoal || HEALTH_GOALS.DEFAULT_STEPS;
-  const goalProgress = (todaysSteps / currentGoal) * 100;
-  const isGoalAchieved = todaysSteps >= currentGoal;
-
-  if (isLoadingSteps) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading step data...</p>
+          <div className="text-4xl font-bold text-blue-600 mb-2">
+            {todaySteps.toLocaleString()}
+          </div>
+          <div className="text-gray-600 mb-4">
+            {goal > 0 && (
+              <span>
+                {Math.round((todaySteps / goal) * 100)}% of {goal.toLocaleString()} goal
+              </span>
+            )}
+          </div>
+          
+          {goal > 0 && (
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div 
+                className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((todaySteps / goal) * 100, 100)}%` }}
+              ></div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Goal Setting */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Goal</h3>
+        <div className="flex items-center space-x-4">
+          <input
+            type="number"
+            placeholder="Enter daily goal"
+            value={goal}
+            onChange={(e) => setGoal(parseInt(e.target.value) || 0)}
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2"
+            min="1000"
+            max="50000"
+            step="500"
+          />
+          <button
+            onClick={handleSetGoal}
+            className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg"
+          >
+            Set Goal
+          </button>
+        </div>
+      </div>
+
+      {/* Manual Entry */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Manual Steps</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Steps</label>
+            <input
+              type="number"
+              placeholder="Enter step count"
+              value={manualSteps}
+              onChange={(e) => setManualSteps(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            />
+          </div>
+        </div>
+        
+        <button
+          onClick={handleAddSteps}
+          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg"
+        >
+          Add Steps
+        </button>
+      </div>
+
+      {/* Recent Entries */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Manual Entries</h3>
+        {stepList.length > 0 ? (
+          <div className="space-y-2">
+            {stepList.slice(-5).reverse().map((entry) => (
+              <div key={entry.id} className="flex justify-between py-2 border-b">
+                <span>{entry.date}</span>
+                <span className="font-semibold">{entry.steps.toLocaleString()} steps</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No manual entries yet</p>
+        )}
+      </div>
+    </div>
+  );
+
+  if (!isSignedIn || !user) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Step Tracker</h1>
+          <p className="text-gray-500 mb-6">Please sign in to track your daily steps and view your progress.</p>
+          <div className="flex justify-center space-x-4">
+            <a href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+              Sign In
+            </a>
+            <a href="/register" className="border border-gray-300 hover:bg-gray-50 px-6 py-2 rounded-lg">
+              Sign Up
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -133,200 +247,72 @@ const StepsPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
+      {/* Header with View Toggle */}
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Step Tracker</h1>
-        <p className="text-gray-600 mt-2">Track your daily steps and reach your fitness goals</p>
+        
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setViewMode('today')}
+            className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+              viewMode === 'today'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Today
+          </button>
+          <button
+            onClick={() => setViewMode('history')}
+            className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+              viewMode === 'history'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            History
+          </button>
+          <button
+            onClick={() => setViewMode('notifications')}
+            className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+              viewMode === 'notifications'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Notifications
+          </button>
+        </div>
       </div>
 
-      {stepError && (
-        <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <span className="text-red-400">⚠️</span>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{stepError}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Today's Progress */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Today's Progress</h2>
-          
-          {/* Steps Circle Progress */}
-          <div className="relative w-48 h-48 mx-auto mb-6">
-            <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="currentColor"
-                strokeWidth="8"
-                fill="transparent"
-                className="text-gray-200"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="currentColor"
-                strokeWidth="8"
-                fill="transparent"
-                strokeDasharray={`${Math.min(goalProgress * 2.51, 251.2)} 251.2`}
-                className={isGoalAchieved ? "text-green-500" : "text-blue-500"}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-gray-900">{formatSteps(todaysSteps)}</span>
-              <span className="text-sm text-gray-600">of {formatSteps(currentGoal)}</span>
-              <span className="text-lg font-semibold text-blue-600 mt-1">
-                {Math.round(goalProgress)}%
-              </span>
-            </div>
-          </div>
-
-          {isGoalAchieved && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <p className="text-green-800 font-semibold">🎉 Goal achieved! Great job!</p>
-            </div>
+      {/* Content based on view mode */}
+      {viewMode === 'today' && renderTodayView()}
+      {viewMode === 'history' && <StepHistoryView />}
+      {viewMode === 'notifications' && (
+        <div className="space-y-6">
+          {showNotificationPrefs ? (
+            <>
+              <NotificationPreferences onClose={() => setShowNotificationPrefs(false)} />
+              <button
+                onClick={() => setShowNotificationPrefs(false)}
+                className="text-blue-600 hover:text-blue-700 text-sm"
+              >
+                ← Back to notification history
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowNotificationPrefs(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+                >
+                  Notification Settings
+                </button>
+              </div>
+              <NotificationHistory />
+            </>
           )}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <button
-              onClick={() => setShowManualEntry(true)}
-              className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-3 px-4 rounded-lg text-left transition-colors"
-            >
-              📝 Add Manual Step Entry
-            </button>
-            <button
-              onClick={loadStepData}
-              disabled={isLoadingSteps}
-              className="w-full bg-green-50 hover:bg-green-100 text-green-700 py-3 px-4 rounded-lg text-left transition-colors disabled:opacity-50"
-            >
-              🔄 Sync Step Data
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
-          <div className="space-y-3">
-            {stepSummary && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">7-day average:</span>
-                  <span className="font-semibold">{formatSteps(stepSummary.average7Days)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">This week:</span>
-                  <span className="font-semibold">{formatSteps(stepSummary.thisWeek)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">This month:</span>
-                  <span className="font-semibold">{formatSteps(stepSummary.thisMonth)}</span>
-                </div>
-              </>
-            )}
-            {stepStreak && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">Current streak:</span>
-                <span className="font-semibold text-orange-600">
-                  {stepStreak.currentStreak} days 🔥
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Step History */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent History</h3>
-        {stepData.length > 0 ? (
-          <div className="space-y-3">
-            {stepData.slice(0, 10).map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                <div>
-                  <span className="font-medium">{formatDate(entry.date)}</span>
-                  <span className="text-sm text-gray-500 ml-2">({entry.source})</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-semibold">{formatSteps(entry.stepCount)}</span>
-                  {entry.goal > 0 && (
-                    <div className="text-xs text-gray-500">
-                      {Math.round((entry.stepCount / entry.goal) * 100)}% of goal
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <p>No step data yet</p>
-            <p className="text-sm">Add your first entry to get started!</p>
-          </div>
-        )}
-      </div>
-
-      {/* Manual Entry Modal */}
-      {showManualEntry && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Step Entry</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                <input
-                  type="date"
-                  value={manualDate}
-                  onChange={(e) => setManualDate(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Steps</label>
-                <input
-                  type="number"
-                  placeholder="Enter step count"
-                  value={manualSteps}
-                  onChange={(e) => setManualSteps(e.target.value)}
-                  min="0"
-                  max="100000"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowManualEntry(false)}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleManualStepEntry}
-                disabled={isSubmitting || !manualSteps}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? 'Adding...' : 'Add Entry'}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

@@ -10,6 +10,7 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   REGISTER: '/register',
+  ONBOARDING: '/onboarding',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
   GROUPS: '/groups',
@@ -17,6 +18,8 @@ export const ROUTES = {
   STEP_COUNTER: '/steps',
   TRAINING: '/training',
   WELCOME: '/welcome',
+  HELP: '/help',
+  ADMIN_VIDEOS: '/admin/videos',
 } as const;
 
 export const API_ENDPOINTS = {

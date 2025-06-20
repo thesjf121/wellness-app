@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { notificationService, StepNotification } from '../../services/notificationService';
+import { notificationService, WellnessNotification } from '../../services/notificationService';
 
 export const NotificationHistory: React.FC = () => {
-  const [notifications, setNotifications] = useState<StepNotification[]>([]);
+  const [notifications, setNotifications] = useState<WellnessNotification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const NotificationHistory: React.FC = () => {
     ? notifications.filter(n => !n.read)
     : notifications;
 
-  const getNotificationIcon = (type: StepNotification['type']) => {
+  const getNotificationIcon = (type: WellnessNotification['type']) => {
     switch (type) {
       case 'goal_reached': return '🎯';
       case 'streak_milestone': return '🔥';

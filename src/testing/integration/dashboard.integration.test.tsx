@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
-import { MockAuthContext } from '../setup/mockAuthContext';
+import { MockAuthProvider } from '../setup/mockAuthContext';
 
 // Mock the dashboard widgets
 jest.mock('../../components/dashboard/widgets/StepTrackingWidget', () => {
@@ -38,9 +38,9 @@ jest.mock('../../components/dashboard/widgets/NotificationPreferencesWidget', ()
 const renderDashboardWithContext = (user: any, role: 'member' | 'team_sponsor' | 'super_admin' = 'member') => {
   return render(
     <BrowserRouter>
-      <MockAuthContext user={{ ...user, role }}>
+      <MockAuthProvider initialUser={{ ...user, role }} initialSignedIn={true}>
         <DashboardLayout />
-      </MockAuthContext>
+      </MockAuthProvider>
     </BrowserRouter>
   );
 };

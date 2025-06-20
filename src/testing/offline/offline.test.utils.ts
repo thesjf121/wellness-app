@@ -253,8 +253,11 @@ export const testBackgroundSync = async (): Promise<{
     // Test sync registration
     let canRegister = false;
     try {
-      await registration.sync.register('test-background-sync');
-      canRegister = true;
+      const syncManager = (registration as any).sync;
+      if (syncManager) {
+        await syncManager.register('test-background-sync');
+        canRegister = true;
+      }
     } catch (error) {
       console.warn('Background sync registration test failed:', error);
     }

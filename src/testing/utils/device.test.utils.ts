@@ -411,7 +411,7 @@ export const testIOSSpecific = (container: HTMLElement): { passed: boolean; issu
   const scrollableElements = container.querySelectorAll('[style*="overflow"], .scroll');
   scrollableElements.forEach((element, index) => {
     const styles = window.getComputedStyle(element);
-    if (styles.webkitOverflowScrolling !== 'touch') {
+    if ((styles as any).webkitOverflowScrolling !== 'touch') {
       issues.push(`Scrollable element at index ${index} missing -webkit-overflow-scrolling: touch`);
     }
   });

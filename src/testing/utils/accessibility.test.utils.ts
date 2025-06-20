@@ -25,7 +25,7 @@ export interface AccessibilityReport {
   violations: AccessibilityViolation[];
   passes: number;
   violations_count: number;
-  wcag_level: 'AA' | 'AAA';
+  wcag_level: 'A' | 'AA' | 'AAA';
   recommendations: string[];
 }
 

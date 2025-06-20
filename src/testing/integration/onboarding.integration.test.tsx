@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import OnboardingManager from '../../components/onboarding/OnboardingManager';
-import { MockAuthContext } from '../setup/mockAuthContext';
+import OnboardingManager from '../../components/welcome/OnboardingManager';
+import { MockAuthProvider } from '../setup/mockAuthContext';
 
 // Mock the onboarding components
 jest.mock('../../components/welcome/GoalSettingWizard', () => {
@@ -87,9 +87,9 @@ jest.mock('../../components/onboarding/WelcomeVideo', () => {
 const renderOnboardingWithContext = (user: any = null) => {
   return render(
     <BrowserRouter>
-      <MockAuthContext user={user}>
+      <MockAuthProvider initialUser={user} initialSignedIn={!!user}>
         <OnboardingManager />
-      </MockAuthContext>
+      </MockAuthProvider>
     </BrowserRouter>
   );
 };
@@ -408,7 +408,7 @@ describe('Onboarding Integration Tests', () => {
       // Look for progress indicator
       const progressIndicator = screen.queryByText(/step 1/i) || 
                                screen.queryByText(/1 of 4/i) ||
-                               screen.querySelector('[role="progressbar"]');
+                               screen.queryByRole('progressbar');
       
       if (progressIndicator) {
         expect(progressIndicator).toBeInTheDocument();

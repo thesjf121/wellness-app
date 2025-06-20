@@ -3,6 +3,8 @@
  * Provides utilities for detecting, capturing, and reporting application crashes
  */
 
+import React from 'react';
+
 export interface CrashReport {
   id: string;
   timestamp: Date;

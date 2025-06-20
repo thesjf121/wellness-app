@@ -436,11 +436,14 @@ class NotificationService {
       const milestones = [3, 7, 14, 30, 50, 100, 365];
       if (!milestones.includes(streakDays)) return;
 
-      const notification: StepNotification = {
+      const notification: WellnessNotification = {
         id: `streak_${Date.now()}`,
         type: 'streak_milestone',
+        category: 'achievements',
         title: '🔥 Streak Milestone!',
         body: `Amazing! You've maintained a ${streakDays}-day streak. Keep it up!`,
+        icon: '🔥',
+        priority: 'high',
         data: { streakDays },
         timestamp: new Date(),
         read: false
@@ -459,11 +462,14 @@ class NotificationService {
     try {
       if (!this.preferences.personalBest) return;
 
-      const notification: StepNotification = {
+      const notification: WellnessNotification = {
         id: `pb_${Date.now()}`,
         type: 'personal_best',
+        category: 'achievements',
         title: '🏆 New Personal Best!',
         body: `Incredible! You've set a new personal record with ${steps.toLocaleString()} steps, beating your previous best of ${previousBest.toLocaleString()}.`,
+        icon: '🏆',
+        priority: 'high',
         data: { steps, previousBest },
         timestamp: new Date(),
         read: false
@@ -482,11 +488,14 @@ class NotificationService {
     try {
       if (!this.preferences.weeklySummary) return;
 
-      const notification: StepNotification = {
+      const notification: WellnessNotification = {
         id: `weekly_${Date.now()}`,
         type: 'weekly_summary',
+        category: 'wellness',
         title: '📊 Weekly Summary',
         body: `This week: ${totalSteps.toLocaleString()} total steps, ${avgSteps.toLocaleString()} daily average, ${goalsReached}/7 goals reached.`,
+        icon: '📊',
+        priority: 'normal',
         data: { totalSteps, avgSteps, goalsReached },
         timestamp: new Date(),
         read: false
@@ -569,7 +578,7 @@ class NotificationService {
   /**
    * Get notification history
    */
-  getNotificationHistory(): StepNotification[] {
+  getNotificationHistory(): WellnessNotification[] {
     return [...this.notifications];
   }
 
@@ -595,7 +604,7 @@ class NotificationService {
   /**
    * Send notification (internal method)
    */
-  private async sendNotification(notification: StepNotification): Promise<void> {
+  async sendNotification(notification: WellnessNotification): Promise<void> {
     try {
       // Add to history
       this.notifications.unshift(notification);

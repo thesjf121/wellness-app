@@ -12,7 +12,28 @@ export const NotificationPreferences: React.FC<NotificationPreferencesProps> = (
     personalBest: true,
     dailyReminders: true,
     weeklySummary: true,
-    reminderTime: '20:00'
+    achievementCelebrations: true,
+    groupActivity: true,
+    mealReminders: true,
+    trainingReminders: true,
+    motivationalMessages: true,
+    healthTips: true,
+    socialChallenges: true,
+    reEngagementCampaigns: false,
+    reminderTime: '20:00',
+    mealReminderTimes: ['08:00', '12:00', '18:00'],
+    quietHours: {
+      enabled: true,
+      startTime: '22:00',
+      endTime: '07:00'
+    },
+    maxDailyNotifications: 10,
+    batchNotifications: true,
+    smartScheduling: true,
+    pushNotifications: true,
+    emailNotifications: false,
+    inAppNotifications: true,
+    desktopNotifications: false
   });
   const [saving, setSaving] = useState(false);
 

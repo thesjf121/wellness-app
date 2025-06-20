@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface NotificationChannel {
   id: string;
@@ -20,7 +20,7 @@ interface NotificationType {
 }
 
 const NotificationSetup: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   
   const [channels, setChannels] = useState<NotificationChannel[]>([
     {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { memberActivityService } from '../../services/memberActivityService';
 import { groupService } from '../../services/groupService';
 import { groupActivityFeedService } from '../../services/groupActivityFeedService';
@@ -25,7 +25,7 @@ export const GroupActivityFeed: React.FC<GroupActivityFeedProps> = ({
   groupId, 
   maxItems = 20 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

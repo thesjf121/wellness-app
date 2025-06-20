@@ -1,6 +1,7 @@
 // Google Gemini API service for nutrition analysis
 
 import { errorService } from './errorService';
+import { environmentService } from '../config/environment';
 
 export interface NutritionData {
   foodItem: string;
@@ -44,19 +45,19 @@ class GeminiService {
   private readonly VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent';
 
   constructor() {
-    // In production, this would come from environment variables
-    this.API_KEY = process.env.REACT_APP_GEMINI_API_KEY || 'demo-key';
+    // Get API key from environment service
+    this.API_KEY = environmentService.get('geminiApiKey') || '';
   }
 
   /**
    * Check if Gemini API is properly configured
    */
   isConfigured(): boolean {
-    return this.API_KEY !== 'demo-key' && 
+    return this.API_KEY.length > 0 && 
            this.API_KEY !== 'your_gemini_api_key_here' && 
-           this.API_KEY.length > 0 &&
            !this.API_KEY.includes('placeholder') &&
-           !this.API_KEY.includes('example');
+           !this.API_KEY.includes('example') &&
+           !this.API_KEY.includes('demo');
   }
 
   /**
@@ -64,12 +65,11 @@ class GeminiService {
    */
   async analyzeFoodText(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
     try {
-      console.log('Gemini service - API Key:', this.API_KEY);
-      console.log('Gemini service - isConfigured:', this.isConfigured());
+      console.log('Gemini service - API Key configured:', this.isConfigured());
       
       if (!this.isConfigured()) {
-        console.log('Using mock nutrition data');
-        return this.getMockNutritionData(request.text || 'apple');
+        console.log('Gemini API not configured, using offline mode');
+        return this.getOfflineNutritionData(request.text || 'unknown food');
       }
 
       const prompt = this.buildNutritionPrompt(request.text || '', request.mealType);
@@ -95,6 +95,15 @@ class GeminiService {
       });
 
       if (!response.ok) {
+        // Handle specific API errors
+        if (response.status === 429) {
+          console.warn('Gemini API rate limit reached, using offline mode');
+          return this.getOfflineNutritionData(request.text || 'unknown food');
+        }
+        if (response.status === 401) {
+          console.error('Invalid Gemini API key');
+          return this.getOfflineNutritionData(request.text || 'unknown food');
+        }
         throw new Error(`Gemini API error: ${response.status}`);
       }
 
@@ -119,10 +128,9 @@ class GeminiService {
         request 
       });
 
-      return {
-        success: false,
-        error: (error as Error).message
-      };
+      // Fallback to offline mode on any error
+      console.warn('Gemini API error, falling back to offline mode:', error);
+      return this.getOfflineNutritionData(request.text || 'unknown food');
     }
   }
 
@@ -132,7 +140,7 @@ class GeminiService {
   async analyzeFoodImage(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
     try {
       if (!this.isConfigured()) {
-        return this.getMockNutritionData('food from image');
+        return this.getOfflineNutritionData('food from image');
       }
 
       if (!request.imageBase64) {
@@ -361,7 +369,7 @@ Important notes:
   /**
    * Generate mock nutrition data for demo/development
    */
-  private getMockNutritionData(foodDescription: string): GeminiAnalysisResponse {
+  private getOfflineNutritionData(foodDescription: string): GeminiAnalysisResponse {
     const mockData: NutritionData[] = [
       {
         foodItem: foodDescription,

@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 import { sessionService } from '../../services/sessionService';
+import { getUserRole, getUserDisplayName, isAdmin } from '../../utils/clerkHelpers';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,7 +13,8 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSignedIn, signOut, user } = useMockAuth();
+  const { isSignedIn, signOut } = useAuth();
+  const { user } = useUser();
 
   const navItems = [
     { name: 'Home', path: ROUTES.HOME },
@@ -91,7 +93,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
               </nav>
 
               {/* Admin Controls */}
-              {isSignedIn && (user?.role === 'super_admin' || user?.role === 'team_sponsor') && (
+              {isSignedIn && isAdmin(user) && (
                 <div className="hidden md:flex space-x-2">
                   {adminItems.map((item) => (
                     <button
@@ -113,7 +115,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                       onClick={() => navigate(ROUTES.PROFILE)}
                       className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
                     >
-                      Hi, {user?.firstName || 'User'}!
+                      Hi, {getUserDisplayName(user)}!
                     </button>
                     <button
                       onClick={handleSignOut}

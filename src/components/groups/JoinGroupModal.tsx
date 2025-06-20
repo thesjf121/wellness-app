@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { groupService } from '../../services/groupService';
 import { JoinGroupRequest, EligibilityCheck, Group } from '../../types/groups';
 import { GroupCapacityIndicator } from './GroupCapacityIndicator';
@@ -15,7 +15,7 @@ export const JoinGroupModal: React.FC<JoinGroupModalProps> = ({
   onClose,
   onGroupJoined
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [inviteCode, setInviteCode] = useState('');
   const [message, setMessage] = useState('');
   const [eligibility, setEligibility] = useState<EligibilityCheck | null>(null);

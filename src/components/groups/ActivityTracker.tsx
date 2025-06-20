@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { activityTrackingService } from '../../services/activityTrackingService';
 import { UserActivity } from '../../types/groups';
 
@@ -21,7 +21,7 @@ interface EligibilityStatus {
 }
 
 export const ActivityTracker: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [summary, setSummary] = useState<ActivitySummary | null>(null);
   const [eligibility, setEligibility] = useState<EligibilityStatus | null>(null);

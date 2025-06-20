@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import OnboardingProgress, { useOnboardingProgress } from './OnboardingProgress';
 
 interface OnboardingSession {
@@ -25,7 +25,8 @@ const OnboardingManager: React.FC<OnboardingManagerProps> = ({
   redirectOnComplete = '/dashboard'
 }) => {
   const navigate = useNavigate();
-  const { user } = useMockAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const { currentStep, isOnboardingComplete, markStepCompleted } = useOnboardingProgress();
   
   const [session, setSession] = useState<OnboardingSession | null>(null);

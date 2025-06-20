@@ -4,7 +4,7 @@ import { groupService } from '../../services/groupService';
 import { GroupCapacityIndicator } from './GroupCapacityIndicator';
 import { GroupAchievements } from './GroupAchievements';
 import { GroupChat } from './GroupChat';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { memberActivityService } from '../../services/memberActivityService';
 
 interface GroupManagementProps {
@@ -18,7 +18,7 @@ export const GroupManagement: React.FC<GroupManagementProps> = ({
   isOwner,
   onGroupUpdated
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'members' | 'chat' | 'achievements' | 'settings' | 'analytics'>('members');

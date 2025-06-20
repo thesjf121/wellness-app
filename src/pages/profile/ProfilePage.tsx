@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { UserProfile, ActivityLevel, WellnessGoal } from '../../types/user';
 import { ROUTES } from '../../utils/constants';
 import { TwoFactorAuth } from '../../components/security/TwoFactorAuth';
+import { getUserProfile, updateUserMetadata } from '../../utils/clerkHelpers';
 
 const ProfilePage: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -67,12 +68,14 @@ const ProfilePage: React.FC = () => {
       setProfile(JSON.parse(savedProfile));
     } else if (user) {
       // Initialize with Clerk user data
+      const clerkProfile = getUserProfile(user);
       setProfile(prev => ({
         ...prev,
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        email: user.email || '',
-        displayName: `${user.firstName} ${user.lastName}`.trim()
+        email: user.primaryEmailAddress?.emailAddress || '',
+        displayName: `${user.firstName} ${user.lastName}`.trim(),
+        ...clerkProfile
       }));
     }
   };
@@ -91,11 +94,19 @@ const ProfilePage: React.FC = () => {
     
     setSaving(true);
     try {
-      // In production, this would save to backend
+      // Save to localStorage (in production, this would save to backend)
       localStorage.setItem(`profile_${user.id}`, JSON.stringify(profile));
       
-      // Update mock user with updateUser from context
-      // This would update the backend in production
+      // Update Clerk metadata (in production, this would be done via backend API)
+      await updateUserMetadata(user.id, {
+        profile: {
+          dailyStepGoal: profile.dailyStepGoal,
+          dailyCalorieGoal: profile.dailyCalorieGoal,
+          height: profile.height,
+          weight: profile.weight,
+          preferredUnits: profile.measurementSystem === 'metric' ? 'metric' : 'imperial'
+        }
+      });
 
       setIsEditing(false);
       alert('Profile saved successfully!');
@@ -376,7 +387,7 @@ const ProfilePage: React.FC = () => {
                 </label>
                 <input
                   type="email"
-                  value={user.email || ''}
+                  value={user.primaryEmailAddress?.emailAddress || ''}
                   disabled
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
                 />

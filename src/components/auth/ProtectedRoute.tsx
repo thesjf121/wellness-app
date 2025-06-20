@@ -4,6 +4,7 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 import { UserRole } from '../../types/user';
 import { rbacService, RolePermissions } from '../../services/rbacService';
 import { ROUTES } from '../../utils/constants';
+import { getUserRole } from '../../utils/clerkHelpers';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -41,32 +42,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <>{children}</>;
   }
 
-  // For role/permission checks, we need user data
-  // In a real app, this would come from your user profile service
-  // For now, we'll use a mock user profile based on Clerk user
-  const mockUserProfile = {
-    id: user?.id || '',
-    clerkId: user?.id || '',
-    email: user?.emailAddresses[0]?.emailAddress || '',
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    role: 'member' as UserRole, // This would come from your backend
-    trainingCompleted: false,
-    eligibilityDate: new Date(),
-    groupMemberships: [],
-    // ... other profile fields
-  };
+  // Get user role from Clerk metadata
+  const userRole = getUserRole(user);
 
   // Check role requirement
-  if (requiredRole && mockUserProfile.role !== requiredRole) {
+  if (requiredRole && userRole !== requiredRole) {
     // Check if user has higher role
-    if (!rbacService.isHigherRole(mockUserProfile.role, requiredRole)) {
+    if (!rbacService.isHigherRole(userRole, requiredRole)) {
       return <Navigate to={ROUTES.HOME} replace />;
     }
   }
 
   // Check permission requirement
-  if (requiredPermission && !rbacService.hasPermission(mockUserProfile.role, requiredPermission)) {
+  if (requiredPermission && !rbacService.hasPermission(userRole, requiredPermission)) {
     return <Navigate to={ROUTES.HOME} replace />;
   }
 

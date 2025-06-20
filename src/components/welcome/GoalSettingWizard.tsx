@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { ROUTES, HEALTH_GOALS, WELLNESS_GOALS, ACTIVITY_LEVELS } from '../../utils/constants';
+import { updateUserMetadata } from '../../utils/clerkHelpers';
 
 interface WizardStep {
   id: number;
@@ -11,7 +12,7 @@ interface WizardStep {
 
 const GoalSettingWizard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUser } = useMockAuth();
+  const { user } = useUser();
   const [currentStep, setCurrentStep] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
   
@@ -113,16 +114,24 @@ const GoalSettingWizard: React.FC = () => {
     try {
       // Save goals to user profile
       if (user) {
-        updateUser({
-          ...user,
+        await updateUserMetadata(user.id, {
           profile: {
-            ...user.profile,
-            primaryGoals: goals.primaryGoals,
-            activityLevel: goals.activityLevel as any,
             dailyStepGoal: goals.dailyStepGoal,
-            dailyCalorieGoal: goals.dailyCalorieGoal
+            dailyCalorieGoal: goals.dailyCalorieGoal,
+            preferredUnits: 'imperial' // default, could be made configurable
           }
         });
+        
+        // Save additional goals data to localStorage
+        const profileKey = `profile_${user.id}`;
+        const existingProfile = JSON.parse(localStorage.getItem(profileKey) || '{}');
+        localStorage.setItem(profileKey, JSON.stringify({
+          ...existingProfile,
+          primaryGoals: goals.primaryGoals,
+          activityLevel: goals.activityLevel,
+          dailyStepGoal: goals.dailyStepGoal,
+          dailyCalorieGoal: goals.dailyCalorieGoal
+        }));
       }
       
       // Save detailed goals to localStorage

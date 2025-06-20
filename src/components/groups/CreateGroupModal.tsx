@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { groupService } from '../../services/groupService';
 import { CreateGroupRequest, EligibilityCheck } from '../../types/groups';
 
@@ -14,7 +14,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onClose,
   onGroupCreated
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [formData, setFormData] = useState({
     name: '',
     description: '',

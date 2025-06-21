@@ -39,8 +39,8 @@ function App() {
     <ClerkErrorBoundary>
       <ClerkProvider 
         publishableKey={clerkPublishableKey}
-        afterSignInUrl="/dashboard"
-        afterSignUpUrl="/dashboard"
+        afterSignInUrl="/"
+        afterSignUpUrl="/"
       >
         <Router>
           <TutorialProvider autoStart={true}>

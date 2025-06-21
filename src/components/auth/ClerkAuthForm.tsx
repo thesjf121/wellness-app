@@ -33,7 +33,7 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
     }
   };
 
-  const redirectUrl = ROUTES.DASHBOARD;
+  const redirectUrl = ROUTES.HOME;
 
   return (
     <div className="max-w-md mx-auto">

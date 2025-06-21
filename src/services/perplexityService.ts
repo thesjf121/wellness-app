@@ -114,6 +114,8 @@ Return the actual nutrition numbers per serving, not placeholder values.`
       
       // Extract nutrition data from response
       const content = data.choices?.[0]?.message?.content;
+      console.log('📝 Perplexity Content to parse:', content);
+      
       if (content) {
         const nutritionData = this.parsePerplexityResponse(content, data.citations);
         console.log('✅ Parsed Perplexity Nutrition Data:', nutritionData);

@@ -35,23 +35,19 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
 
   const redirectUrl = ROUTES.HOME;
 
-  // Redirect to Clerk hosted pages instead of using embedded components
-  React.useEffect(() => {
-    const clerkUrl = mode === 'login' 
-      ? 'https://unbiased-slug-45.clerk.accounts.dev/sign-in'
-      : 'https://unbiased-slug-45.clerk.accounts.dev/sign-up';
-    
-    window.location.href = clerkUrl;
-  }, [mode]);
-
   return (
     <div className="max-w-md mx-auto text-center py-8">
       <div className="mb-4 p-4 bg-blue-100 rounded">
-        <p>Redirecting to Clerk hosted authentication...</p>
-        <p>If you're not redirected automatically, <a href={mode === 'login' 
-          ? 'https://unbiased-slug-45.clerk.accounts.dev/sign-in'
-          : 'https://unbiased-slug-45.clerk.accounts.dev/sign-up'} 
-          className="text-blue-600 underline">click here</a></p>
+        <h2 className="text-xl font-bold mb-2">{mode === 'login' ? 'Sign In' : 'Sign Up'}</h2>
+        <p className="mb-4">Use Clerk hosted authentication for the best experience:</p>
+        <a 
+          href={mode === 'login' 
+            ? 'https://unbiased-slug-45.clerk.accounts.dev/sign-in'
+            : 'https://unbiased-slug-45.clerk.accounts.dev/sign-up'} 
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 inline-block"
+        >
+          {mode === 'login' ? 'Go to Sign In' : 'Go to Sign Up'}
+        </a>
       </div>
       
       <div className="mt-6 text-center">

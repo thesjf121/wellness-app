@@ -99,15 +99,12 @@ class GeminiService {
   }
 
   /**
-   * Analyze food from text description - tries Perplexity first (for branded products), then OpenAI, then Gemini
+   * Analyze food from text description - uses ONLY Perplexity for real-time nutrition data
    */
   async analyzeFoodText(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
-    // Check if this looks like a branded product
-    const isBrandedProduct = this.looksLikeBrandedProduct(request.text || '');
-    
-    // Try Perplexity first for branded products
-    if (isBrandedProduct && perplexityService.isConfigured()) {
-      console.log('🔍 Detected branded product, trying Perplexity first...');
+    // Use Perplexity for ALL food lookups
+    if (perplexityService.isConfigured()) {
+      console.log('🔍 Using Perplexity for real-time nutrition lookup...');
       try {
         const perplexityResult = await perplexityService.analyzeFoodText(request);
         console.log('🔍 Perplexity Result:', {
@@ -120,36 +117,31 @@ class GeminiService {
           console.log('✅ Perplexity succeeded with real-time data');
           return perplexityResult;
         }
-        console.log('❌ Perplexity failed, falling back to OpenAI. Error:', perplexityResult.error);
+        console.log('❌ Perplexity failed:', perplexityResult.error);
+        
+        // Return the error instead of falling back
+        return {
+          success: false,
+          error: `Perplexity lookup failed: ${perplexityResult.error}`,
+          nutritionData: []
+        };
       } catch (error) {
-        console.log('❌ Perplexity error, falling back to OpenAI:', error);
+        console.log('❌ Perplexity error:', error);
+        return {
+          success: false,
+          error: `Perplexity error: ${(error as Error).message}`,
+          nutritionData: []
+        };
       }
     }
     
-    // Try OpenAI second
-    if (openaiService.isConfigured()) {
-      console.log('🤖 Trying OpenAI...');
-      try {
-        const openaiResult = await openaiService.analyzeFoodText(request);
-        console.log('🤖 OpenAI Result:', {
-          success: openaiResult.success,
-          error: openaiResult.error,
-          hasData: !!openaiResult.nutritionData,
-          dataLength: openaiResult.nutritionData?.length
-        });
-        if (openaiResult.success) {
-          console.log('✅ OpenAI succeeded, using result');
-          return openaiResult;
-        }
-        console.log('❌ OpenAI failed, falling back to Gemini. Error:', openaiResult.error);
-      } catch (error) {
-        console.log('❌ OpenAI error, falling back to Gemini:', error);
-      }
-    }
-
-    // Fallback to Gemini
-    console.log('🧠 Using Gemini...');
-    return this.analyzeWithGemini(request);
+    // If Perplexity not configured, return error
+    console.log('❌ Perplexity not configured');
+    return {
+      success: false,
+      error: 'Perplexity API not configured',
+      nutritionData: []
+    };
   }
 
   /**

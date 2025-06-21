@@ -133,6 +133,8 @@ class GeminiService {
         })
       });
 
+      console.log('📡 Got response from Gemini. Status:', response.status, 'OK:', response.ok);
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('🚨 Gemini API Error Details:', {
@@ -176,13 +178,21 @@ class GeminiService {
       };
 
     } catch (error) {
+      console.error('🚨 GEMINI API CALL FAILED:', error);
+      console.error('🚨 Error details:', {
+        message: (error as Error).message,
+        stack: (error as Error).stack,
+        requestText: request.text,
+        apiKeyLength: this.API_KEY.length
+      });
+      
       errorService.logError(error as Error, { 
         context: 'GeminiService.analyzeFoodText',
         request 
       });
 
       // Fallback to offline mode on any error
-      console.warn('Gemini API error, falling back to offline mode:', error);
+      console.warn('🔄 Falling back to offline mode due to error:', error);
       return this.getOfflineNutritionData(request.text || 'unknown food');
     }
   }

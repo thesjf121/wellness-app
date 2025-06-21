@@ -35,41 +35,23 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
 
   const redirectUrl = ROUTES.HOME;
 
+  // Redirect to Clerk hosted pages instead of using embedded components
+  React.useEffect(() => {
+    const clerkUrl = mode === 'login' 
+      ? 'https://unbiased-slug-45.clerk.accounts.dev/sign-in'
+      : 'https://unbiased-slug-45.clerk.accounts.dev/sign-up';
+    
+    window.location.href = clerkUrl;
+  }, [mode]);
+
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto text-center py-8">
       <div className="mb-4 p-4 bg-blue-100 rounded">
-        <p>Debug: ClerkAuthForm mode = {mode}</p>
-        <p>Redirect URL: {redirectUrl}</p>
-        <p>Current URL: {window.location.href}</p>
-        <p>Environment: {process.env.NODE_ENV}</p>
-        <p>Clerk Key: {process.env.REACT_APP_CLERK_PUBLISHABLE_KEY ? 'Set' : 'Missing'}</p>
-      </div>
-      
-      <div className="mb-4 p-4 bg-yellow-100 rounded">
-        <p>About to render Clerk {mode === 'login' ? 'SignIn' : 'SignUp'} component...</p>
-      </div>
-      
-      {mode === 'login' ? (
-        <SignIn 
-          appearance={appearance}
-          redirectUrl={redirectUrl}
-          afterSignInUrl={redirectUrl}
-          signUpUrl={ROUTES.REGISTER}
-        />
-      ) : (
-        <SignUp 
-          appearance={appearance}
-          redirectUrl={redirectUrl}
-          afterSignUpUrl={redirectUrl}
-          signInUrl={ROUTES.LOGIN}
-          unsafeMetadata={{
-            role: 'member'
-          }}
-        />
-      )}
-      
-      <div className="mt-4 p-4 bg-green-100 rounded">
-        <p>Clerk component should be rendered above this box</p>
+        <p>Redirecting to Clerk hosted authentication...</p>
+        <p>If you're not redirected automatically, <a href={mode === 'login' 
+          ? 'https://unbiased-slug-45.clerk.accounts.dev/sign-in'
+          : 'https://unbiased-slug-45.clerk.accounts.dev/sign-up'} 
+          className="text-blue-600 underline">click here</a></p>
       </div>
       
       <div className="mt-6 text-center">

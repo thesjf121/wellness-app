@@ -42,7 +42,7 @@ export interface GeminiAnalysisResponse {
 class GeminiService {
   private readonly API_KEY: string;
   private readonly BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-  private readonly VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  private readonly VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
 
   constructor() {
     // Get API key from environment service
@@ -81,7 +81,10 @@ class GeminiService {
 
       const prompt = this.buildNutritionPrompt(request.text || '', request.mealType);
       
-      const response = await fetch(`${this.BASE_URL}?key=${this.API_KEY}`, {
+      const url = `${this.BASE_URL}?key=${this.API_KEY}`;
+      console.log('🌐 Making request to:', url.replace(this.API_KEY, 'API_KEY_HIDDEN'));
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

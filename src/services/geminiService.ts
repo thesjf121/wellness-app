@@ -14,12 +14,36 @@ export interface NutritionData {
     sugar: number;        // grams
   };
   micronutrients: {
+    // Minerals
     sodium: number;       // mg
     potassium: number;    // mg
     calcium: number;      // mg
     iron: number;         // mg
-    vitaminC: number;     // mg
+    magnesium: number;    // mg
+    phosphorus: number;   // mg
+    zinc: number;         // mg
+    copper: number;       // mg
+    manganese: number;    // mg
+    selenium: number;     // mcg
+    iodine: number;       // mcg
+    
+    // Fat-soluble vitamins
     vitaminA: number;     // IU
+    vitaminD: number;     // IU
+    vitaminE: number;     // mg
+    vitaminK: number;     // mcg
+    
+    // Water-soluble vitamins
+    vitaminC: number;     // mg
+    thiamine: number;     // mg (B1)
+    riboflavin: number;   // mg (B2)
+    niacin: number;       // mg (B3)
+    pantothenicAcid: number; // mg (B5)
+    vitaminB6: number;    // mg
+    biotin: number;       // mcg (B7)
+    folate: number;       // mcg (B9)
+    vitaminB12: number;   // mcg
+    choline: number;      // mg
   };
   servingSize: string;
   confidence: number;    // 0-1 scale
@@ -256,8 +280,27 @@ Please provide nutrition information for each food item mentioned. Return ONLY a
       "potassium": number (mg),
       "calcium": number (mg),
       "iron": number (mg),
+      "magnesium": number (mg),
+      "phosphorus": number (mg),
+      "zinc": number (mg),
+      "copper": number (mg),
+      "manganese": number (mg),
+      "selenium": number (mcg),
+      "iodine": number (mcg),
+      "vitaminA": number (IU),
+      "vitaminD": number (IU),
+      "vitaminE": number (mg),
+      "vitaminK": number (mcg),
       "vitaminC": number (mg),
-      "vitaminA": number (IU)
+      "thiamine": number (mg),
+      "riboflavin": number (mg),
+      "niacin": number (mg),
+      "pantothenicAcid": number (mg),
+      "vitaminB6": number (mg),
+      "biotin": number (mcg),
+      "folate": number (mcg),
+      "vitaminB12": number (mcg),
+      "choline": number (mg)
     },
     "servingSize": "description of serving size",
     "confidence": number (0-1 scale)
@@ -300,8 +343,27 @@ Please identify each food item visible and provide nutrition information. Return
       "potassium": number (mg),
       "calcium": number (mg),
       "iron": number (mg),
+      "magnesium": number (mg),
+      "phosphorus": number (mg),
+      "zinc": number (mg),
+      "copper": number (mg),
+      "manganese": number (mg),
+      "selenium": number (mcg),
+      "iodine": number (mcg),
+      "vitaminA": number (IU),
+      "vitaminD": number (IU),
+      "vitaminE": number (mg),
+      "vitaminK": number (mcg),
       "vitaminC": number (mg),
-      "vitaminA": number (IU)
+      "thiamine": number (mg),
+      "riboflavin": number (mg),
+      "niacin": number (mg),
+      "pantothenicAcid": number (mg),
+      "vitaminB6": number (mg),
+      "biotin": number (mcg),
+      "folate": number (mcg),
+      "vitaminB12": number (mcg),
+      "choline": number (mg)
     },
     "servingSize": "estimated serving size",
     "confidence": number (0-1 scale based on image clarity)
@@ -347,8 +409,27 @@ Important notes:
           potassium: Math.max(0, Number(item.micronutrients?.potassium) || 0),
           calcium: Math.max(0, Number(item.micronutrients?.calcium) || 0),
           iron: Math.max(0, Number(item.micronutrients?.iron) || 0),
-          vitaminC: Math.max(0, Number(item.micronutrients?.vitaminC) || 0),
+          magnesium: Math.max(0, Number(item.micronutrients?.magnesium) || 0),
+          phosphorus: Math.max(0, Number(item.micronutrients?.phosphorus) || 0),
+          zinc: Math.max(0, Number(item.micronutrients?.zinc) || 0),
+          copper: Math.max(0, Number(item.micronutrients?.copper) || 0),
+          manganese: Math.max(0, Number(item.micronutrients?.manganese) || 0),
+          selenium: Math.max(0, Number(item.micronutrients?.selenium) || 0),
+          iodine: Math.max(0, Number(item.micronutrients?.iodine) || 0),
           vitaminA: Math.max(0, Number(item.micronutrients?.vitaminA) || 0),
+          vitaminD: Math.max(0, Number(item.micronutrients?.vitaminD) || 0),
+          vitaminE: Math.max(0, Number(item.micronutrients?.vitaminE) || 0),
+          vitaminK: Math.max(0, Number(item.micronutrients?.vitaminK) || 0),
+          vitaminC: Math.max(0, Number(item.micronutrients?.vitaminC) || 0),
+          thiamine: Math.max(0, Number(item.micronutrients?.thiamine) || 0),
+          riboflavin: Math.max(0, Number(item.micronutrients?.riboflavin) || 0),
+          niacin: Math.max(0, Number(item.micronutrients?.niacin) || 0),
+          pantothenicAcid: Math.max(0, Number(item.micronutrients?.pantothenicAcid) || 0),
+          vitaminB6: Math.max(0, Number(item.micronutrients?.vitaminB6) || 0),
+          biotin: Math.max(0, Number(item.micronutrients?.biotin) || 0),
+          folate: Math.max(0, Number(item.micronutrients?.folate) || 0),
+          vitaminB12: Math.max(0, Number(item.micronutrients?.vitaminB12) || 0),
+          choline: Math.max(0, Number(item.micronutrients?.choline) || 0),
         },
         servingSize: item.servingSize || '1 serving',
         confidence: Math.min(1, Math.max(0, Number(item.confidence) || 0.5))
@@ -376,8 +457,27 @@ Important notes:
           potassium: 100,
           calcium: 20,
           iron: 1,
+          magnesium: 25,
+          phosphorus: 50,
+          zinc: 1,
+          copper: 0.1,
+          manganese: 0.5,
+          selenium: 10,
+          iodine: 50,
+          vitaminA: 100,
+          vitaminD: 10,
+          vitaminE: 2,
+          vitaminK: 20,
           vitaminC: 5,
-          vitaminA: 100
+          thiamine: 0.1,
+          riboflavin: 0.1,
+          niacin: 2,
+          pantothenicAcid: 1,
+          vitaminB6: 0.2,
+          biotin: 5,
+          folate: 25,
+          vitaminB12: 0.5,
+          choline: 25
         },
         servingSize: '1 serving',
         confidence: 0.1
@@ -408,8 +508,27 @@ Important notes:
           potassium: 100 + Math.floor(Math.random() * 400),
           calcium: 20 + Math.floor(Math.random() * 200),
           iron: 1 + Math.floor(Math.random() * 5),
+          magnesium: 25 + Math.floor(Math.random() * 100),
+          phosphorus: 50 + Math.floor(Math.random() * 200),
+          zinc: 1 + Math.floor(Math.random() * 10),
+          copper: 0.1 + Math.floor(Math.random() * 2),
+          manganese: 0.5 + Math.floor(Math.random() * 3),
+          selenium: 10 + Math.floor(Math.random() * 50),
+          iodine: 50 + Math.floor(Math.random() * 100),
+          vitaminA: 100 + Math.floor(Math.random() * 1000),
+          vitaminD: 10 + Math.floor(Math.random() * 100),
+          vitaminE: 2 + Math.floor(Math.random() * 20),
+          vitaminK: 20 + Math.floor(Math.random() * 100),
           vitaminC: 5 + Math.floor(Math.random() * 50),
-          vitaminA: 100 + Math.floor(Math.random() * 1000)
+          thiamine: 0.1 + Math.floor(Math.random() * 2),
+          riboflavin: 0.1 + Math.floor(Math.random() * 2),
+          niacin: 2 + Math.floor(Math.random() * 20),
+          pantothenicAcid: 1 + Math.floor(Math.random() * 5),
+          vitaminB6: 0.2 + Math.floor(Math.random() * 2),
+          biotin: 5 + Math.floor(Math.random() * 30),
+          folate: 25 + Math.floor(Math.random() * 200),
+          vitaminB12: 0.5 + Math.floor(Math.random() * 5),
+          choline: 25 + Math.floor(Math.random() * 200)
         },
         servingSize: '1 serving (estimated)',
         confidence: 0.1  // Low confidence to indicate fake data

@@ -209,6 +209,16 @@ const FoodJournalPage: React.FC = () => {
           >
             Add Food
           </button>
+          <button
+            onClick={() => {
+              geminiService.clearAllStoredData();
+              alert('All food data cleared! Next food entries will be fresh from AI.');
+              window.location.reload();
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+          >
+            Clear Data
+          </button>
         </div>
       </div>
 

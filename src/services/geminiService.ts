@@ -520,6 +520,18 @@ Important notes:
   }
 
   /**
+   * Clear all cached/stored data to force fresh API calls
+   */
+  clearAllStoredData(): void {
+    // Clear localStorage of any cached food data
+    localStorage.removeItem('wellness_food_entries');
+    localStorage.removeItem('wellness_nutrition_goals');
+    localStorage.removeItem('wellness_favorite_foods');
+    localStorage.removeItem('wellness_offline_queue');
+    console.log('🗑️ Cleared all stored food data - next queries will be fresh');
+  }
+
+  /**
    * Test API connectivity with detailed logging
    */
   async testConnection(): Promise<boolean> {

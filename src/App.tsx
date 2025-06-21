@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { Layout } from './components/layout/Layout';
 import { OfflineIndicator } from './components/common/OfflineIndicator';
@@ -41,21 +41,16 @@ function App() {
         publishableKey={clerkPublishableKey}
         afterSignInUrl="/dashboard"
         afterSignUpUrl="/dashboard"
-        signInUrl="/sign-in"
-        signUpUrl="/sign-up"
       >
         <Router>
           <TutorialProvider autoStart={true}>
             <Layout>
               <Routes>
                 <Route path={ROUTES.HOME} element={<HomePage />} />
-                <Route path={ROUTES.LOGIN} element={<AuthPage mode="login" />} />
-                <Route path={ROUTES.REGISTER} element={<AuthPage mode="register" />} />
-                <Route path="/sign-in" element={<AuthPage mode="login" />} />
-                <Route path="/sign-up" element={<AuthPage mode="register" />} />
-                <Route path="/sso-callback" element={<AuthPage mode="login" />} />
-                <Route path="/login/sso-callback" element={<AuthPage mode="login" />} />
-                <Route path="/register/sso-callback" element={<AuthPage mode="register" />} />
+                <Route path={ROUTES.LOGIN} element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-in" replace />} />
+                <Route path={ROUTES.REGISTER} element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-up" replace />} />
+                <Route path="/sign-in" element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-in" replace />} />
+                <Route path="/sign-up" element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-up" replace />} />
                 <Route path={ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
                 <Route path="/welcome/goals" element={<GoalSettingWizard />} />

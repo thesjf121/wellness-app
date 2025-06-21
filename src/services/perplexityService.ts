@@ -51,32 +51,44 @@ class PerplexityService {
           'Authorization': `Bearer ${this.API_KEY}`
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online', // Real-time web search model
+          model: 'llama-3.1-sonar-large-128k-online', // More powerful real-time web search model
           messages: [{
             role: 'system',
-            content: `You are a nutrition data extractor. Search for the EXACT nutrition facts from the official product label or manufacturer website. Return ONLY accurate data from official sources. Format your response as a JSON object with this exact structure:
+            content: `You are a nutrition data extractor. Your task is to search the web and find EXACT nutrition facts from product labels, manufacturer websites, or reliable sources. 
+
+IMPORTANT: You must return actual numbers, not null values. If you find the product, extract the nutrition data from the search results or your knowledge.
+
+Return ONLY a JSON object with this exact structure:
 {
   "food_items": [{
     "food_name": "exact product name",
-    "serving_size": "exact serving size from label",
-    "calories": number,
-    "protein_g": number,
-    "carbohydrates_g": number,
-    "fat_g": number,
-    "fiber_g": number,
-    "sugar_g": number,
-    "sodium_mg": number,
-    "source": "URL or source of the nutrition data"
+    "serving_size": "serving size from label (e.g., '1 scoop (30g)')",
+    "calories": number (actual calories per serving),
+    "protein_g": number (grams of protein),
+    "carbohydrates_g": number (grams of carbs),
+    "fat_g": number (grams of fat),
+    "fiber_g": number (grams of fiber),
+    "sugar_g": number (grams of sugar),
+    "sodium_mg": number (milligrams of sodium),
+    "source": "URL or description of source"
   }]
 }`
           }, {
             role: 'user',
-            content: `Find the exact nutrition facts for: ${request.text}. Search for the official product nutrition label or manufacturer website. Return ONLY verified nutrition data.`
+            content: `Find the nutrition facts for: ${request.text}
+
+Search for and extract the actual nutrition label data. Common sources include:
+- Official brand websites (nakednutrition.com for Naked products)
+- Major retailers (Amazon, Walmart, Target)
+- Nutrition databases
+- Product packaging images
+
+Return the actual nutrition numbers per serving, not placeholder values.`
           }],
           temperature: 0.1,
           max_tokens: 1000,
           return_citations: true,
-          search_domain_filter: ["amazon.com", "walmart.com", "target.com", "iherb.com", "vitacost.com", "gnc.com", "bodybuilding.com"],
+          search_domain_filter: ["nakednutrition.com", "amazon.com", "walmart.com", "target.com", "iherb.com", "vitacost.com", "gnc.com", "bodybuilding.com"],
           search_recency_filter: "year"
         })
       });

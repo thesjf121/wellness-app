@@ -4,13 +4,15 @@ import { Capacitor } from '@capacitor/core';
 import { HealthPermissions, StepEntry, StepDataSource } from '../types/steps';
 import { errorService } from './errorService';
 
-// Import the health plugin for iOS HealthKit
-let CapacitorHealth: any;
+// Health plugin for iOS HealthKit - graceful fallback when not available
+let CapacitorHealth: any = null;
 try {
-  const { CapacitorHealth: Health } = require('capacitor-health');
-  CapacitorHealth = Health;
+  if (typeof require !== 'undefined') {
+    const healthModule = require('capacitor-health');
+    CapacitorHealth = healthModule?.CapacitorHealth;
+  }
 } catch (error) {
-  console.warn('HealthKit plugin not available:', error);
+  console.warn('HealthKit plugin not available, using fallback mode:', error);
 }
 
 export interface HealthKitPermissions {

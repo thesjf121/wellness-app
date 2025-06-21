@@ -64,12 +64,14 @@ export interface NotificationPreferences {
 }
 
 // Import Capacitor Local Notifications plugin if available
-let LocalNotifications: any;
+let LocalNotifications: any = null;
 try {
-  const { LocalNotifications: LN } = require('@capacitor/local-notifications');
-  LocalNotifications = LN;
+  if (typeof require !== 'undefined') {
+    const notificationModule = require('@capacitor/local-notifications');
+    LocalNotifications = notificationModule?.LocalNotifications;
+  }
 } catch (error) {
-  console.warn('Local Notifications plugin not available:', error);
+  console.warn('Local Notifications plugin not available, using fallback mode:', error);
 }
 
 class NotificationService {

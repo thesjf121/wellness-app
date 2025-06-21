@@ -16,13 +16,16 @@ import { healthKitService } from './healthKitService';
 import { googleFitService } from './googleFitService';
 import { notificationService } from './notificationService';
 
-// Import the health plugin
-let CapacitorHealth: any;
+// Health plugin - graceful fallback when not available
+let CapacitorHealth: any = null;
 try {
-  const { CapacitorHealth: Health } = require('capacitor-health');
-  CapacitorHealth = Health;
+  // Only attempt to load if the package exists
+  if (typeof require !== 'undefined') {
+    const healthModule = require('capacitor-health');
+    CapacitorHealth = healthModule?.CapacitorHealth;
+  }
 } catch (error) {
-  console.warn('Health plugin not available:', error);
+  console.warn('Health plugin not available, using fallback mode:', error);
 }
 
 interface HealthServiceConfig {

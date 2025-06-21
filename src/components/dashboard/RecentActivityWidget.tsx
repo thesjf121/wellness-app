@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
+import { getUserProfile } from '../../utils/clerkHelpers';
 import { ROUTES } from '../../utils/constants';
 
 interface ActivityItem {
@@ -106,7 +107,8 @@ const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({
     }
 
     // Simulated step achievements
-    const stepGoal = user?.profile?.dailyStepGoal || 8000;
+    const userProfile = getUserProfile(user);
+  const stepGoal = userProfile.dailyStepGoal || 8000;
     const todaySteps = Math.floor(Math.random() * stepGoal * 1.2);
     
     if (todaySteps >= stepGoal) {

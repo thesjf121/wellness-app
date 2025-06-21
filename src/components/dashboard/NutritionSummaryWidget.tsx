@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { getUserProfile } from '../../utils/clerkHelpers';
 
 interface NutritionData {
   date: string;
@@ -72,7 +73,8 @@ const NutritionSummaryWidget: React.FC<NutritionSummaryWidgetProps> = ({
   const averageMeals = nutritionData.length > 0 ? (nutritionData.reduce((sum, day) => sum + day.mealsLogged, 0) / nutritionData.length).toFixed(1) : '0';
   const averageWater = nutritionData.length > 0 ? Math.floor(nutritionData.reduce((sum, day) => sum + day.waterGlasses, 0) / nutritionData.length) : 0;
 
-  const calorieGoal = user?.profile?.dailyCalorieGoal || 2000;
+  const userProfile = getUserProfile(user);
+  const calorieGoal = userProfile.dailyCalorieGoal || 2000;
   const waterGoal = 8; // glasses per day
 
   const getMacroPercentage = (protein: number, carbs: number, fat: number) => {

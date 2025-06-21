@@ -28,7 +28,7 @@ const EnhancedVideoUploadManager: React.FC<VideoUploadManagerProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user has admin privileges
-  const isAdmin = user?.role === 'super_admin' || user?.role === 'team_sponsor';
+  const isAdmin = user?.publicMetadata?.role === 'super_admin' || user?.publicMetadata?.role === 'team_sponsor';
 
   // Load videos on component mount
   useEffect(() => {

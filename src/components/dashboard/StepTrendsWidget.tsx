@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { getUserProfile } from '../../utils/clerkHelpers';
 
 interface StepData {
   date: string;
@@ -41,7 +42,8 @@ const StepTrendsWidget: React.FC<StepTrendsWidgetProps> = ({
       date.setDate(date.getDate() - i);
       
       // Generate realistic step data with some randomness
-      const baseSteps = user?.profile?.dailyStepGoal || 8000;
+      const userProfile = getUserProfile(user);
+  const baseSteps = userProfile.dailyStepGoal || 8000;
       const variation = Math.random() * 0.4 + 0.8; // 80% to 120% of goal
       const steps = Math.floor(baseSteps * variation);
       

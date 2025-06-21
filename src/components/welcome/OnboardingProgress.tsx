@@ -102,7 +102,7 @@ const OnboardingProgress: React.FC<OnboardingProgressProps> = ({
       // Auto-detect completion for some steps
       switch (step.id) {
         case 'profile_setup':
-          isCompleted = user?.firstName && user?.profile?.activityLevel ? true : false;
+          isCompleted = user?.firstName && (user?.publicMetadata as any)?.profile?.activityLevel ? true : false;
           break;
         case 'health_permissions':
           // Check if health permissions have been granted (simulated)

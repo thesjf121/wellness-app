@@ -23,6 +23,8 @@ export interface UserProfile {
   height?: number;
   weight?: number;
   preferredUnits?: 'metric' | 'imperial';
+  activityLevel?: string;
+  [key: string]: any; // Allow additional properties
 }
 
 export const getUserProfile = (user: UserResource | null | undefined): UserProfile => {

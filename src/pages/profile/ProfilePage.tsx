@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserProfile, ActivityLevel, WellnessGoal } from '../../types/user';
 import { ROUTES } from '../../utils/constants';
 import { TwoFactorAuth } from '../../components/security/TwoFactorAuth';
-import { getUserProfile, updateUserMetadata } from '../../utils/clerkHelpers';
+import { updateUserMetadata } from '../../utils/clerkHelpers';
 
 const ProfilePage: React.FC = () => {
   const { user } = useUser();
@@ -68,7 +68,7 @@ const ProfilePage: React.FC = () => {
       setProfile(JSON.parse(savedProfile));
     } else if (user) {
       // Initialize with Clerk user data
-      const clerkProfile = getUserProfile(user);
+      const clerkProfile = (user?.publicMetadata as any)?.profile || {};
       setProfile(prev => ({
         ...prev,
         firstName: user.firstName || '',

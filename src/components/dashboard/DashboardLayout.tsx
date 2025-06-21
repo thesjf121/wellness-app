@@ -23,8 +23,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
 
   // Determine layout based on user role if not specified
   const effectiveLayout = layout || (
-    user?.role === 'super_admin' ? 'super_admin' :
-    user?.role === 'team_sponsor' ? 'admin' :
+    user?.publicMetadata?.role === 'super_admin' ? 'super_admin' :
+    user?.publicMetadata?.role === 'team_sponsor' ? 'admin' :
     'member'
   );
 

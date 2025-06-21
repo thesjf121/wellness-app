@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { getUserProfile } from '../../utils/clerkHelpers';
 
 interface StreakData {
   type: 'steps' | 'food' | 'training' | 'general';
@@ -101,7 +102,8 @@ const StreakCounterWidget: React.FC<StreakCounterWidgetProps> = ({
 
   const calculateStepStreak = () => {
     // Simulate step streak calculation
-    const stepGoal = user?.profile?.dailyStepGoal || 8000;
+    const userProfile = getUserProfile(user);
+  const stepGoal = userProfile.dailyStepGoal || 8000;
     
     // Generate mock streak data
     const current = Math.floor(Math.random() * 14); // 0-14 days

@@ -368,11 +368,14 @@ Important notes:
 
   /**
    * Generate mock nutrition data for demo/development
+   * WARNING: This is fake data used when Gemini API is not available
    */
   private getOfflineNutritionData(foodDescription: string): GeminiAnalysisResponse {
+    console.warn('🚨 USING FAKE NUTRITION DATA - Gemini API not configured!');
+    
     const mockData: NutritionData[] = [
       {
-        foodItem: foodDescription,
+        foodItem: `⚠️ FAKE DATA: ${foodDescription}`,
         calories: 150 + Math.floor(Math.random() * 200),
         macronutrients: {
           protein: 5 + Math.floor(Math.random() * 20),
@@ -389,15 +392,16 @@ Important notes:
           vitaminC: 5 + Math.floor(Math.random() * 50),
           vitaminA: 100 + Math.floor(Math.random() * 1000)
         },
-        servingSize: '1 medium serving',
-        confidence: 0.85
+        servingSize: '1 serving (estimated)',
+        confidence: 0.1  // Low confidence to indicate fake data
       }
     ];
 
     return {
-      success: true,
+      success: false,  // Mark as failed to indicate offline mode
       nutritionData: mockData,
-      rawResponse: `Mock analysis for: ${foodDescription}`
+      rawResponse: `⚠️ OFFLINE MODE: This is fake nutrition data! Configure REACT_APP_GEMINI_API_KEY for accurate analysis.`,
+      error: 'Gemini API not configured - using fake data'
     };
   }
 

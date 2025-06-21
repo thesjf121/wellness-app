@@ -9,7 +9,7 @@ import { FavoriteFoods } from '../../components/food/FavoriteFoods';
 import { NutritionGoals } from '../../components/food/NutritionGoals';
 import { GoalProgress } from '../../components/food/GoalProgress';
 import { foodService } from '../../services/foodService';
-import { GeminiAnalysisResponse, NutritionData } from '../../services/geminiService';
+import { GeminiAnalysisResponse, NutritionData, geminiService } from '../../services/geminiService';
 import { FoodEntry, DailyNutrition, MealType } from '../../types/food';
 
 const FoodJournalPage: React.FC = () => {
@@ -60,6 +60,11 @@ const FoodJournalPage: React.FC = () => {
   const handleAnalysisComplete = (result: GeminiAnalysisResponse) => {
     setAnalysisResult(result);
     setShowAddForm(false);
+    
+    // Show warning if using fake data
+    if (!result.success && result.error?.includes('fake data')) {
+      alert('⚠️ WARNING: This nutrition analysis is FAKE DATA!\n\nTo get accurate nutrition information, you need to configure the Gemini API key in your environment variables.');
+    }
   };
 
   const handleSaveFoodEntry = async (nutritionData: NutritionData[]) => {
@@ -127,6 +132,26 @@ const FoodJournalPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* AI Configuration Warning */}
+      {!geminiService.isConfigured() && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <span className="text-yellow-400 text-xl">⚠️</span>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Warning:</strong> AI nutrition analysis is disabled. Food entries will show fake/random nutrition data. 
+                <br />
+                <span className="text-xs text-yellow-600">
+                  To fix: Configure REACT_APP_GEMINI_API_KEY in your environment variables.
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Food Journal</h1>
         

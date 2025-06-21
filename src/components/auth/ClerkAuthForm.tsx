@@ -36,28 +36,25 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
   const redirectUrl = ROUTES.HOME;
 
   return (
-    <div className="max-w-md mx-auto text-center py-8">
-      <div className="mb-4 p-4 bg-blue-100 rounded">
-        <h2 className="text-xl font-bold mb-2">{mode === 'login' ? 'Sign In' : 'Sign Up'}</h2>
-        <p className="mb-4">Click below to authenticate with Clerk:</p>
-        <a 
-          href={mode === 'login' 
-            ? 'https://unbiased-slug-45.accounts.dev/sign-in'
-            : 'https://unbiased-slug-45.accounts.dev/sign-up'} 
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 inline-block"
-        >
-          {mode === 'login' ? 'Go to Sign In' : 'Go to Sign Up'}
-        </a>
-      </div>
-      
-      <div className="mt-6 text-center">
-        <button
-          onClick={() => navigate(ROUTES.HOME)}
-          className="text-sm text-gray-600 hover:text-gray-900"
-        >
-          ← Back to Home
-        </button>
-      </div>
+    <div className="max-w-md mx-auto">
+      {mode === 'login' ? (
+        <SignIn 
+          appearance={appearance}
+          redirectUrl={redirectUrl}
+          afterSignInUrl={redirectUrl}
+          signUpUrl={ROUTES.REGISTER}
+        />
+      ) : (
+        <SignUp 
+          appearance={appearance}
+          redirectUrl={redirectUrl}
+          afterSignUpUrl={redirectUrl}
+          signInUrl={ROUTES.LOGIN}
+          unsafeMetadata={{
+            role: 'member'
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -375,22 +375,22 @@ Important notes:
       const nutritionData = JSON.parse(jsonText);
       console.log('📊 Raw parsed data:', nutritionData);
 
-      // Validate and sanitize the data
+      // Validate and sanitize the data - handle both formats
       return nutritionData.map((item: any) => ({
-        foodItem: item.foodItem || 'Unknown food',
+        foodItem: item.foodItem || item.product_name || 'Unknown food',
         calories: Math.max(0, Number(item.calories) || 0),
         macronutrients: {
-          protein: Math.max(0, Number(item.macronutrients?.protein) || 0),
-          carbohydrates: Math.max(0, Number(item.macronutrients?.carbohydrates) || 0),
-          fat: Math.max(0, Number(item.macronutrients?.fat) || 0),
-          fiber: Math.max(0, Number(item.macronutrients?.fiber) || 0),
-          sugar: Math.max(0, Number(item.macronutrients?.sugar) || 0),
+          protein: Math.max(0, Number(item.macronutrients?.protein) || Number(item.macronutrients?.protein_g) || 0),
+          carbohydrates: Math.max(0, Number(item.macronutrients?.carbohydrates) || Number(item.macronutrients?.carbohydrates_g) || 0),
+          fat: Math.max(0, Number(item.macronutrients?.fat) || Number(item.macronutrients?.fat_g) || 0),
+          fiber: Math.max(0, Number(item.macronutrients?.fiber) || Number(item.macronutrients?.fiber_g) || 0),
+          sugar: Math.max(0, Number(item.macronutrients?.sugar) || Number(item.macronutrients?.sugar_g) || 0),
         },
         micronutrients: {
-          sodium: Math.max(0, Number(item.micronutrients?.sodium) || 0),
-          potassium: Math.max(0, Number(item.micronutrients?.potassium) || 0),
-          calcium: Math.max(0, Number(item.micronutrients?.calcium) || 0),
-          iron: Math.max(0, Number(item.micronutrients?.iron) || 0),
+          sodium: Math.max(0, Number(item.micronutrients?.sodium) || Number(item.micronutrients?.sodium_mg) || 0),
+          potassium: Math.max(0, Number(item.micronutrients?.potassium) || Number(item.micronutrients?.potassium_mg) || 0),
+          calcium: Math.max(0, Number(item.micronutrients?.calcium) || Number(item.micronutrients?.calcium_mg) || 0),
+          iron: Math.max(0, Number(item.micronutrients?.iron) || Number(item.micronutrients?.iron_mg) || 0),
           magnesium: Math.max(0, Number(item.micronutrients?.magnesium) || 0),
           phosphorus: Math.max(0, Number(item.micronutrients?.phosphorus) || 0),
           zinc: Math.max(0, Number(item.micronutrients?.zinc) || 0),
@@ -413,7 +413,7 @@ Important notes:
           vitaminB12: Math.max(0, Number(item.micronutrients?.vitaminB12) || 0),
           choline: Math.max(0, Number(item.micronutrients?.choline) || 0),
         },
-        servingSize: item.servingSize || '1 serving',
+        servingSize: item.servingSize || item.serving_size || '1 serving',
         confidence: Math.min(1, Math.max(0, Number(item.confidence) || 0.5))
       }));
 

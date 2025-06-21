@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import VideoPlayer from './VideoPlayer';
 
 interface WelcomeVideo {
@@ -15,7 +15,7 @@ interface WelcomeVideo {
 }
 
 const VideoUploadManager: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [videos, setVideos] = useState<WelcomeVideo[]>([
     {
       id: '1',

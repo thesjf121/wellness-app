@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { groupAchievementService } from '../../services/groupAchievementService';
 import { MemberAchievement } from '../../types/groups';
 
@@ -19,7 +19,7 @@ export const GroupAchievements: React.FC<GroupAchievementsProps> = ({
   groupId, 
   showUserView = false 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [userAchievements, setUserAchievements] = useState<MemberAchievement[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [achievementProgress, setAchievementProgress] = useState<any[]>([]);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 
 interface ActivityItem {
@@ -24,7 +24,7 @@ const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({
   maxItems = 8 
 }) => {
   const navigate = useNavigate();
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 

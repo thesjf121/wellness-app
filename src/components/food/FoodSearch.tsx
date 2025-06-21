@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { foodService } from '../../services/foodService';
 import { FoodEntry, MealType } from '../../types/food';
 
@@ -15,7 +15,7 @@ interface SearchFilters {
 }
 
 export const FoodSearch: React.FC<FoodSearchProps> = ({ onClose }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
     startDate: '',

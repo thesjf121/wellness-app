@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { FoodEntryForm } from '../../components/food/FoodEntryForm';
 import { NutritionAnalysisResult } from '../../components/food/NutritionAnalysisResult';
 import { FoodSearch } from '../../components/food/FoodSearch';
@@ -13,7 +13,8 @@ import { GeminiAnalysisResponse, NutritionData } from '../../services/geminiServ
 import { FoodEntry, DailyNutrition, MealType } from '../../types/food';
 
 const FoodJournalPage: React.FC = () => {
-  const { user, isSignedIn } = useMockAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const [currentView, setCurrentView] = useState<'daily' | 'dashboard' | 'reports' | 'goals'>('daily');
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const [showAddForm, setShowAddForm] = useState(false);

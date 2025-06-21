@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { groupService } from '../../services/groupService';
 import { Group } from '../../types/groups';
 
@@ -16,7 +16,7 @@ export const LeaveGroupModal: React.FC<LeaveGroupModalProps> = ({
   group,
   onGroupLeft
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState('');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface StreakData {
   type: 'steps' | 'food' | 'training' | 'general';
@@ -22,7 +22,7 @@ const StreakCounterWidget: React.FC<StreakCounterWidgetProps> = ({
   compact = false, 
   showAll = true 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [streaks, setStreaks] = useState<StreakData[]>([]);
   const [loading, setLoading] = useState(true);
 

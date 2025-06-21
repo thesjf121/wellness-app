@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 
 interface Badge {
@@ -41,7 +41,7 @@ const AchievementBadgeWidget: React.FC<AchievementBadgeWidgetProps> = ({
   maxBadges = 12
 }) => {
   const navigate = useNavigate();
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);

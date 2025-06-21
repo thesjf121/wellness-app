@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface EmailSchedule {
   id: string;
@@ -32,7 +32,7 @@ const EmailSummaryWidget: React.FC<EmailSummaryWidgetProps> = ({
   compact = false, 
   isAdmin = false 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [schedules, setSchedules] = useState<EmailSchedule[]>([]);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [showSettings, setShowSettings] = useState(false);

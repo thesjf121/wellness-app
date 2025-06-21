@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { MealType } from '../../types/food';
 import { geminiService, GeminiAnalysisResponse } from '../../services/geminiService';
 
@@ -16,7 +16,7 @@ export const FoodEntryForm: React.FC<FoodEntryFormProps> = ({
   defaultMealType,
   defaultDate
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [entryType, setEntryType] = useState<'text' | 'photo'>('text');

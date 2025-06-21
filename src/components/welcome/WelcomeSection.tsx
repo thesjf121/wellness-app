@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import OnboardingProgress from './OnboardingProgress';
 import { ROUTES } from '../../utils/constants';
 
 const WelcomeSection: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [currentWalkthroughStep, setCurrentWalkthroughStep] = useState(0);
 

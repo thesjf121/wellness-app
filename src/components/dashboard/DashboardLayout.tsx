@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 
 // Import widgets
@@ -17,7 +17,8 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   const navigate = useNavigate();
-  const { user, isSignedIn } = useMockAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
 
   // Determine layout based on user role if not specified

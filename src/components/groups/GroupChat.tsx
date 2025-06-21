@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { groupMessagingService } from '../../services/groupMessagingService';
 import { groupService } from '../../services/groupService';
 import { GroupMessage, GroupMember } from '../../types/groups';
@@ -11,7 +11,7 @@ interface GroupChatProps {
 }
 
 export const GroupChat: React.FC<GroupChatProps> = ({ groupId }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(true);

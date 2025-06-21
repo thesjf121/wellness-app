@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { foodService } from '../../services/foodService';
 import { NutritionGoals as NutritionGoalsType } from '../../types/food';
 
@@ -8,7 +8,7 @@ interface NutritionGoalsProps {
 }
 
 export const NutritionGoals: React.FC<NutritionGoalsProps> = ({ onClose }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [goals, setGoals] = useState<NutritionGoalsType | null>(null);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);

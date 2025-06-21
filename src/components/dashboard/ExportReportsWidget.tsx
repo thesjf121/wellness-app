@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface ExportOptions {
   dateRange: 'week' | 'month' | 'quarter' | 'year' | 'custom';
@@ -22,7 +22,7 @@ const ExportReportsWidget: React.FC<ExportReportsWidgetProps> = ({
   compact = false, 
   isAdmin = false 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [isExporting, setIsExporting] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [exportOptions, setExportOptions] = useState<ExportOptions>({

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 
 interface GroupMember {
@@ -32,7 +32,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
   compact = false 
 }) => {
   const navigate = useNavigate();
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
   const [recentActivity, setRecentActivity] = useState<GroupActivity[]>([]);
   const [isInGroup, setIsInGroup] = useState(false);

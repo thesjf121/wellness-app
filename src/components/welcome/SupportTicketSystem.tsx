@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface SupportTicket {
   id: string;
@@ -35,7 +35,7 @@ interface TicketAttachment {
 }
 
 const SupportTicketSystem: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);

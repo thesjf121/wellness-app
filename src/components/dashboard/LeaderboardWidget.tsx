@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 
 interface LeaderboardEntry {
@@ -37,7 +37,7 @@ const LeaderboardWidget: React.FC<LeaderboardWidgetProps> = ({
   maxEntries = 10 
 }) => {
   const navigate = useNavigate();
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [selectedCategory, setSelectedCategory] = useState('overall');
   const [selectedPeriod, setSelectedPeriod] = useState<'weekly' | 'monthly' | 'alltime'>('weekly');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);

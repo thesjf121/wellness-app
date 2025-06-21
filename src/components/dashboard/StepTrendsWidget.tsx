@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface StepData {
   date: string;
@@ -20,7 +20,7 @@ const StepTrendsWidget: React.FC<StepTrendsWidgetProps> = ({
   showTrend = true,
   days = 7 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [stepData, setStepData] = useState<StepData[]>([]);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [loading, setLoading] = useState(true);

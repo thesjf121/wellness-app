@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { foodService } from '../../services/foodService';
 import { FoodEntry, DailyNutrition } from '../../types/food';
 
@@ -23,7 +23,7 @@ interface TrendData {
 }
 
 export const NutritionDashboard: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [period, setPeriod] = useState<'week' | 'month' | 'quarter'>('week');
   const [stats, setStats] = useState<NutritionStats | null>(null);
   const [trends, setTrends] = useState<TrendData[]>([]);

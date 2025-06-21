@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { TrainingModuleNavigation } from '../../components/training/TrainingModuleNavigation';
 import { ModuleViewer } from '../../components/training/ModuleViewer';
 
 const TrainingPage: React.FC = () => {
-  const { user, isSignedIn } = useMockAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const { moduleId } = useParams();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(moduleId || null);
 

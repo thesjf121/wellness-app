@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { StepHistoryView } from '../../components/steps/StepHistoryView';
 import { healthService } from '../../services/healthService';
 import { NotificationHistory } from '../../components/notifications/NotificationHistory';
@@ -8,7 +8,8 @@ import { NotificationPreferences } from '../../components/notifications/Notifica
 type ViewMode = 'today' | 'history' | 'notifications';
 
 const StepsPage: React.FC = () => {
-  const { user, isSignedIn } = useMockAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [manualSteps, setManualSteps] = useState('');
   const [stepList, setStepList] = useState<Array<{id: string, steps: number, date: string}>>([]);

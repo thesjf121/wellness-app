@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { foodService } from '../../services/foodService';
 import { FoodEntry } from '../../types/food';
 
@@ -38,7 +38,7 @@ interface NutritionReportsProps {
 }
 
 export const NutritionReports: React.FC<NutritionReportsProps> = ({ onClose }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [reportType, setReportType] = useState<'weekly' | 'monthly' | 'quarterly'>('weekly');
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(false);

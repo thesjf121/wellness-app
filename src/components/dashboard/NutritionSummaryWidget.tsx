@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface NutritionData {
   date: string;
@@ -23,7 +23,7 @@ const NutritionSummaryWidget: React.FC<NutritionSummaryWidgetProps> = ({
   showDetails = true,
   days = 7 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [nutritionData, setNutritionData] = useState<NutritionData[]>([]);
   const [loading, setLoading] = useState(true);
 

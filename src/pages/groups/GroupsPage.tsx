@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { CreateGroupModal } from '../../components/groups/CreateGroupModal';
 import { JoinGroupModal } from '../../components/groups/JoinGroupModal';
 import { InviteCodeCard } from '../../components/groups/InviteCodeCard';
@@ -12,7 +12,8 @@ import { groupService } from '../../services/groupService';
 import { Group, GroupMember, EligibilityCheck } from '../../types/groups';
 
 const GroupsPage: React.FC = () => {
-  const { user, isSignedIn } = useMockAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [userMembers, setUserMembers] = useState<GroupMember[]>([]);
   const [eligibility, setEligibility] = useState<EligibilityCheck | null>(null);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { foodService } from '../../services/foodService';
 import { NutritionGoals, DailyNutrition } from '../../types/food';
 
@@ -18,7 +18,7 @@ interface ProgressItem {
 }
 
 export const GoalProgress: React.FC<GoalProgressProps> = ({ date, dailyNutrition }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [goals, setGoals] = useState<NutritionGoals | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { videoStorageService, VideoMetadata, VideoUploadProgress, VideoUtils } from '../../services/videoStorageService';
 import VideoPlayer from './VideoPlayer';
 
@@ -12,7 +12,7 @@ const EnhancedVideoUploadManager: React.FC<VideoUploadManagerProps> = ({
   groupId, 
   onVideoUploaded 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [videos, setVideos] = useState<VideoMetadata[]>([]);
   const [activeUploads, setActiveUploads] = useState<VideoUploadProgress[]>([]);
   const [showUploadModal, setShowUploadModal] = useState(false);

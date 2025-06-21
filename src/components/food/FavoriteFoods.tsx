@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { foodService } from '../../services/foodService';
 import { FavoriteFoodItem } from '../../types/food';
 import { NutritionData } from '../../services/geminiService';
@@ -13,7 +13,7 @@ export const FavoriteFoods: React.FC<FavoriteFoodsProps> = ({
   onSelectFood, 
   showActions = true 
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [favorites, setFavorites] = useState<FavoriteFoodItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -187,7 +187,7 @@ export const FavoriteFoods: React.FC<FavoriteFoodsProps> = ({
 
 // Standalone component for adding current foods to favorites
 export const FavoriteFoodManager: React.FC = () => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newFoodName, setNewFoodName] = useState('');
 

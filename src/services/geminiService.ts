@@ -2,6 +2,7 @@
 
 import { errorService } from './errorService';
 import { environmentService } from '../config/environment';
+import { openaiService } from './openaiService';
 
 export interface NutritionData {
   foodItem: string;
@@ -97,9 +98,33 @@ class GeminiService {
   }
 
   /**
-   * Analyze food from text description using Gemini function calling
+   * Analyze food from text description - tries OpenAI first, then Gemini
    */
   async analyzeFoodText(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
+    // Try OpenAI first
+    if (openaiService.isConfigured()) {
+      console.log('🤖 Trying OpenAI first...');
+      try {
+        const openaiResult = await openaiService.analyzeFoodText(request);
+        if (openaiResult.success) {
+          console.log('✅ OpenAI succeeded, using result');
+          return openaiResult;
+        }
+        console.log('❌ OpenAI failed, falling back to Gemini');
+      } catch (error) {
+        console.log('❌ OpenAI error, falling back to Gemini:', error);
+      }
+    }
+
+    // Fallback to Gemini
+    console.log('🧠 Using Gemini...');
+    return this.analyzeWithGemini(request);
+  }
+
+  /**
+   * Analyze food using Gemini function calling
+   */
+  private async analyzeWithGemini(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
     try {
       console.log('Gemini service - API Key configured:', this.isConfigured());
       

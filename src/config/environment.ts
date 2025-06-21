@@ -12,6 +12,7 @@ interface EnvironmentConfig {
   
   // AI Services
   geminiApiKey: string;
+  openaiApiKey: string;
   
   // App Configuration
   appName: string;
@@ -50,6 +51,7 @@ class EnvironmentService {
       
       // AI Services
       geminiApiKey: process.env.REACT_APP_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '',
+      openaiApiKey: process.env.REACT_APP_OPENAI_API_KEY || process.env.OPENAI_API_KEY || '',
       
       // App Configuration
       appName: process.env.REACT_APP_APP_NAME || 'WellnessApp',
@@ -83,7 +85,16 @@ class EnvironmentService {
     // Warn about optional configurations
     if (!this.config.geminiApiKey || 
         this.config.geminiApiKey === 'your_gemini_api_key_here') {
-      console.warn('Gemini API key not configured - AI features will use offline mode');
+      console.warn('Gemini API key not configured');
+    }
+    
+    if (!this.config.openaiApiKey || 
+        this.config.openaiApiKey === 'your_openai_api_key_here') {
+      console.warn('OpenAI API key not configured');
+    }
+    
+    if (!this.config.geminiApiKey && !this.config.openaiApiKey) {
+      console.warn('No AI API keys configured - will use offline mode');
     }
     
     if (errors.length > 0) {
@@ -172,6 +183,7 @@ class EnvironmentService {
     console.log('API Base URL:', this.config.apiBaseUrl);
     console.log('Clerk Configured:', !!this.config.clerkPublishableKey);
     console.log('Gemini Configured:', !!this.config.geminiApiKey);
+    console.log('OpenAI Configured:', !!this.config.openaiApiKey);
     console.log('Offline Mode:', this.config.enableOfflineMode);
     console.log('Analytics:', this.config.enableAnalytics);
     console.log('HealthKit:', this.config.healthKitEnabled);

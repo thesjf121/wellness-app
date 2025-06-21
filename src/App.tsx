@@ -9,6 +9,15 @@ import { ROUTES } from './utils/constants';
 import { ClerkErrorBoundary } from './components/auth/ClerkErrorBoundary';
 import { environmentService } from './config/environment';
 
+// Component to redirect to external Clerk URLs
+const RedirectToClerk: React.FC<{ url: string }> = ({ url }) => {
+  React.useEffect(() => {
+    window.location.href = url;
+  }, [url]);
+  
+  return <div>Redirecting to authentication...</div>;
+};
+
 // Import all page components
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/auth/AuthPage';
@@ -47,10 +56,10 @@ function App() {
             <Layout>
               <Routes>
                 <Route path={ROUTES.HOME} element={<HomePage />} />
-                <Route path={ROUTES.LOGIN} element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-in" replace />} />
-                <Route path={ROUTES.REGISTER} element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-up" replace />} />
-                <Route path="/sign-in" element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-in" replace />} />
-                <Route path="/sign-up" element={<Navigate to="https://unbiased-slug-45.clerk.accounts.dev/sign-up" replace />} />
+                <Route path={ROUTES.LOGIN} element={<RedirectToClerk url="https://unbiased-slug-45.clerk.accounts.dev/sign-in" />} />
+                <Route path={ROUTES.REGISTER} element={<RedirectToClerk url="https://unbiased-slug-45.clerk.accounts.dev/sign-up" />} />
+                <Route path="/sign-in" element={<RedirectToClerk url="https://unbiased-slug-45.clerk.accounts.dev/sign-in" />} />
+                <Route path="/sign-up" element={<RedirectToClerk url="https://unbiased-slug-45.clerk.accounts.dev/sign-up" />} />
                 <Route path={ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
                 <Route path="/welcome/goals" element={<GoalSettingWizard />} />

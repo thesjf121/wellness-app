@@ -37,7 +37,13 @@ function App() {
 
   return (
     <ClerkErrorBoundary>
-      <ClerkProvider publishableKey={clerkPublishableKey}>
+      <ClerkProvider 
+        publishableKey={clerkPublishableKey}
+        afterSignInUrl="/dashboard"
+        afterSignUpUrl="/dashboard"
+        signInUrl="/sign-in"
+        signUpUrl="/sign-up"
+      >
         <Router>
           <TutorialProvider autoStart={true}>
             <Layout>

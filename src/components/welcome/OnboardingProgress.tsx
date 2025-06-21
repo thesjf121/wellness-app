@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useMockAuth } from '../../context/MockAuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 interface OnboardingStep {
   id: string;
@@ -22,7 +22,7 @@ const OnboardingProgress: React.FC<OnboardingProgressProps> = ({
   onStepClick,
   compact = false
 }) => {
-  const { user } = useMockAuth();
+  const { user } = useUser();
   const [steps, setSteps] = useState<OnboardingStep[]>([]);
   const [overallProgress, setOverallProgress] = useState(0);
 

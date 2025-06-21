@@ -277,60 +277,7 @@ class GeminiService {
    * Build nutrition analysis prompt for text input
    */
   private buildNutritionPrompt(foodText: string, mealType?: string): string {
-    return `
-Provide detailed nutrition information for "${foodText}" and return ONLY a valid JSON array with this exact structure:
-
-[
-  {
-    "foodItem": "name of food item",
-    "calories": number,
-    "macronutrients": {
-      "protein": number (grams),
-      "carbohydrates": number (grams),
-      "fat": number (grams),
-      "fiber": number (grams),
-      "sugar": number (grams)
-    },
-    "micronutrients": {
-      "sodium": number (mg),
-      "potassium": number (mg),
-      "calcium": number (mg),
-      "iron": number (mg),
-      "magnesium": number (mg),
-      "phosphorus": number (mg),
-      "zinc": number (mg),
-      "copper": number (mg),
-      "manganese": number (mg),
-      "selenium": number (mcg),
-      "iodine": number (mcg),
-      "vitaminA": number (IU),
-      "vitaminD": number (IU),
-      "vitaminE": number (mg),
-      "vitaminK": number (mcg),
-      "vitaminC": number (mg),
-      "thiamine": number (mg),
-      "riboflavin": number (mg),
-      "niacin": number (mg),
-      "pantothenicAcid": number (mg),
-      "vitaminB6": number (mg),
-      "biotin": number (mcg),
-      "folate": number (mcg),
-      "vitaminB12": number (mcg),
-      "choline": number (mg)
-    },
-    "servingSize": "description of serving size",
-    "confidence": number (0-1 scale)
-  }
-]
-
-Important notes:
-- For branded products, use the exact nutrition facts from the actual product label with correct serving sizes
-- Be very precise with protein powder nutrition - these are well-documented products
-- If multiple foods are mentioned, create separate entries
-- Use standard USDA nutrition values when possible, but prioritize brand-specific data for commercial products
-- Set confidence based on how specific the description is
-- Return ONLY the JSON array, no additional text
-`;
+    return `Provide detailed nutrition information for "${foodText}". Return only a JSON array with accurate nutrition data including calories, macronutrients (protein, carbohydrates, fat, fiber, sugar), micronutrients (sodium, potassium, calcium, iron, etc.), and serving size. Use exact product label information for branded products.`;
   }
 
   /**

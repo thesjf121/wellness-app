@@ -40,6 +40,13 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
       <div className="mb-4 p-4 bg-blue-100 rounded">
         <p>Debug: ClerkAuthForm mode = {mode}</p>
         <p>Redirect URL: {redirectUrl}</p>
+        <p>Current URL: {window.location.href}</p>
+        <p>Environment: {process.env.NODE_ENV}</p>
+        <p>Clerk Key: {process.env.REACT_APP_CLERK_PUBLISHABLE_KEY ? 'Set' : 'Missing'}</p>
+      </div>
+      
+      <div className="mb-4 p-4 bg-yellow-100 rounded">
+        <p>About to render Clerk {mode === 'login' ? 'SignIn' : 'SignUp'} component...</p>
       </div>
       
       {mode === 'login' ? (
@@ -60,6 +67,10 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
           }}
         />
       )}
+      
+      <div className="mt-4 p-4 bg-green-100 rounded">
+        <p>Clerk component should be rendered above this box</p>
+      </div>
       
       <div className="mt-6 text-center">
         <button

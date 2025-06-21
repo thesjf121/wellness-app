@@ -54,12 +54,7 @@ class OpenAIService {
           model: 'gpt-3.5-turbo',
           messages: [{
             role: 'user',
-            content: `Analyze the nutrition information for: ${request.text}. 
-For branded products like Naked Nutrition, provide the EXACT nutrition data from the official product label.
-Common branded products nutrition facts:
-- Naked Vanilla Protein (1 scoop/30g): 150 calories, 27g protein, 3g carbs, 2g fat
-- Naked Chocolate Protein (1 scoop/30g): 160 calories, 26g protein, 5g carbs, 2.5g fat
-Provide accurate data matching the actual product label.`
+            content: `Analyze the nutrition information for: ${request.text}. Provide accurate nutrition data from the actual product label.`
           }],
           functions: [{
             name: 'get_nutrition_facts',

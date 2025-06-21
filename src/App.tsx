@@ -45,6 +45,8 @@ function App() {
                 <Route path={ROUTES.HOME} element={<HomePage />} />
                 <Route path={ROUTES.LOGIN} element={<AuthPage mode="login" />} />
                 <Route path={ROUTES.REGISTER} element={<AuthPage mode="register" />} />
+                <Route path="/sign-in" element={<AuthPage mode="login" />} />
+                <Route path="/sign-up" element={<AuthPage mode="register" />} />
                 <Route path={ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
                 <Route path="/welcome/goals" element={<GoalSettingWizard />} />

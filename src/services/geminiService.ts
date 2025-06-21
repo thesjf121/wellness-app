@@ -104,16 +104,25 @@ class GeminiService {
     // Try OpenAI first
     if (openaiService.isConfigured()) {
       console.log('🤖 Trying OpenAI first...');
+      console.log('🔑 OpenAI configured check:', openaiService.isConfigured());
       try {
         const openaiResult = await openaiService.analyzeFoodText(request);
+        console.log('🤖 OpenAI Result:', {
+          success: openaiResult.success,
+          error: openaiResult.error,
+          hasData: !!openaiResult.nutritionData,
+          dataLength: openaiResult.nutritionData?.length
+        });
         if (openaiResult.success) {
           console.log('✅ OpenAI succeeded, using result');
           return openaiResult;
         }
-        console.log('❌ OpenAI failed, falling back to Gemini');
+        console.log('❌ OpenAI failed, falling back to Gemini. Error:', openaiResult.error);
       } catch (error) {
         console.log('❌ OpenAI error, falling back to Gemini:', error);
       }
+    } else {
+      console.log('⚠️ OpenAI not configured, using Gemini directly');
     }
 
     // Fallback to Gemini

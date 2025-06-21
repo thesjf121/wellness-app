@@ -75,8 +75,13 @@ class GeminiService {
     // Debug logging
     console.log('🔑 Gemini API Key Length:', this.API_KEY.length);
     console.log('🔑 API Key Configured:', this.isConfigured());
+    console.log('🔑 REACT_APP_GEMINI_API_KEY:', process.env.REACT_APP_GEMINI_API_KEY ? 'SET' : 'NOT SET');
+    console.log('🔑 GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'SET' : 'NOT SET');
     if (this.API_KEY.length > 0) {
       console.log('🔑 API Key Preview:', this.API_KEY.substring(0, 8) + '...');
+      console.log('🔑 API Key is placeholder:', this.API_KEY === 'your_gemini_api_key_here');
+    } else {
+      console.error('🚨 NO GEMINI API KEY FOUND - Will use fake data!');
     }
   }
 
@@ -308,9 +313,11 @@ Please provide nutrition information for each food item mentioned. Return ONLY a
 ]
 
 Important notes:
-- Estimate reasonable serving sizes if not specified
+- For protein powders, use standard serving size (1 scoop = ~30g) unless specified otherwise
+- For branded products (like "Naked Vanilla Protein"), use the exact nutrition facts from the actual product label
+- Be very precise with protein powder nutrition - these are well-documented products
 - If multiple foods are mentioned, create separate entries
-- Use standard USDA nutrition values when possible
+- Use standard USDA nutrition values when possible, but prioritize brand-specific data for commercial products
 - Set confidence based on how specific the description is
 - Return ONLY the JSON array, no additional text
 `;

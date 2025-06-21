@@ -49,7 +49,7 @@ class EnvironmentService {
       clerkPublishableKey: process.env.REACT_APP_CLERK_PUBLISHABLE_KEY || '',
       
       // AI Services
-      geminiApiKey: process.env.REACT_APP_GEMINI_API_KEY || '',
+      geminiApiKey: process.env.REACT_APP_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '',
       
       // App Configuration
       appName: process.env.REACT_APP_APP_NAME || 'WellnessApp',

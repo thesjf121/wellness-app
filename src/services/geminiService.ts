@@ -124,13 +124,7 @@ class GeminiService {
             parts: [{
               text: prompt
             }]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 4096,
-          }
+          }]
         })
       });
 
@@ -277,7 +271,7 @@ class GeminiService {
    * Build nutrition analysis prompt for text input
    */
   private buildNutritionPrompt(foodText: string, mealType?: string): string {
-    return `What are the exact nutrition facts for ${foodText}? Please provide the most current and accurate product label information. Return as JSON array.`;
+    return `${foodText} nutrition facts`;
   }
 
   /**

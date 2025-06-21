@@ -53,6 +53,9 @@ function App() {
                 <Route path={ROUTES.REGISTER} element={<AuthPage mode="register" />} />
                 <Route path="/sign-in" element={<AuthPage mode="login" />} />
                 <Route path="/sign-up" element={<AuthPage mode="register" />} />
+                <Route path="/sso-callback" element={<AuthPage mode="login" />} />
+                <Route path="/login/sso-callback" element={<AuthPage mode="login" />} />
+                <Route path="/register/sso-callback" element={<AuthPage mode="register" />} />
                 <Route path={ROUTES.ONBOARDING} element={<OnboardingPage />} />
                 <Route path={ROUTES.WELCOME} element={<WelcomePage />} />
                 <Route path="/welcome/goals" element={<GoalSettingWizard />} />

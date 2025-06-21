@@ -54,23 +54,26 @@ class PerplexityService {
           model: 'llama-3.1-sonar-large-128k-online', // More powerful real-time web search model
           messages: [{
             role: 'system',
-            content: `You are a nutrition data extractor. Your task is to search the web and find EXACT nutrition facts from product labels, manufacturer websites, or reliable sources. 
+            content: `You are a nutrition data extractor. Search the web and find EXACT nutrition facts.
 
-IMPORTANT: You must return actual numbers, not null values. If you find the product, extract the nutrition data from the search results or your knowledge.
+CRITICAL RULES:
+1. Return ONLY valid JSON - no markdown, no explanations, no comments
+2. Use actual numbers from nutrition labels, NOT null or placeholder values
+3. Do not include any text before or after the JSON
 
-Return ONLY a JSON object with this exact structure:
+Return this exact JSON structure with real numbers:
 {
   "food_items": [{
     "food_name": "exact product name",
-    "serving_size": "serving size from label (e.g., '1 scoop (30g)')",
-    "calories": number (actual calories per serving),
-    "protein_g": number (grams of protein),
-    "carbohydrates_g": number (grams of carbs),
-    "fat_g": number (grams of fat),
-    "fiber_g": number (grams of fiber),
-    "sugar_g": number (grams of sugar),
-    "sodium_mg": number (milligrams of sodium),
-    "source": "URL or description of source"
+    "serving_size": "1 scoop (30g)",
+    "calories": 120,
+    "protein_g": 25,
+    "carbohydrates_g": 3,
+    "fat_g": 0.5,
+    "fiber_g": 0,
+    "sugar_g": 2,
+    "sodium_mg": 110,
+    "source": "nakednutrition.com"
   }]
 }`
           }, {
@@ -149,14 +152,36 @@ Return the actual nutrition numbers per serving, not placeholder values.`
       // Try to extract JSON from the response
       let jsonText = responseText.trim();
       
+      // Remove markdown code blocks if present
+      jsonText = jsonText.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
+      
+      // Remove any text before the first {
+      const firstBrace = jsonText.indexOf('{');
+      if (firstBrace > 0) {
+        jsonText = jsonText.substring(firstBrace);
+      }
+      
+      // Remove any text after the last }
+      const lastBrace = jsonText.lastIndexOf('}');
+      if (lastBrace > 0 && lastBrace < jsonText.length - 1) {
+        jsonText = jsonText.substring(0, lastBrace + 1);
+      }
+      
       // Look for JSON object
       const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         jsonText = jsonMatch[0];
       }
+      
+      console.log('🎯 Cleaned JSON text:', jsonText);
 
       const parsed = JSON.parse(jsonText);
       const foodItems = parsed.food_items || [];
+      
+      // If we got null values, throw an error to fall back to other services
+      if (foodItems.length > 0 && foodItems[0].calories === null) {
+        throw new Error('Perplexity returned null nutrition values');
+      }
       
       return foodItems.map((item: any) => ({
         foodItem: item.food_name || 'Unknown food',

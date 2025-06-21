@@ -42,6 +42,7 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
           afterSignInUrl={redirectUrl}
           signUpUrl={ROUTES.REGISTER}
           routing="path"
+          path="/sign-in"
         />
       ) : (
         <SignUp 
@@ -50,6 +51,7 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
           afterSignUpUrl={redirectUrl}
           signInUrl={ROUTES.LOGIN}
           routing="path"
+          path="/sign-up"
           unsafeMetadata={{
             role: 'member'
           }}

@@ -279,7 +279,19 @@ class GeminiService {
     return `
 You are a nutrition expert. Analyze "${foodText}" and return ONLY a JSON array (no other text) with precise nutrition information.
 
-For protein powders like "naked vanilla protein", use the exact nutrition facts from the actual product label.
+IMPORTANT: For "naked vanilla protein" specifically, use these EXACT nutrition facts from the actual product label (per 2 scoops / 30g):
+- Calories: 130
+- Protein: 25g
+- Carbohydrates: 2g
+- Fat: 2g
+- Fiber: 0g
+- Sugar: 1g
+- Sodium: 150mg
+- Potassium: 150mg
+- Calcium: 60mg
+- Iron: 0.4mg
+
+For other protein powders and foods, use accurate USDA or product label data.
 
 Return this exact JSON format:
 

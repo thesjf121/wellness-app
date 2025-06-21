@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: wellness-app-frontend
-    env: node
+    name: wellness-app
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./build
     pullRequestPreviewsEnabled: true
@@ -10,35 +10,46 @@ services:
         source: /*
         destination: /index.html
     headers:
+      # Security Headers
       - path: /*
         name: X-Frame-Options
         value: DENY
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=*, microphone=*, geolocation=*
+      # Cache Control for static assets
+      - path: /static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /manifest.json
+        name: Cache-Control
+        value: public, max-age=3600
     envVars:
       - key: NODE_ENV
         value: production
-      - key: REACT_APP_API_BASE_URL
-        fromService:
-          type: web
-          name: wellness-app-backend
-          property: host
-        
-  - type: web
-    name: wellness-app-backend
-    env: node
-    buildCommand: npm install
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
+      - key: REACT_APP_ENVIRONMENT
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: wellness-app-db
-          property: connectionString
-          
-databases:
-  - name: wellness-app-db
-    databaseName: wellness_app
-    user: wellness_user
+      - key: REACT_APP_APP_NAME
+        value: WellnessApp
+      - key: REACT_APP_APP_VERSION
+        value: "1.0.0"
+      - key: REACT_APP_ENABLE_OFFLINE_MODE
+        value: "true"
+      - key: REACT_APP_ENABLE_ANALYTICS
+        value: "true"
+      - key: REACT_APP_HEALTH_KIT_ENABLED
+        value: "true"
+      - key: REACT_APP_GOOGLE_FIT_ENABLED
+        value: "true"
+      # IMPORTANT: Add these in Render Dashboard with actual values:
+      # REACT_APP_CLERK_PUBLISHABLE_KEY=pk_live_your_actual_clerk_key
+      # REACT_APP_GEMINI_API_KEY=your_actual_gemini_key (optional)

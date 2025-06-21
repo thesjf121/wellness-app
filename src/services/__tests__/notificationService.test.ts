@@ -21,7 +21,7 @@ describe('NotificationService', () => {
       expect(preferences.dailyReminders).toBe(true);
       expect(preferences.achievementCelebrations).toBe(true);
       expect(preferences.pushNotifications).toBe(true);
-      expect(preferences.reminderTime).toBe('20:00');
+      expect(preferences.reminderTime).toBe('09:00');
     });
 
     it('should load saved preferences from localStorage', async () => {
@@ -128,7 +128,7 @@ describe('NotificationService', () => {
     it('should send streak notification with correct message', async () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-      await notificationService.sendStreakNotification(7);
+      await notificationService.sendStreakMilestoneNotification(7);
 
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Notification:'),

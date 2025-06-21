@@ -638,9 +638,11 @@ class NotificationService {
    */
   private loadPreferences(): void {
     try {
+      this.preferences = this.getDefaultPreferences();
       const stored = localStorage.getItem('notification_preferences');
       if (stored) {
-        this.preferences = JSON.parse(stored);
+        const savedPrefs = JSON.parse(stored);
+        this.preferences = { ...this.preferences, ...savedPrefs };
       }
     } catch (error) {
       errorService.logError(error as Error, { context: 'NotificationService.loadPreferences' });
@@ -674,6 +676,73 @@ class NotificationService {
     } catch (error) {
       errorService.logError(error as Error, { context: 'NotificationService.saveNotificationHistory' });
     }
+  }
+
+  /**
+   * Get notification analytics
+   */
+  async getNotificationAnalytics(): Promise<any[]> {
+    try {
+      return this.notifications.map(notification => ({
+        id: notification.id,
+        type: notification.type,
+        category: notification.category,
+        timestamp: notification.timestamp,
+        read: notification.read
+      }));
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'NotificationService.getNotificationAnalytics' });
+      return [];
+    }
+  }
+
+  /**
+   * Clear notification data
+   */
+  async clearNotificationData(): Promise<void> {
+    try {
+      this.notifications = [];
+      this.preferences = this.getDefaultPreferences();
+      localStorage.removeItem('notification_preferences');
+      localStorage.removeItem('notification_history');
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'NotificationService.clearNotificationData' });
+    }
+  }
+
+  /**
+   * Get default preferences
+   */
+  private getDefaultPreferences(): NotificationPreferences {
+    return {
+      goalReached: true,
+      streakMilestones: true,
+      personalBest: true,
+      dailyReminders: true,
+      weeklySummary: true,
+      achievementCelebrations: true,
+      groupActivity: true,
+      mealReminders: true,
+      trainingReminders: true,
+      motivationalMessages: true,
+      healthTips: true,
+      socialChallenges: true,
+      reEngagementCampaigns: false,
+      reminderTime: '09:00',
+      mealReminderTimes: ['08:00', '12:30', '18:30'],
+      quietHours: {
+        enabled: false,
+        startTime: '22:00',
+        endTime: '08:00'
+      },
+      maxDailyNotifications: 10,
+      batchNotifications: false,
+      smartScheduling: true,
+      pushNotifications: true,
+      emailNotifications: true,
+      inAppNotifications: true,
+      desktopNotifications: false
+    };
   }
 }
 

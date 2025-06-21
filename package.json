@@ -50,7 +50,9 @@
     "cap:open:ios": "npx cap open ios",
     "cap:build": "npm run build && npx cap sync",
     "dev": "npm run start",
-    "dev:mobile": "npm run cap:sync && npm run start"
+    "dev:mobile": "npm run cap:sync && npm run start",
+    "deploy:check": "node scripts/deploy-check.js",
+    "deploy:build": "npm run deploy:check && npm run build"
   },
   "eslintConfig": {
     "extends": [

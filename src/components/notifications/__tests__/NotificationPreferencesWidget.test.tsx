@@ -7,7 +7,7 @@ import * as notificationService from '../../../services/notificationService';
 jest.mock('../../../services/notificationService', () => ({
   notificationService: {
     getPreferences: jest.fn(),
-    updatePreferences: jest.fn(),
+    updatePreferences: jest.fn() as any,
     sendMotivationalNotification: jest.fn(),
   },
 }));
@@ -56,9 +56,9 @@ describe('NotificationPreferencesWidget', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockNotificationService.getPreferences.mockResolvedValue(mockPreferences);
-    mockNotificationService.updatePreferences.mockResolvedValue();
-    mockNotificationService.sendMotivationalNotification.mockResolvedValue();
+    (mockNotificationService.getPreferences as jest.Mock).mockResolvedValue(mockPreferences);
+    (mockNotificationService.updatePreferences as jest.Mock).mockResolvedValue(undefined);
+    (mockNotificationService.sendMotivationalNotification as jest.Mock).mockResolvedValue(undefined);
   });
 
   describe('rendering', () => {
@@ -255,7 +255,7 @@ describe('NotificationPreferencesWidget', () => {
 
   describe('error handling', () => {
     it('should handle preference loading error gracefully', async () => {
-      mockNotificationService.getPreferences.mockRejectedValue(new Error('Failed to load'));
+      (mockNotificationService.getPreferences as jest.Mock).mockRejectedValue(new Error('Failed to load'));
       
       render(<NotificationPreferencesWidget />);
       
@@ -265,7 +265,7 @@ describe('NotificationPreferencesWidget', () => {
     });
 
     it('should handle preference update error gracefully', async () => {
-      mockNotificationService.updatePreferences.mockRejectedValue(new Error('Failed to update'));
+      (mockNotificationService.updatePreferences as jest.Mock).mockRejectedValue(new Error('Failed to update'));
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       
@@ -289,7 +289,7 @@ describe('NotificationPreferencesWidget', () => {
     });
 
     it('should handle test notification error gracefully', async () => {
-      mockNotificationService.sendMotivationalNotification.mockRejectedValue(new Error('Failed to send'));
+      (mockNotificationService.sendMotivationalNotification as jest.Mock).mockRejectedValue(new Error('Failed to send'));
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       

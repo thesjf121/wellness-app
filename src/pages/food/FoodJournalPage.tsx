@@ -198,41 +198,6 @@ const FoodJournalPage: React.FC = () => {
             />
           )}
           <button
-            onClick={async () => {
-              console.log('🐛 DEBUG: Button clicked!');
-              console.log('🐛 Environment Variables:', {
-                GEMINI_API_KEY: process.env.REACT_APP_GEMINI_API_KEY ? 'SET (length: ' + process.env.REACT_APP_GEMINI_API_KEY.length + ')' : 'NOT SET',
-                CLERK_KEY: process.env.REACT_APP_CLERK_PUBLISHABLE_KEY ? 'SET' : 'NOT SET',
-                NODE_ENV: process.env.NODE_ENV,
-                ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT
-              });
-              console.log('🐛 Gemini Service:', geminiService);
-              console.log('🐛 Is Configured:', geminiService.isConfigured());
-              
-              try {
-                const testResult = await geminiService.testConnection();
-                console.log('🧪 Test Connection Result:', testResult);
-                
-                const apiKeySet = process.env.REACT_APP_GEMINI_API_KEY ? 'YES' : 'NO';
-                const apiKeyLength = process.env.REACT_APP_GEMINI_API_KEY?.length || 0;
-                
-                alert(`🐛 DEBUG RESULTS:\n\n` +
-                      `Environment:\n` +
-                      `- API Key Set: ${apiKeySet}\n` +
-                      `- API Key Length: ${apiKeyLength}\n` +
-                      `- Service Configured: ${geminiService.isConfigured()}\n` +
-                      `- Test Result: ${testResult}\n\n` +
-                      `Check browser console for detailed logs!`);
-              } catch (error) {
-                console.error('🚨 Debug Error:', error);
-                alert(`Debug Error: ${error}\n\nCheck console for details.`);
-              }
-            }}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            🐛 Debug AI
-          </button>
-          <button
             onClick={() => setShowSearch(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
           >

@@ -528,7 +528,7 @@ Important notes:
     localStorage.removeItem('wellness_nutrition_goals');
     localStorage.removeItem('wellness_favorite_foods');
     localStorage.removeItem('wellness_offline_queue');
-    console.log('🗑️ Cleared all stored food data - next queries will be fresh');
+    console.log('🗑️ Cleared all stored food data - next queries will be fresh from API');
   }
 
   /**

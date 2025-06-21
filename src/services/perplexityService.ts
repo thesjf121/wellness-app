@@ -52,31 +52,29 @@ class PerplexityService {
         },
         body: JSON.stringify({
           model: 'llama-3.1-sonar-large-128k-online', // More powerful real-time web search model
+          search_domain_filter: [],  // Remove filter to search all domains
+          search_recency_filter: "month",  // Search recent data
           messages: [{
             role: 'system',
-            content: `You are a nutrition data extractor. Search for COMPLETE nutrition information including ALL vitamins, minerals, and active ingredients.
+            content: `SEARCH THE WEB for actual nutrition facts. DO NOT make up hypothetical data.
 
-For supplements, include:
-- Serving size (e.g. "3 capsules" not "1 capsule")
-- ALL ingredients with their amounts (mg, mcg, IU)
-- Both nutrition facts AND supplement facts
-- Active ingredients and their dosages
-
-Return ONLY valid JSON:
+Return ONLY this JSON structure with REAL numbers:
 {
   "food_items": [{
-    "food_name": "product name",
-    "serving_size": "actual serving size from label",
-    "calories": number,
-    "protein_g": number,
-    "carbohydrates_g": number,
-    "fat_g": number,
-    "fiber_g": number,
-    "sugar_g": number,
-    "sodium_mg": number,
-    "source": "source URL or website"
+    "food_name": "exact product name",
+    "serving_size": "serving from label",
+    "calories": 0,
+    "protein_g": 0,
+    "carbohydrates_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "sugar_g": 0,
+    "sodium_mg": 0,
+    "source": "website.com"
   }]
-}`
+}
+
+NO explanatory text. NO markdown. ONLY JSON.`
           }, {
             role: 'user',
             content: `${request.text} nutrition value`
@@ -84,8 +82,6 @@ Return ONLY valid JSON:
           temperature: 0.1,
           max_tokens: 1000,
           return_citations: true,
-          search_domain_filter: ["nakednutrition.com", "amazon.com", "walmart.com", "target.com", "iherb.com", "vitacost.com", "gnc.com", "bodybuilding.com"],
-          search_recency_filter: "year"
         })
       });
 
@@ -165,10 +161,17 @@ Return ONLY valid JSON:
       // CRITICAL: Remove JavaScript comments (// ...) which make JSON invalid
       jsonText = jsonText.replace(/\/\/.*$/gm, '');
       
+      // Remove any trailing commas before closing braces/brackets
+      jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
+      
       // Look for JSON object
-      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+      const jsonMatch = jsonText.match(/\{[\s\S]*?\}(?:\s*\])?/);
       if (jsonMatch) {
         jsonText = jsonMatch[0];
+        // Ensure it ends with proper closing
+        if (!jsonText.includes(']}')) {
+          jsonText = jsonText.replace(/\}$/, ']}');
+        }
       }
       
       console.log('🎯 Cleaned JSON text:', jsonText);

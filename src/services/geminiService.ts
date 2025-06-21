@@ -3,6 +3,7 @@
 import { errorService } from './errorService';
 import { environmentService } from '../config/environment';
 import { openaiService } from './openaiService';
+import { perplexityService } from './perplexityService';
 
 export interface NutritionData {
   foodItem: string;
@@ -98,13 +99,36 @@ class GeminiService {
   }
 
   /**
-   * Analyze food from text description - tries OpenAI first, then Gemini
+   * Analyze food from text description - tries Perplexity first (for branded products), then OpenAI, then Gemini
    */
   async analyzeFoodText(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
-    // Try OpenAI first
+    // Check if this looks like a branded product
+    const isBrandedProduct = this.looksLikeBrandedProduct(request.text || '');
+    
+    // Try Perplexity first for branded products
+    if (isBrandedProduct && perplexityService.isConfigured()) {
+      console.log('🔍 Detected branded product, trying Perplexity first...');
+      try {
+        const perplexityResult = await perplexityService.analyzeFoodText(request);
+        console.log('🔍 Perplexity Result:', {
+          success: perplexityResult.success,
+          error: perplexityResult.error,
+          hasData: !!perplexityResult.nutritionData,
+          dataLength: perplexityResult.nutritionData?.length
+        });
+        if (perplexityResult.success) {
+          console.log('✅ Perplexity succeeded with real-time data');
+          return perplexityResult;
+        }
+        console.log('❌ Perplexity failed, falling back to OpenAI. Error:', perplexityResult.error);
+      } catch (error) {
+        console.log('❌ Perplexity error, falling back to OpenAI:', error);
+      }
+    }
+    
+    // Try OpenAI second
     if (openaiService.isConfigured()) {
-      console.log('🤖 Trying OpenAI first...');
-      console.log('🔑 OpenAI configured check:', openaiService.isConfigured());
+      console.log('🤖 Trying OpenAI...');
       try {
         const openaiResult = await openaiService.analyzeFoodText(request);
         console.log('🤖 OpenAI Result:', {
@@ -121,8 +145,6 @@ class GeminiService {
       } catch (error) {
         console.log('❌ OpenAI error, falling back to Gemini:', error);
       }
-    } else {
-      console.log('⚠️ OpenAI not configured, using Gemini directly');
     }
 
     // Fallback to Gemini
@@ -741,6 +763,51 @@ Important notes:
       baseUrl: this.BASE_URL,
       apiKeyPreview: this.API_KEY.length > 0 ? this.API_KEY.substring(0, 8) + '...' : 'NOT SET'
     };
+  }
+
+  /**
+   * Check if the food text looks like a branded product
+   */
+  private looksLikeBrandedProduct(text: string): boolean {
+    const brandedIndicators = [
+      'naked', 'quest', 'clif', 'kind', 'rxbar', 'larabar', 'pure protein',
+      'premier protein', 'muscle milk', 'orgain', 'vega', 'garden of life',
+      'optimum nutrition', 'gold standard', 'bsn', 'dymatize', 'isopure',
+      'coca cola', 'pepsi', 'gatorade', 'powerade', 'vitamin water',
+      'red bull', 'monster', 'rockstar', 'bang', 'celsius',
+      'yoplait', 'chobani', 'dannon', 'oikos', 'fage', 'siggi',
+      'ben & jerry', 'haagen dazs', 'breyers', 'blue bell',
+      'kellogg', 'general mills', 'post', 'quaker',
+      'doritos', 'lay\'s', 'pringles', 'cheetos', 'fritos',
+      'oreo', 'chips ahoy', 'nabisco', 'keebler',
+      'nature valley', 'fiber one', 'special k', 'nutri grain',
+      'campbell', 'progresso', 'healthy choice', 'lean cuisine',
+      'stouffer', 'marie callender', 'amy\'s', 'annie\'s'
+    ];
+    
+    const lowerText = text.toLowerCase();
+    
+    // Check if text contains any brand indicators
+    const hasBrand = brandedIndicators.some(brand => lowerText.includes(brand));
+    
+    // Check for patterns that indicate branded products
+    const hasProductPattern = /\b(bar|shake|powder|drink|snack|chips|cookie|cereal|yogurt|ice cream|soup|meal)\b/i.test(text);
+    
+    // Check for trademark symbols
+    const hasTrademark = /[®™©]/.test(text);
+    
+    // Check for product-like capitalization (e.g., "Naked Vanilla Protein")
+    const hasProductCapitalization = /[A-Z][a-z]+\s+[A-Z]/.test(text);
+    
+    console.log('🏷️ Brand detection for:', text, {
+      hasBrand,
+      hasProductPattern,
+      hasTrademark,
+      hasProductCapitalization,
+      isBranded: hasBrand || (hasProductPattern && hasProductCapitalization) || hasTrademark
+    });
+    
+    return hasBrand || (hasProductPattern && hasProductCapitalization) || hasTrademark;
   }
 }
 

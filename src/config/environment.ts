@@ -13,6 +13,7 @@ interface EnvironmentConfig {
   // AI Services
   geminiApiKey: string;
   openaiApiKey: string;
+  perplexityApiKey: string;
   
   // App Configuration
   appName: string;
@@ -52,6 +53,7 @@ class EnvironmentService {
       // AI Services
       geminiApiKey: process.env.REACT_APP_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '',
       openaiApiKey: process.env.REACT_APP_OPENAI_API_KEY || process.env.OPENAI_API_KEY || '',
+      perplexityApiKey: process.env.REACT_APP_PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY || '',
       
       // App Configuration
       appName: process.env.REACT_APP_APP_NAME || 'WellnessApp',
@@ -91,6 +93,11 @@ class EnvironmentService {
     if (!this.config.openaiApiKey || 
         this.config.openaiApiKey === 'your_openai_api_key_here') {
       console.warn('OpenAI API key not configured');
+    }
+    
+    if (!this.config.perplexityApiKey || 
+        this.config.perplexityApiKey === 'your_perplexity_api_key_here') {
+      console.warn('Perplexity API key not configured');
     }
     
     if (!this.config.geminiApiKey && !this.config.openaiApiKey) {

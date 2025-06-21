@@ -56,13 +56,17 @@ class PerplexityService {
           search_recency_filter: "month",  // Search recent data
           messages: [{
             role: 'system',
-            content: `SEARCH THE WEB for actual nutrition facts. DO NOT make up hypothetical data.
+            content: `SEARCH THE WEB and find the ACTUAL INGREDIENTS AND AMOUNTS.
 
-Return ONLY this JSON structure with REAL numbers:
+For supplements, I need the VITAMIN and MINERAL content in the micronutrients field.
+If it has 200mg Vitamin C, put vitaminC: 200
+If it has 500mg Niacin, put niacin: 500
+
+Return ONLY this JSON with ACTUAL INGREDIENT AMOUNTS:
 {
   "food_items": [{
-    "food_name": "exact product name",
-    "serving_size": "serving from label",
+    "food_name": "product name",
+    "serving_size": "3 capsules",
     "calories": 0,
     "protein_g": 0,
     "carbohydrates_g": 0,
@@ -70,11 +74,12 @@ Return ONLY this JSON structure with REAL numbers:
     "fiber_g": 0,
     "sugar_g": 0,
     "sodium_mg": 0,
-    "source": "website.com"
+    "vitaminC": 200,
+    "niacin": 500,
+    "other_ingredients": "list other active ingredients here",
+    "source": "website"
   }]
-}
-
-NO explanatory text. NO markdown. ONLY JSON.`
+}`
           }, {
             role: 'user',
             content: `${request.text} nutrition value`

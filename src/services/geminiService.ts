@@ -156,13 +156,18 @@ class GeminiService {
       }
 
       const data = await response.json();
+      console.log('🔍 Raw Gemini Response:', JSON.stringify(data, null, 2));
+      
       const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      console.log('📝 Analysis Text from Gemini:', analysisText);
       
       if (!analysisText) {
+        console.error('❌ No analysis text received from Gemini. Full response:', data);
         throw new Error('No analysis text received from Gemini');
       }
 
       const nutritionData = this.parseNutritionResponse(analysisText);
+      console.log('✅ Parsed Nutrition Data:', nutritionData);
       
       return {
         success: true,
@@ -391,14 +396,20 @@ Important notes:
    */
   private parseNutritionResponse(responseText: string): NutritionData[] {
     try {
+      console.log('🧩 Parsing response text:', responseText);
+      
       // Remove any markdown formatting or extra text
       const jsonMatch = responseText.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
+        console.error('❌ No JSON array found in response. Full text:', responseText);
         throw new Error('No valid JSON found in response');
       }
 
       const jsonText = jsonMatch[0];
+      console.log('🎯 Extracted JSON:', jsonText);
+      
       const nutritionData = JSON.parse(jsonText);
+      console.log('📊 Raw parsed data:', nutritionData);
 
       // Validate and sanitize the data
       return nutritionData.map((item: any) => ({

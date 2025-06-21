@@ -146,16 +146,23 @@ NO explanatory text. NO markdown. ONLY JSON.`
       // Remove markdown code blocks if present
       jsonText = jsonText.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
       
-      // Remove any text before the first {
-      const firstBrace = jsonText.indexOf('{');
-      if (firstBrace > 0) {
-        jsonText = jsonText.substring(firstBrace);
+      // Find the JSON boundaries - look for the complete object structure
+      const jsonStart = jsonText.indexOf('{');
+      let braceCount = 0;
+      let jsonEnd = -1;
+      
+      // Find the matching closing brace
+      for (let i = jsonStart; i < jsonText.length; i++) {
+        if (jsonText[i] === '{') braceCount++;
+        if (jsonText[i] === '}') braceCount--;
+        if (braceCount === 0) {
+          jsonEnd = i;
+          break;
+        }
       }
       
-      // Remove any text after the last }
-      const lastBrace = jsonText.lastIndexOf('}');
-      if (lastBrace > 0 && lastBrace < jsonText.length - 1) {
-        jsonText = jsonText.substring(0, lastBrace + 1);
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        jsonText = jsonText.substring(jsonStart, jsonEnd + 1);
       }
       
       // CRITICAL: Remove JavaScript comments (// ...) which make JSON invalid
@@ -163,16 +170,6 @@ NO explanatory text. NO markdown. ONLY JSON.`
       
       // Remove any trailing commas before closing braces/brackets
       jsonText = jsonText.replace(/,\s*([\]}])/g, '$1');
-      
-      // Look for JSON object
-      const jsonMatch = jsonText.match(/\{[\s\S]*?\}(?:\s*\])?/);
-      if (jsonMatch) {
-        jsonText = jsonMatch[0];
-        // Ensure it ends with proper closing
-        if (!jsonText.includes(']}')) {
-          jsonText = jsonText.replace(/\}$/, ']}');
-        }
-      }
       
       console.log('🎯 Cleaned JSON text:', jsonText);
 

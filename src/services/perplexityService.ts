@@ -54,39 +54,32 @@ class PerplexityService {
           model: 'llama-3.1-sonar-large-128k-online', // More powerful real-time web search model
           messages: [{
             role: 'system',
-            content: `You are a nutrition data extractor. Search the web and find EXACT nutrition facts.
+            content: `You are a nutrition data extractor. Search for COMPLETE nutrition information including ALL vitamins, minerals, and active ingredients.
 
-CRITICAL RULES:
-1. Return ONLY valid JSON - no markdown, no explanations, no comments
-2. Use actual numbers from nutrition labels, NOT null or placeholder values
-3. Do not include any text before or after the JSON
+For supplements, include:
+- Serving size (e.g. "3 capsules" not "1 capsule")
+- ALL ingredients with their amounts (mg, mcg, IU)
+- Both nutrition facts AND supplement facts
+- Active ingredients and their dosages
 
-Return this exact JSON structure with real numbers:
+Return ONLY valid JSON:
 {
   "food_items": [{
-    "food_name": "exact product name",
-    "serving_size": "1 scoop (30g)",
-    "calories": 120,
-    "protein_g": 25,
-    "carbohydrates_g": 3,
-    "fat_g": 0.5,
-    "fiber_g": 0,
-    "sugar_g": 2,
-    "sodium_mg": 110,
-    "source": "nakednutrition.com"
+    "food_name": "product name",
+    "serving_size": "actual serving size from label",
+    "calories": number,
+    "protein_g": number,
+    "carbohydrates_g": number,
+    "fat_g": number,
+    "fiber_g": number,
+    "sugar_g": number,
+    "sodium_mg": number,
+    "source": "source URL or website"
   }]
 }`
           }, {
             role: 'user',
-            content: `Find the nutrition facts for: ${request.text}
-
-Search for and extract the actual nutrition label data. Common sources include:
-- Official brand websites (nakednutrition.com for Naked products)
-- Major retailers (Amazon, Walmart, Target)
-- Nutrition databases
-- Product packaging images
-
-Return the actual nutrition numbers per serving, not placeholder values.`
+            content: `${request.text} nutrition value`
           }],
           temperature: 0.1,
           max_tokens: 1000,

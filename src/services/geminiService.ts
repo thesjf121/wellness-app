@@ -125,10 +125,10 @@ class GeminiService {
             }]
           }],
           generationConfig: {
-            temperature: 0.1,
+            temperature: 0.0,
             topK: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
+            topP: 0.8,
+            maxOutputTokens: 4096,
           }
         })
       });
@@ -277,12 +277,11 @@ class GeminiService {
    */
   private buildNutritionPrompt(foodText: string, mealType?: string): string {
     return `
-Analyze the following food description and provide detailed nutrition information in JSON format.
+You are a nutrition expert. Analyze "${foodText}" and return ONLY a JSON array (no other text) with precise nutrition information.
 
-Food description: "${foodText}"
-${mealType ? `Meal type: ${mealType}` : ''}
+For protein powders like "naked vanilla protein", use the exact nutrition facts from the actual product label.
 
-Please provide nutrition information for each food item mentioned. Return ONLY a valid JSON array with this exact structure:
+Return this exact JSON format:
 
 [
   {
@@ -408,14 +407,26 @@ Important notes:
     try {
       console.log('🧩 Parsing response text:', responseText);
       
-      // Remove any markdown formatting or extra text
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) {
-        console.error('❌ No JSON array found in response. Full text:', responseText);
-        throw new Error('No valid JSON found in response');
+      // Try to extract JSON - be more aggressive about finding it
+      let jsonText = responseText.trim();
+      
+      // Remove markdown code blocks if present
+      jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      
+      // Look for JSON array
+      const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      } else {
+        console.error('❌ No JSON array found. Full text:', responseText);
+        // Try to parse the entire response as JSON
+        if (jsonText.startsWith('[') && jsonText.endsWith(']')) {
+          // It might already be valid JSON
+        } else {
+          throw new Error('No valid JSON array found in response');
+        }
       }
 
-      const jsonText = jsonMatch[0];
       console.log('🎯 Extracted JSON:', jsonText);
       
       const nutritionData = JSON.parse(jsonText);

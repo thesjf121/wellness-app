@@ -28,12 +28,36 @@ export interface DailyNutrition {
     sugar: number;
   };
   totalMicros: {
+    // Minerals
     sodium: number;
     potassium: number;
     calcium: number;
     iron: number;
-    vitaminC: number;
+    magnesium: number;
+    phosphorus: number;
+    zinc: number;
+    copper: number;
+    manganese: number;
+    selenium: number;
+    iodine: number;
+    
+    // Fat-soluble vitamins
     vitaminA: number;
+    vitaminD: number;
+    vitaminE: number;
+    vitaminK: number;
+    
+    // Water-soluble vitamins
+    vitaminC: number;
+    thiamine: number;
+    riboflavin: number;
+    niacin: number;
+    pantothenicAcid: number;
+    vitaminB6: number;
+    biotin: number;
+    folate: number;
+    vitaminB12: number;
+    choline: number;
   };
   mealBreakdown: {
     breakfast: Partial<DailyNutrition>;
@@ -55,12 +79,36 @@ export interface NutritionGoals {
     sugar: number; // grams
   };
   microGoals: {
+    // Minerals
     sodium: number; // mg (usually a limit)
     potassium: number; // mg
     calcium: number; // mg
     iron: number; // mg
-    vitaminC: number; // mg
+    magnesium: number; // mg
+    phosphorus: number; // mg
+    zinc: number; // mg
+    copper: number; // mg
+    manganese: number; // mg
+    selenium: number; // mcg
+    iodine: number; // mcg
+    
+    // Fat-soluble vitamins
     vitaminA: number; // IU
+    vitaminD: number; // IU
+    vitaminE: number; // mg
+    vitaminK: number; // mcg
+    
+    // Water-soluble vitamins
+    vitaminC: number; // mg
+    thiamine: number; // mg
+    riboflavin: number; // mg
+    niacin: number; // mg
+    pantothenicAcid: number; // mg
+    vitaminB6: number; // mg
+    biotin: number; // mcg
+    folate: number; // mcg
+    vitaminB12: number; // mcg
+    choline: number; // mg
   };
   createdAt: Date;
   updatedAt: Date;

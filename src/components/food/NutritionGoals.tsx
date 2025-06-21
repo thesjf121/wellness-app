@@ -75,8 +75,27 @@ export const NutritionGoals: React.FC<NutritionGoalsProps> = ({ onClose }) => {
           potassium: 3500, // Default values for nutrients not in form
           calcium: 1000,
           iron: 18,
+          magnesium: 400,
+          phosphorus: 700,
+          zinc: 11,
+          copper: 0.9,
+          manganese: 2.3,
+          selenium: 55,
+          iodine: 150,
+          vitaminA: 900,
+          vitaminD: 600,
+          vitaminE: 15,
+          vitaminK: 120,
           vitaminC: 90,
-          vitaminA: 900
+          thiamine: 1.2,
+          riboflavin: 1.3,
+          niacin: 16,
+          pantothenicAcid: 5,
+          vitaminB6: 1.7,
+          biotin: 30,
+          folate: 400,
+          vitaminB12: 2.4,
+          choline: 550
         }
       };
 

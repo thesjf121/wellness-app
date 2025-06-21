@@ -228,7 +228,10 @@ class FoodService {
         date,
         totalCalories: 0,
         totalMacros: { protein: 0, carbohydrates: 0, fat: 0, fiber: 0, sugar: 0 },
-        totalMicros: { sodium: 0, potassium: 0, calcium: 0, iron: 0, vitaminC: 0, vitaminA: 0 },
+        totalMicros: { 
+          sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
+          vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
+        },
         mealBreakdown: {
           breakfast: {},
           lunch: {},
@@ -427,13 +430,33 @@ class FoodService {
         acc.potassium += food.micronutrients.potassium;
         acc.calcium += food.micronutrients.calcium;
         acc.iron += food.micronutrients.iron;
-        acc.vitaminC += food.micronutrients.vitaminC;
+        acc.magnesium += food.micronutrients.magnesium || 0;
+        acc.phosphorus += food.micronutrients.phosphorus || 0;
+        acc.zinc += food.micronutrients.zinc || 0;
+        acc.copper += food.micronutrients.copper || 0;
+        acc.manganese += food.micronutrients.manganese || 0;
+        acc.selenium += food.micronutrients.selenium || 0;
+        acc.iodine += food.micronutrients.iodine || 0;
         acc.vitaminA += food.micronutrients.vitaminA;
+        acc.vitaminD += food.micronutrients.vitaminD || 0;
+        acc.vitaminE += food.micronutrients.vitaminE || 0;
+        acc.vitaminK += food.micronutrients.vitaminK || 0;
+        acc.vitaminC += food.micronutrients.vitaminC;
+        acc.thiamine += food.micronutrients.thiamine || 0;
+        acc.riboflavin += food.micronutrients.riboflavin || 0;
+        acc.niacin += food.micronutrients.niacin || 0;
+        acc.pantothenicAcid += food.micronutrients.pantothenicAcid || 0;
+        acc.vitaminB6 += food.micronutrients.vitaminB6 || 0;
+        acc.biotin += food.micronutrients.biotin || 0;
+        acc.folate += food.micronutrients.folate || 0;
+        acc.vitaminB12 += food.micronutrients.vitaminB12 || 0;
+        acc.choline += food.micronutrients.choline || 0;
       });
       return acc;
     }, {
       calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0,
-      sodium: 0, potassium: 0, calcium: 0, iron: 0, vitaminC: 0, vitaminA: 0
+      sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
+      vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0
     });
 
     return {
@@ -450,8 +473,27 @@ class FoodService {
         potassium: totals.potassium,
         calcium: totals.calcium,
         iron: totals.iron,
+        magnesium: totals.magnesium,
+        phosphorus: totals.phosphorus,
+        zinc: totals.zinc,
+        copper: totals.copper,
+        manganese: totals.manganese,
+        selenium: totals.selenium,
+        iodine: totals.iodine,
+        vitaminA: totals.vitaminA,
+        vitaminD: totals.vitaminD,
+        vitaminE: totals.vitaminE,
+        vitaminK: totals.vitaminK,
         vitaminC: totals.vitaminC,
-        vitaminA: totals.vitaminA
+        thiamine: totals.thiamine,
+        riboflavin: totals.riboflavin,
+        niacin: totals.niacin,
+        pantothenicAcid: totals.pantothenicAcid,
+        vitaminB6: totals.vitaminB6,
+        biotin: totals.biotin,
+        folate: totals.folate,
+        vitaminB12: totals.vitaminB12,
+        choline: totals.choline
       }
     };
   }
@@ -472,14 +514,36 @@ class FoodService {
         acc.micros.potassium += food.micronutrients.potassium;
         acc.micros.calcium += food.micronutrients.calcium;
         acc.micros.iron += food.micronutrients.iron;
-        acc.micros.vitaminC += food.micronutrients.vitaminC;
+        acc.micros.magnesium += food.micronutrients.magnesium || 0;
+        acc.micros.phosphorus += food.micronutrients.phosphorus || 0;
+        acc.micros.zinc += food.micronutrients.zinc || 0;
+        acc.micros.copper += food.micronutrients.copper || 0;
+        acc.micros.manganese += food.micronutrients.manganese || 0;
+        acc.micros.selenium += food.micronutrients.selenium || 0;
+        acc.micros.iodine += food.micronutrients.iodine || 0;
         acc.micros.vitaminA += food.micronutrients.vitaminA;
+        acc.micros.vitaminD += food.micronutrients.vitaminD || 0;
+        acc.micros.vitaminE += food.micronutrients.vitaminE || 0;
+        acc.micros.vitaminK += food.micronutrients.vitaminK || 0;
+        acc.micros.vitaminC += food.micronutrients.vitaminC;
+        acc.micros.thiamine += food.micronutrients.thiamine || 0;
+        acc.micros.riboflavin += food.micronutrients.riboflavin || 0;
+        acc.micros.niacin += food.micronutrients.niacin || 0;
+        acc.micros.pantothenicAcid += food.micronutrients.pantothenicAcid || 0;
+        acc.micros.vitaminB6 += food.micronutrients.vitaminB6 || 0;
+        acc.micros.biotin += food.micronutrients.biotin || 0;
+        acc.micros.folate += food.micronutrients.folate || 0;
+        acc.micros.vitaminB12 += food.micronutrients.vitaminB12 || 0;
+        acc.micros.choline += food.micronutrients.choline || 0;
       });
       return acc;
     }, {
       calories: 0,
       macros: { protein: 0, carbohydrates: 0, fat: 0, fiber: 0, sugar: 0 },
-      micros: { sodium: 0, potassium: 0, calcium: 0, iron: 0, vitaminC: 0, vitaminA: 0 }
+      micros: { 
+        sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
+        vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
+      }
     });
 
     return totals;

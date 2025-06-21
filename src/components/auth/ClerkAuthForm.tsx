@@ -10,6 +10,8 @@ interface ClerkAuthFormProps {
 export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
   const navigate = useNavigate();
 
+  console.log('ClerkAuthForm rendering with mode:', mode);
+
   // Custom appearance configuration for Clerk components
   const appearance = {
     elements: {
@@ -35,14 +37,17 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
 
   return (
     <div className="max-w-md mx-auto">
+      <div className="mb-4 p-4 bg-blue-100 rounded">
+        <p>Debug: ClerkAuthForm mode = {mode}</p>
+        <p>Redirect URL: {redirectUrl}</p>
+      </div>
+      
       {mode === 'login' ? (
         <SignIn 
           appearance={appearance}
           redirectUrl={redirectUrl}
           afterSignInUrl={redirectUrl}
           signUpUrl={ROUTES.REGISTER}
-          routing="path"
-          path="/sign-in"
         />
       ) : (
         <SignUp 
@@ -50,8 +55,6 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
           redirectUrl={redirectUrl}
           afterSignUpUrl={redirectUrl}
           signInUrl={ROUTES.LOGIN}
-          routing="path"
-          path="/sign-up"
           unsafeMetadata={{
             role: 'member'
           }}

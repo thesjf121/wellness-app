@@ -41,12 +41,19 @@ export interface GeminiAnalysisResponse {
 
 class GeminiService {
   private readonly API_KEY: string;
-  private readonly BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-  private readonly VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent';
+  private readonly BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  private readonly VISION_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
   constructor() {
     // Get API key from environment service
     this.API_KEY = environmentService.get('geminiApiKey') || '';
+    
+    // Debug logging
+    console.log('🔑 Gemini API Key Length:', this.API_KEY.length);
+    console.log('🔑 API Key Configured:', this.isConfigured());
+    if (this.API_KEY.length > 0) {
+      console.log('🔑 API Key Preview:', this.API_KEY.substring(0, 8) + '...');
+    }
   }
 
   /**
@@ -95,16 +102,25 @@ class GeminiService {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🚨 Gemini API Error Details:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorBody: errorText,
+          apiKeyLength: this.API_KEY.length,
+          apiKeyConfigured: this.isConfigured()
+        });
+        
         // Handle specific API errors
         if (response.status === 429) {
           console.warn('Gemini API rate limit reached, using offline mode');
           return this.getOfflineNutritionData(request.text || 'unknown food');
         }
-        if (response.status === 401) {
-          console.error('Invalid Gemini API key');
+        if (response.status === 401 || response.status === 403) {
+          console.error('🚨 Invalid/Missing Gemini API key - Status:', response.status);
           return this.getOfflineNutritionData(request.text || 'unknown food');
         }
-        throw new Error(`Gemini API error: ${response.status}`);
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
@@ -406,26 +422,51 @@ Important notes:
   }
 
   /**
-   * Test API connectivity
+   * Test API connectivity with detailed logging
    */
   async testConnection(): Promise<boolean> {
     try {
+      console.log('🧪 Testing Gemini API Connection...');
+      console.log('🔑 API Key Configured:', this.isConfigured());
+      console.log('🔑 API Key Length:', this.API_KEY.length);
+      
       if (!this.isConfigured()) {
+        console.log('❌ API Key not configured, using mock mode');
         return true; // Mock mode always works
       }
 
+      console.log('📡 Making test API call to Gemini...');
       const response = await this.analyzeFoodText({
         text: 'apple',
         userId: 'test'
       });
 
+      console.log('🧪 Test Result:', { 
+        success: response.success, 
+        hasData: !!response.nutritionData,
+        error: response.error 
+      });
+
       return response.success;
     } catch (error) {
+      console.error('🚨 Gemini API test failed:', error);
       errorService.logError(error as Error, { 
         context: 'GeminiService.testConnection' 
       });
       return false;
     }
+  }
+
+  /**
+   * Debug method to check configuration status
+   */
+  getDebugInfo() {
+    return {
+      apiKeyLength: this.API_KEY.length,
+      isConfigured: this.isConfigured(),
+      baseUrl: this.BASE_URL,
+      apiKeyPreview: this.API_KEY.length > 0 ? this.API_KEY.substring(0, 8) + '...' : 'NOT SET'
+    };
   }
 }
 

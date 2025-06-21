@@ -45,8 +45,17 @@ export const NutritionAnalysisResult: React.FC<NutritionAnalysisResultProps> = (
     carbs: total.carbs + item.macronutrients.carbohydrates,
     fat: total.fat + item.macronutrients.fat,
     fiber: total.fiber + item.macronutrients.fiber,
-    sugar: total.sugar + item.macronutrients.sugar
-  }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 });
+    sugar: total.sugar + item.macronutrients.sugar,
+    sodium: total.sodium + item.micronutrients.sodium,
+    potassium: total.potassium + item.micronutrients.potassium,
+    calcium: total.calcium + item.micronutrients.calcium,
+    iron: total.iron + item.micronutrients.iron,
+    vitaminC: total.vitaminC + item.micronutrients.vitaminC,
+    vitaminA: total.vitaminA + item.micronutrients.vitaminA
+  }), { 
+    calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0,
+    sodium: 0, potassium: 0, calcium: 0, iron: 0, vitaminC: 0, vitaminA: 0
+  });
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'text-green-600 bg-green-100';
@@ -72,7 +81,9 @@ export const NutritionAnalysisResult: React.FC<NutritionAnalysisResultProps> = (
       {/* Summary Card */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <h3 className="font-semibold text-blue-900 mb-3">Total Nutrition Summary</h3>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
+        
+        {/* Macronutrients */}
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center mb-4">
           <div>
             <div className="text-2xl font-bold text-blue-600">{Math.round(totalNutrition.calories)}</div>
             <div className="text-xs text-blue-700">Calories</div>
@@ -96,6 +107,37 @@ export const NutritionAnalysisResult: React.FC<NutritionAnalysisResultProps> = (
           <div>
             <div className="text-lg font-semibold text-gray-700">{Math.round(totalNutrition.sugar)}g</div>
             <div className="text-xs text-gray-600">Sugar</div>
+          </div>
+        </div>
+
+        {/* Micronutrients */}
+        <div className="border-t pt-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">📊 Micronutrients</h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
+            <div className="bg-white rounded p-2 border">
+              <div className="text-sm font-semibold text-red-600">{Math.round(totalNutrition.sodium)}mg</div>
+              <div className="text-xs text-gray-600">Sodium</div>
+            </div>
+            <div className="bg-white rounded p-2 border">
+              <div className="text-sm font-semibold text-orange-600">{Math.round(totalNutrition.potassium)}mg</div>
+              <div className="text-xs text-gray-600">Potassium</div>
+            </div>
+            <div className="bg-white rounded p-2 border">
+              <div className="text-sm font-semibold text-blue-600">{Math.round(totalNutrition.calcium)}mg</div>
+              <div className="text-xs text-gray-600">Calcium</div>
+            </div>
+            <div className="bg-white rounded p-2 border">
+              <div className="text-sm font-semibold text-gray-600">{Math.round(totalNutrition.iron)}mg</div>
+              <div className="text-xs text-gray-600">Iron</div>
+            </div>
+            <div className="bg-white rounded p-2 border">
+              <div className="text-sm font-semibold text-green-600">{Math.round(totalNutrition.vitaminC)}mg</div>
+              <div className="text-xs text-gray-600">Vitamin C</div>
+            </div>
+            <div className="bg-white rounded p-2 border">
+              <div className="text-sm font-semibold text-yellow-600">{Math.round(totalNutrition.vitaminA)}IU</div>
+              <div className="text-xs text-gray-600">Vitamin A</div>
+            </div>
           </div>
         </div>
       </div>
@@ -256,46 +298,48 @@ export const NutritionAnalysisResult: React.FC<NutritionAnalysisResultProps> = (
                   </div>
                 </div>
 
-                {/* Detailed Nutrition (Collapsible) */}
-                <details className="group">
-                  <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-700">
-                    View detailed nutrition info
-                  </summary>
-                  <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                {/* Micronutrients - Now visible by default */}
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  <h5 className="text-xs font-medium text-gray-700 mb-2">📊 Micronutrients</h5>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                     <div className="flex justify-between">
-                      <span>Fiber:</span>
-                      <span>{Math.round(item.macronutrients.fiber)}g</span>
+                      <span className="text-gray-600">Sodium:</span>
+                      <span className="font-medium text-red-600">{Math.round(item.micronutrients.sodium)}mg</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Sugar:</span>
-                      <span>{Math.round(item.macronutrients.sugar)}g</span>
+                      <span className="text-gray-600">Potassium:</span>
+                      <span className="font-medium text-orange-600">{Math.round(item.micronutrients.potassium)}mg</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Sodium:</span>
-                      <span>{Math.round(item.micronutrients.sodium)}mg</span>
+                      <span className="text-gray-600">Calcium:</span>
+                      <span className="font-medium text-blue-600">{Math.round(item.micronutrients.calcium)}mg</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Potassium:</span>
-                      <span>{Math.round(item.micronutrients.potassium)}mg</span>
+                      <span className="text-gray-600">Iron:</span>
+                      <span className="font-medium text-gray-600">{Math.round(item.micronutrients.iron)}mg</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Calcium:</span>
-                      <span>{Math.round(item.micronutrients.calcium)}mg</span>
+                      <span className="text-gray-600">Vitamin C:</span>
+                      <span className="font-medium text-green-600">{Math.round(item.micronutrients.vitaminC)}mg</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Iron:</span>
-                      <span>{Math.round(item.micronutrients.iron)}mg</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Vitamin C:</span>
-                      <span>{Math.round(item.micronutrients.vitaminC)}mg</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Vitamin A:</span>
-                      <span>{Math.round(item.micronutrients.vitaminA)} IU</span>
+                      <span className="text-gray-600">Vitamin A:</span>
+                      <span className="font-medium text-yellow-600">{Math.round(item.micronutrients.vitaminA)}IU</span>
                     </div>
                   </div>
-                </details>
+                </div>
+
+                {/* Additional Macronutrients */}
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex justify-between p-2 bg-yellow-50 rounded">
+                    <span className="text-gray-600">Fiber:</span>
+                    <span className="font-medium text-yellow-600">{Math.round(item.macronutrients.fiber)}g</span>
+                  </div>
+                  <div className="flex justify-between p-2 bg-pink-50 rounded">
+                    <span className="text-gray-600">Sugar:</span>
+                    <span className="font-medium text-pink-600">{Math.round(item.macronutrients.sugar)}g</span>
+                  </div>
+                </div>
               </>
             )}
           </div>

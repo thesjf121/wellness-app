@@ -169,6 +169,9 @@ Return the actual nutrition numbers per serving, not placeholder values.`
         jsonText = jsonText.substring(0, lastBrace + 1);
       }
       
+      // CRITICAL: Remove JavaScript comments (// ...) which make JSON invalid
+      jsonText = jsonText.replace(/\/\/.*$/gm, '');
+      
       // Look for JSON object
       const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {

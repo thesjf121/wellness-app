@@ -51,7 +51,7 @@ class OpenAIService {
           'Authorization': `Bearer ${this.API_KEY}`
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-3.5-turbo',
           messages: [{
             role: 'user',
             content: `Analyze the nutrition information for: ${request.text}. Provide accurate nutrition data from the actual product label.`

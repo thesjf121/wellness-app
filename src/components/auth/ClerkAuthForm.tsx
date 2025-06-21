@@ -41,13 +41,15 @@ export const ClerkAuthForm: React.FC<ClerkAuthFormProps> = ({ mode }) => {
           redirectUrl={redirectUrl}
           afterSignInUrl={redirectUrl}
           signUpUrl={ROUTES.REGISTER}
+          routing="path"
         />
       ) : (
         <SignUp 
           appearance={appearance}
           redirectUrl={redirectUrl}
-          afterSignUpUrl={ROUTES.ONBOARDING}
+          afterSignUpUrl={redirectUrl}
           signInUrl={ROUTES.LOGIN}
+          routing="path"
           unsafeMetadata={{
             role: 'member'
           }}

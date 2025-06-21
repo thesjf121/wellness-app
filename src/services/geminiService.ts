@@ -97,7 +97,7 @@ class GeminiService {
   }
 
   /**
-   * Analyze food from text description
+   * Analyze food from text description using Gemini function calling
    */
   async analyzeFoodText(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
     try {
@@ -108,8 +108,8 @@ class GeminiService {
         return this.getOfflineNutritionData(request.text || 'unknown food');
       }
 
-      const prompt = this.buildNutritionPrompt(request.text || '', request.mealType);
-      console.log('📝 EXACT PROMPT BEING SENT:', prompt);
+      const prompt = `Analyze the nutrition information for: ${request.text}`;
+      console.log('📝 Using Gemini Tools for:', request.text);
       
       const url = `${this.BASE_URL}?key=${this.API_KEY}`;
       console.log('🌐 Making request to:', url.replace(this.API_KEY, 'API_KEY_HIDDEN'));
@@ -124,11 +124,57 @@ class GeminiService {
             parts: [{
               text: prompt
             }]
-          }]
+          }],
+          tools: [{
+            function_declarations: [{
+              name: 'get_nutrition_facts',
+              description: 'Get accurate nutrition facts for food items including branded products',
+              parameters: {
+                type: 'object',
+                properties: {
+                  food_items: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        food_name: { type: 'string', description: 'Name of the food item' },
+                        serving_size: { type: 'string', description: 'Serving size from product label' },
+                        calories: { type: 'number', description: 'Calories per serving' },
+                        protein_g: { type: 'number', description: 'Protein in grams' },
+                        carbohydrates_g: { type: 'number', description: 'Carbohydrates in grams' },
+                        fat_g: { type: 'number', description: 'Fat in grams' },
+                        fiber_g: { type: 'number', description: 'Fiber in grams' },
+                        sugar_g: { type: 'number', description: 'Sugar in grams' },
+                        sodium_mg: { type: 'number', description: 'Sodium in milligrams' },
+                        potassium_mg: { type: 'number', description: 'Potassium in milligrams' },
+                        calcium_mg: { type: 'number', description: 'Calcium in milligrams' },
+                        iron_mg: { type: 'number', description: 'Iron in milligrams' },
+                        magnesium_mg: { type: 'number', description: 'Magnesium in milligrams' },
+                        phosphorus_mg: { type: 'number', description: 'Phosphorus in milligrams' },
+                        zinc_mg: { type: 'number', description: 'Zinc in milligrams' },
+                        vitamin_c_mg: { type: 'number', description: 'Vitamin C in milligrams' },
+                        vitamin_d_iu: { type: 'number', description: 'Vitamin D in IU' },
+                        vitamin_a_iu: { type: 'number', description: 'Vitamin A in IU' },
+                        confidence: { type: 'number', description: 'Confidence score 0-1' }
+                      },
+                      required: ['food_name', 'serving_size', 'calories', 'protein_g', 'carbohydrates_g', 'fat_g']
+                    }
+                  }
+                },
+                required: ['food_items']
+              }
+            }]
+          }],
+          tool_config: {
+            function_calling_config: {
+              mode: 'ANY',
+              allowed_function_names: ['get_nutrition_facts']
+            }
+          }
         })
       });
 
-      console.log('📡 Got response from Gemini. Status:', response.status, 'OK:', response.ok);
+      console.log('📡 Got response from Gemini Tools. Status:', response.status, 'OK:', response.ok);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -153,27 +199,37 @@ class GeminiService {
       }
 
       const data = await response.json();
-      console.log('🔍 Raw Gemini Response:', JSON.stringify(data, null, 2));
+      console.log('🔍 Raw Gemini Tools Response:', JSON.stringify(data, null, 2));
       
-      const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      console.log('📝 Analysis Text from Gemini:', analysisText);
-      
-      if (!analysisText) {
-        console.error('❌ No analysis text received from Gemini. Full response:', data);
-        throw new Error('No analysis text received from Gemini');
+      // Extract function call response
+      const functionCall = data.candidates?.[0]?.content?.parts?.[0]?.functionCall;
+      if (functionCall && functionCall.name === 'get_nutrition_facts') {
+        const nutritionData = this.parseToolsResponse(functionCall.args);
+        console.log('✅ Parsed Tools Nutrition Data:', nutritionData);
+        
+        return {
+          success: true,
+          nutritionData,
+          rawResponse: JSON.stringify(functionCall.args)
+        };
       }
 
-      const nutritionData = this.parseNutritionResponse(analysisText);
-      console.log('✅ Parsed Nutrition Data:', nutritionData);
+      // Fallback to text parsing if no function call
+      const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (analysisText) {
+        console.log('📝 Fallback to text parsing:', analysisText);
+        const nutritionData = this.parseNutritionResponse(analysisText);
+        return {
+          success: true,
+          nutritionData,
+          rawResponse: analysisText
+        };
+      }
       
-      return {
-        success: true,
-        nutritionData,
-        rawResponse: analysisText
-      };
+      throw new Error('No function call or text response received from Gemini');
 
     } catch (error) {
-      console.error('🚨 GEMINI API CALL FAILED:', error);
+      console.error('🚨 GEMINI TOOLS API CALL FAILED:', error);
       console.error('🚨 Error details:', {
         message: (error as Error).message,
         stack: (error as Error).stack,
@@ -335,6 +391,80 @@ Important notes:
 - Set confidence based on image quality and food visibility
 - Return ONLY the JSON array, no additional text
 `;
+  }
+
+  /**
+   * Parse nutrition response from Gemini Tools function call
+   */
+  private parseToolsResponse(args: any): NutritionData[] {
+    try {
+      console.log('🧩 Parsing Tools response:', args);
+      
+      const foodItems = args.food_items || [];
+      
+      return foodItems.map((item: any) => ({
+        foodItem: item.food_name || 'Unknown food',
+        calories: Math.max(0, Number(item.calories) || 0),
+        macronutrients: {
+          protein: Math.max(0, Number(item.protein_g) || 0),
+          carbohydrates: Math.max(0, Number(item.carbohydrates_g) || 0),
+          fat: Math.max(0, Number(item.fat_g) || 0),
+          fiber: Math.max(0, Number(item.fiber_g) || 0),
+          sugar: Math.max(0, Number(item.sugar_g) || 0),
+        },
+        micronutrients: {
+          sodium: Math.max(0, Number(item.sodium_mg) || 0),
+          potassium: Math.max(0, Number(item.potassium_mg) || 0),
+          calcium: Math.max(0, Number(item.calcium_mg) || 0),
+          iron: Math.max(0, Number(item.iron_mg) || 0),
+          magnesium: Math.max(0, Number(item.magnesium_mg) || 0),
+          phosphorus: Math.max(0, Number(item.phosphorus_mg) || 0),
+          zinc: Math.max(0, Number(item.zinc_mg) || 0),
+          copper: 0, // Not in schema, default to 0
+          manganese: 0,
+          selenium: 0,
+          iodine: 0,
+          vitaminA: Math.max(0, Number(item.vitamin_a_iu) || 0),
+          vitaminD: Math.max(0, Number(item.vitamin_d_iu) || 0),
+          vitaminE: 0,
+          vitaminK: 0,
+          vitaminC: Math.max(0, Number(item.vitamin_c_mg) || 0),
+          thiamine: 0,
+          riboflavin: 0,
+          niacin: 0,
+          pantothenicAcid: 0,
+          vitaminB6: 0,
+          biotin: 0,
+          folate: 0,
+          vitaminB12: 0,
+          choline: 0,
+        },
+        servingSize: item.serving_size || '1 serving',
+        confidence: Math.min(1, Math.max(0, Number(item.confidence) || 0.8))
+      }));
+
+    } catch (error) {
+      console.error('❌ Error parsing Tools response:', error);
+      errorService.logError(error as Error, { 
+        context: 'GeminiService.parseToolsResponse',
+        args 
+      });
+      
+      // Return fallback
+      return [{
+        foodItem: 'Unknown food item',
+        calories: 100,
+        macronutrients: { protein: 2, carbohydrates: 15, fat: 3, fiber: 1, sugar: 5 },
+        micronutrients: {
+          sodium: 50, potassium: 100, calcium: 20, iron: 1, magnesium: 25, phosphorus: 50, zinc: 1,
+          copper: 0.1, manganese: 0.5, selenium: 10, iodine: 50, vitaminA: 100, vitaminD: 10,
+          vitaminE: 2, vitaminK: 20, vitaminC: 5, thiamine: 0.1, riboflavin: 0.1, niacin: 2,
+          pantothenicAcid: 1, vitaminB6: 0.2, biotin: 5, folate: 25, vitaminB12: 0.5, choline: 25
+        },
+        servingSize: '1 serving',
+        confidence: 0.1
+      }];
+    }
   }
 
   /**

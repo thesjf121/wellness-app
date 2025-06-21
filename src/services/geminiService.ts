@@ -324,8 +324,7 @@ Provide detailed nutrition information for "${foodText}" and return ONLY a valid
 ]
 
 Important notes:
-- For protein powders, use standard serving size (1 scoop = ~30g) unless specified otherwise
-- For branded products (like "Naked Vanilla Protein"), use the exact nutrition facts from the actual product label
+- For branded products, use the exact nutrition facts from the actual product label with correct serving sizes
 - Be very precise with protein powder nutrition - these are well-documented products
 - If multiple foods are mentioned, create separate entries
 - Use standard USDA nutrition values when possible, but prioritize brand-specific data for commercial products

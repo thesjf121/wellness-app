@@ -131,8 +131,10 @@ class GeminiService {
       //   };
       // }
 
-      const prompt = `What is the nutrition value of ${request.text}? Only provide values in your answer. Format as JSON array:
-[{"foodItem": "food name", "calories": 0, "macronutrients": {"protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0, "sugar": 0}, "micronutrients": {"sodium": 0, "potassium": 0, "calcium": 0, "iron": 0, "magnesium": 0, "phosphorus": 0, "zinc": 0, "vitaminA": 0, "vitaminC": 0, "vitaminD": 0}, "servingSize": "100g", "confidence": 0.9}]`;
+      const prompt = `What is the nutrition value of ${request.text}? Provide detailed serving size assumptions. Only provide values in your answer. Format as JSON array:
+[{"foodItem": "food name", "calories": 0, "macronutrients": {"protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0, "sugar": 0}, "micronutrients": {"sodium": 0, "potassium": 0, "calcium": 0, "iron": 0, "magnesium": 0, "phosphorus": 0, "zinc": 0, "vitaminA": 0, "vitaminC": 0, "vitaminD": 0}, "servingSize": "6 oz (170g) Grilled Sirloin Steak", "confidence": 0.9}]
+
+Be specific with serving sizes including weight, preparation method, and any assumptions made.`;
       
       console.log('📝 Simple Gemini prompt for:', request.text);
       

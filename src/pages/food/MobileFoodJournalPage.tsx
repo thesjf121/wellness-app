@@ -434,7 +434,12 @@ const MobileFoodJournalPage: React.FC = () => {
                     <h4 className="font-semibold text-gray-900">Macronutrients</h4>
                     {selectedEntry.foods.map((food, index) => (
                       <div key={index} className="bg-gray-50 rounded-xl p-4">
-                        <h5 className="font-medium text-gray-900 mb-3">{food.foodItem}</h5>
+                        <h5 className="font-medium text-gray-900 mb-2">{food.foodItem}</h5>
+                        {food.servingSize && (
+                          <p className="text-xs text-blue-600 mb-3 italic">
+                            Based on: {food.servingSize}
+                          </p>
+                        )}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Protein</span>

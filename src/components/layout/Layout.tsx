@@ -15,6 +15,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   const location = useLocation();
   const { isSignedIn, signOut } = useAuth();
   const { user } = useUser();
+  
+  // TEMPORARY DEMO MODE - Remove after testing
+  const isDemoMode = true; // Set to false to disable demo mode
 
   const navItems = [
     { name: 'Home', path: ROUTES.HOME },
@@ -31,22 +34,23 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     { name: 'Video Manager', path: ROUTES.ADMIN_VIDEOS, requiresRole: ['super_admin', 'team_sponsor'] },
   ];
 
-  // Initialize session management when user signs in
+  // Initialize session management when user signs in (or demo mode)
   useEffect(() => {
-    if (isSignedIn && user) {
-      sessionService.initialize(user.id);
+    if ((isSignedIn && user) || isDemoMode) {
+      const userId = user?.id || 'demo_user_123';
+      sessionService.initialize(userId);
       sessionService.updateActivity('page_view', { path: location.pathname });
-    } else if (!isSignedIn) {
+    } else if (!isSignedIn && !isDemoMode) {
       sessionService.clearAllData();
     }
-  }, [isSignedIn, user]);
+  }, [isSignedIn, user, isDemoMode]);
 
   // Update activity on route changes
   useEffect(() => {
-    if (isSignedIn) {
+    if (isSignedIn || isDemoMode) {
       sessionService.updateActivity('page_view', { path: location.pathname });
     }
-  }, [location.pathname, isSignedIn]);
+  }, [location.pathname, isSignedIn, isDemoMode]);
 
   const handleSignOut = () => {
     if (user) {
@@ -78,8 +82,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             <div className="flex items-center space-x-4">
               <nav className="hidden md:flex space-x-6" data-tutorial="nav-menu">
                 {navItems.map((item) => {
-                  // Hide auth-required items if not signed in
-                  if (item.requiresAuth && !isSignedIn) return null;
+                  // Hide auth-required items if not signed in (unless demo mode)
+                  if (item.requiresAuth && !isSignedIn && !isDemoMode) return null;
                   
                   return (
                     <button
@@ -112,6 +116,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                 </div>
               )}
 
+              {/* Demo Mode Indicator */}
+              {isDemoMode && (
+                <div className="hidden sm:block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium">
+                  Demo Mode
+                </div>
+              )}
+
               {/* Auth Controls */}
               <div className="flex items-center space-x-3">
                 {isSignedIn ? (
@@ -127,6 +138,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                       className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
                     >
                       Sign Out
+                    </button>
+                  </>
+                ) : isDemoMode ? (
+                  <>
+                    <span className="text-sm text-gray-600">Demo User</span>
+                    <button
+                      onClick={() => navigate(ROUTES.LOGIN)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                    >
+                      Sign Up
                     </button>
                   </>
                 ) : (

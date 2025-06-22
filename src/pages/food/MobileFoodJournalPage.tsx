@@ -59,7 +59,6 @@ const MobileFoodJournalPage: React.FC = () => {
   const handleQuickFoodEntry = async (mealType: MealType, description: string) => {
     if (!user) return;
     
-    console.log('🔵 MOBILE: Starting food analysis for:', description, 'mealType:', mealType);
     setAnalyzingFood(mealType);
     try {
       const analysisResult = await geminiService.analyzeFoodText({ 
@@ -67,8 +66,6 @@ const MobileFoodJournalPage: React.FC = () => {
         mealType,
         userId: user.id
       });
-      console.log('🔵 MOBILE: Got analysis result:', analysisResult);
-      alert(`MOBILE DEBUG: Success=${analysisResult.success}, Items=${analysisResult.nutritionData?.length}, FirstItem=${analysisResult.nutritionData?.[0]?.foodItem}`);
       
       if (analysisResult.nutritionData && analysisResult.nutritionData.length > 0) {
         const dateStr = currentDate.toISOString().split('T')[0];

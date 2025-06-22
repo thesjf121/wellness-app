@@ -118,6 +118,19 @@ class GeminiService {
         return this.getOfflineNutritionData(request.text || 'unknown food');
       }
 
+      // Check cache first for consistent results
+      const cacheKey = `nutrition_${request.text?.toLowerCase().trim()}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        console.log('🗄️ Using cached nutrition data for:', request.text);
+        const cachedData = JSON.parse(cached);
+        return {
+          success: true,
+          nutritionData: cachedData,
+          rawResponse: 'Cached data'
+        };
+      }
+
       const prompt = `Analyze the nutrition information for: ${request.text}`;
       console.log('📝 Using Gemini Tools for:', request.text);
       
@@ -217,6 +230,11 @@ class GeminiService {
         const nutritionData = this.parseToolsResponse(functionCall.args);
         console.log('✅ Parsed Tools Nutrition Data:', nutritionData);
         
+        // Cache the result for consistency
+        const cacheKey = `nutrition_${request.text?.toLowerCase().trim()}`;
+        localStorage.setItem(cacheKey, JSON.stringify(nutritionData));
+        console.log('💾 Cached nutrition data for:', request.text);
+        
         return {
           success: true,
           nutritionData,
@@ -229,6 +247,12 @@ class GeminiService {
       if (analysisText) {
         console.log('📝 Fallback to text parsing:', analysisText);
         const nutritionData = this.parseNutritionResponse(analysisText);
+        
+        // Cache the result for consistency
+        const cacheKey = `nutrition_${request.text?.toLowerCase().trim()}`;
+        localStorage.setItem(cacheKey, JSON.stringify(nutritionData));
+        console.log('💾 Cached nutrition data for:', request.text);
+        
         return {
           success: true,
           nutritionData,

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { UserProfile, ActivityLevel, WellnessGoal } from '../../types/user';
 import { ROUTES } from '../../utils/constants';
 import { TwoFactorAuth } from '../../components/security/TwoFactorAuth';
 import { updateUserMetadata } from '../../utils/clerkHelpers';
+import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
+import { BottomNavigation } from '../../components/ui/BottomNavigation';
 
 const ProfilePage: React.FC = () => {
   const { user } = useUser();
@@ -235,210 +238,280 @@ const ProfilePage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <p className="text-gray-500">Please sign in to view your profile.</p>
-      </div>
+      <>
+        <div className="max-w-4xl mx-auto px-4 py-8 pb-24">
+          <WellnessCard>
+            <CardContent className="text-center p-8">
+              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                <span className="text-2xl">👤</span>
+              </div>
+              <p className="text-gray-500">Please sign in to view your profile.</p>
+            </CardContent>
+          </WellnessCard>
+        </div>
+        <BottomNavigation />
+      </>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-lg shadow-md">
+    <>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         {/* Header */}
-        <div className="border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-            {!isEditing ? (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-              >
-                Edit Profile
-              </button>
-            ) : (
-              <div className="space-x-2">
-                <button
-                  onClick={handleCancel}
-                  className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* Profile Picture */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
-            <div className="flex items-center space-x-6">
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
-                  {profilePicture ? (
-                    <img 
-                      src={profilePicture} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                {uploadingPicture && (
-                  <div className="absolute inset-0 bg-white bg-opacity-75 rounded-full flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <label className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePictureChange}
-                      disabled={!isEditing || uploadingPicture}
-                      className="sr-only"
-                    />
-                    <span className={`inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium ${
-                      isEditing && !uploadingPicture
-                        ? 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
-                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                    }`}>
-                      {uploadingPicture ? 'Uploading...' : 'Change Photo'}
-                    </span>
-                  </label>
-                  
-                  {profilePicture && isEditing && (
-                    <button
-                      onClick={handleRemoveProfilePicture}
-                      className="text-sm text-red-600 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500">
-                  JPG, PNG, GIF or WebP. Max size 5MB.
-                </p>
-              </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8"
+        >
+          <div className="flex items-center mb-4 sm:mb-0">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mr-4">
+              <span className="text-2xl">👤</span>
             </div>
-          </section>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+              <p className="text-gray-600">Manage your personal information and preferences</p>
+            </div>
+          </div>
+          
+          {!isEditing ? (
+            <motion.button
+              onClick={() => setIsEditing(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-medium transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ✏️ Edit Profile
+            </motion.button>
+          ) : (
+            <div className="flex space-x-3">
+              <motion.button
+                onClick={handleCancel}
+                className="border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 transition-all"
+                whileHover={{ scale: saving ? 1 : 1.05 }}
+                whileTap={{ scale: saving ? 1 : 0.95 }}
+              >
+                {saving ? '💾 Saving...' : '💾 Save Changes'}
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+
+        <div className="space-y-8">
+          {/* Profile Picture */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">📸</span>
+                  Profile Picture
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                  <div className="relative">
+                    <div className="w-32 h-32 rounded-3xl overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 shadow-lg">
+                      {profilePicture ? (
+                        <img 
+                          src={profilePicture} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-purple-400">
+                          <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    {uploadingPicture && (
+                      <div className="absolute inset-0 bg-white bg-opacity-90 rounded-3xl flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-3 text-center sm:text-left">
+                    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                      <label className="relative">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProfilePictureChange}
+                          disabled={!isEditing || uploadingPicture}
+                          className="sr-only"
+                        />
+                        <motion.span 
+                          className={`inline-flex items-center px-4 py-2 border-2 rounded-xl text-sm font-medium transition-all ${
+                            isEditing && !uploadingPicture
+                              ? 'border-purple-300 text-purple-700 hover:bg-purple-50 cursor-pointer bg-white'
+                              : 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
+                          }`}
+                          whileHover={isEditing && !uploadingPicture ? { scale: 1.05 } : {}}
+                          whileTap={isEditing && !uploadingPicture ? { scale: 0.95 } : {}}
+                        >
+                          {uploadingPicture ? '📤 Uploading...' : '📷 Change Photo'}
+                        </motion.span>
+                      </label>
+                      
+                      {profilePicture && isEditing && (
+                        <motion.button
+                          onClick={handleRemoveProfilePicture}
+                          className="text-sm text-red-600 hover:text-red-700 font-medium"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          🗑️ Remove
+                        </motion.button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      JPG, PNG, GIF or WebP. Max size 5MB.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Basic Information */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={profile.firstName || ''}
-                  onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-50"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={profile.lastName || ''}
-                  onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-50"
-                />
-              </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">ℹ️</span>
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.firstName || ''}
+                      onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                      disabled={!isEditing}
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.lastName || ''}
+                      onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                      disabled={!isEditing}
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  value={profile.displayName || ''}
-                  onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-50"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Display Name
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.displayName || ''}
+                      onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                      disabled={!isEditing}
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={user.primaryEmailAddress?.emailAddress || ''}
-                  disabled
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={user.primaryEmailAddress?.emailAddress || ''}
+                      disabled
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 bg-gray-50"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={profile.phoneNumber || ''}
-                  onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-50"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={profile.phoneNumber || ''}
+                      onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
+                      disabled={!isEditing}
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  value={profile.dateOfBirth instanceof Date ? profile.dateOfBirth.toISOString().split('T')[0] : ''}
-                  onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value ? new Date(e.target.value) : undefined })}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-50"
-                />
-              </div>
-            </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      value={profile.dateOfBirth instanceof Date ? profile.dateOfBirth.toISOString().split('T')[0] : ''}
+                      onChange={(e) => setProfile({ ...profile, dateOfBirth: e.target.value ? new Date(e.target.value) : undefined })}
+                      disabled={!isEditing}
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
+                    />
+                  </div>
+                </div>
 
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bio
-              </label>
-              <textarea
-                value={profile.bio || ''}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                disabled={!isEditing}
-                rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-50"
-                placeholder="Tell us about yourself..."
-              />
-            </div>
-          </section>
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={profile.bio || ''}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    disabled={!isEditing}
+                    rows={3}
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
+                    placeholder="Tell us about yourself..."
+                  />
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Physical Information */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Physical Information</h2>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">📏</span>
+                  Physical Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -504,12 +577,26 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </label>
                 ))}
-              </div>
-            </div>
-          </section>
+                </div>
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Wellness Goals */}
-          <section>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">🎯</span>
+                  Wellness Goals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Wellness Goals</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {wellnessGoalOptions.map((goal) => (
@@ -531,11 +618,25 @@ const ProfilePage: React.FC = () => {
                   <span className="text-sm font-medium">{goal.label}</span>
                 </label>
               ))}
-            </div>
-          </section>
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Emergency Contact */}
-          <section>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">🚨</span>
+                  Emergency Contact
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -587,11 +688,25 @@ const ProfilePage: React.FC = () => {
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
-            </div>
-          </section>
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Medical Information */}
-          <section>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">🏥</span>
+                  Medical Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Medical Information</h2>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -609,11 +724,25 @@ const ProfilePage: React.FC = () => {
                 placeholder="e.g., Diabetes, Peanut allergy, Asthma"
               />
               <p className="text-xs text-gray-500 mt-1">Separate multiple conditions with commas</p>
-            </div>
-          </section>
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Security & Sessions */}
-          <section>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">🔒</span>
+                  Security & Sessions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Security & Sessions</h2>
             
             {/* Two-Factor Authentication */}
@@ -635,11 +764,25 @@ const ProfilePage: React.FC = () => {
                   Manage Sessions
                 </button>
               </div>
-            </div>
-          </section>
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
 
           {/* Account Management */}
-          <section>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <WellnessCard>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <span className="mr-3">⚙️</span>
+                  Account Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Management</h2>
             
             {/* Deactivate Account */}
@@ -720,12 +863,17 @@ const ProfilePage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          </section>
+                )}
+                </div>
+              </CardContent>
+            </WellnessCard>
+          </motion.div>
+        </div>
         </div>
       </div>
-    </div>
+      
+      <BottomNavigation />
+    </>
   );
 };
 

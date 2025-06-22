@@ -80,7 +80,7 @@ function App() {
                 } />
               </Routes>
             </Layout>
-            <OnboardingManager autoStart={false} showSkipOption={true} />
+            {/* <OnboardingManager autoStart={false} showSkipOption={true} /> */}
             <OfflineIndicator />
           </TutorialProvider>
         </Router>

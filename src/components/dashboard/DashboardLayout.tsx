@@ -62,7 +62,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   }
 
   const renderMemberDashboard = () => (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-6 md:space-y-8 pb-20 min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/30 md:bg-white">
       {/* Daily Greeting */}
       <DailyGreeting userName={user.firstName || 'there'} />
 
@@ -186,7 +186,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6"
         >
           <StepTrendsWidget compact={false} />
           <NutritionSummaryWidget compact={false} />
@@ -200,7 +200,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6"
       >
         <GroupActivityWidget />
         <RecentActivityWidget />
@@ -435,7 +435,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
         backgroundGradient={parallaxPresets.dashboard.backgroundGradient}
         className="min-h-screen"
       >
-        <ParallaxLayer speed={0.3} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ParallaxLayer speed={0.3} className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 md:py-8">
           {effectiveLayout === 'member' && renderMemberDashboard()}
           {effectiveLayout === 'admin' && renderAdminDashboard()}
           {effectiveLayout === 'super_admin' && renderSuperAdminDashboard()}

@@ -27,6 +27,7 @@ import HelpPage from './pages/welcome/HelpPage';
 import VideoManagerPage from './pages/admin/VideoManagerPage';
 import GoalSettingWizard from './components/welcome/GoalSettingWizard';
 import NotificationSetup from './components/welcome/NotificationSetup';
+import MobileCardDemo from './components/ui/cards/MobileCardDemo';
 
 function App() {
   // Get Clerk publishable key from environment service
@@ -57,6 +58,7 @@ function App() {
                 <Route path="/welcome/goals" element={<GoalSettingWizard />} />
                 <Route path="/welcome/notifications" element={<NotificationSetup />} />
                 <Route path={ROUTES.HELP} element={<HelpPage />} />
+                <Route path="/card-demo" element={<MobileCardDemo />} />
                 <Route path={ROUTES.ADMIN_VIDEOS} element={<VideoManagerPage />} />
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
                 <Route path={ROUTES.STEP_COUNTER} element={<StepsPage />} />

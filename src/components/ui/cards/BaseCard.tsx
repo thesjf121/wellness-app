@@ -24,21 +24,21 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   disabled = false,
   ...motionProps
 }) => {
-  const baseClasses = 'rounded-xl transition-all duration-300 relative overflow-hidden';
+  const baseClasses = 'rounded-lg md:rounded-xl transition-all duration-300 relative overflow-hidden';
   
   const variantClasses = {
-    default: 'bg-white border border-gray-100 shadow-sm hover:shadow-md',
-    elevated: 'bg-white shadow-md hover:shadow-lg',
-    glass: 'bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg',
-    gradient: 'bg-gradient-to-br from-blue-50 via-white to-purple-50 border border-gray-100 shadow-sm',
-    outline: 'bg-transparent border-2 border-gray-200 hover:border-gray-300'
+    default: 'bg-white border border-gray-100 shadow-sm hover:shadow-md md:shadow-lg md:hover:shadow-xl',
+    elevated: 'bg-white shadow-lg hover:shadow-xl md:shadow-xl md:hover:shadow-2xl',
+    glass: 'bg-white/80 backdrop-blur-xl border border-white/30 shadow-xl md:bg-white/70',
+    gradient: 'bg-gradient-to-br from-blue-50 via-white to-purple-50 border border-gray-100 shadow-lg md:shadow-md',
+    outline: 'bg-transparent border-2 border-gray-200 hover:border-gray-300 shadow-sm md:shadow-none'
   };
   
   const sizeClasses = {
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-    xl: 'p-10'
+    sm: 'p-3 md:p-4',
+    md: 'p-4 md:p-6',
+    lg: 'p-6 md:p-8',
+    xl: 'p-8 md:p-10'
   };
   
   const interactiveClasses = interactive && !disabled

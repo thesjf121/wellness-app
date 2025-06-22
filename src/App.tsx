@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { Layout } from './components/layout/Layout';
 import { OfflineIndicator } from './components/common/OfflineIndicator';
 import ScrollToTop from './components/ui/ScrollToTop';
+import NotFoundPage from './components/common/NotFoundPage';
 import OnboardingManager from './components/welcome/OnboardingManager';
 import { TutorialProvider } from './components/navigation/TutorialProvider';
 import { ROUTES } from './utils/constants';
@@ -65,21 +66,7 @@ function App() {
                 <Route path={ROUTES.GROUPS} element={<GroupsPage />} />
                 <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
                 <Route path={`${ROUTES.PROFILE}/sessions`} element={<SessionsPage />} />
-                <Route path="*" element={
-                  <div className="p-8 max-w-4xl mx-auto">
-                    <h1 className="text-2xl font-bold mb-4">404 - Route Not Found</h1>
-                    <p className="mb-2"><strong>Current URL:</strong> {window.location.pathname}</p>
-                    <p className="mb-4"><strong>Available routes:</strong></p>
-                    <ul className="list-disc pl-6 space-y-1">
-                      <li>/login (AuthPage with mode=login)</li>
-                      <li>/register (AuthPage with mode=register)</li>
-                      <li>/sign-in (AuthPage with mode=login)</li>
-                      <li>/sign-up (AuthPage with mode=register)</li>
-                      <li>/dashboard</li>
-                      <li>/</li>
-                    </ul>
-                  </div>
-                } />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Layout>
             {/* <OnboardingManager autoStart={false} showSkipOption={true} /> */}

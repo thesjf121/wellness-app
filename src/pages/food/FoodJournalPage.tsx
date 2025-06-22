@@ -3,6 +3,7 @@ import { useUser, useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { FoodEntryForm } from '../../components/food/FoodEntryForm';
 import { NutritionAnalysisResult } from '../../components/food/NutritionAnalysisResult';
+import { QuickFoodEntry } from '../../components/food/QuickFoodEntry';
 import { FoodSearch } from '../../components/food/FoodSearch';
 import { NutritionDashboard } from '../../components/food/NutritionDashboard';
 import { NutritionReports } from '../../components/food/NutritionReports';
@@ -34,10 +35,13 @@ const FoodJournalPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [offlineStatus, setOfflineStatus] = useState({ count: 0, isOnline: true });
+  const [analyzingFood, setAnalyzingFood] = useState<MealType | null>(null);
+  const [recentFoods, setRecentFoods] = useState<string[]>([]);
 
   useEffect(() => {
     if (user) {
       loadDailyNutrition();
+      loadRecentFoods();
     }
   }, [user, currentDate]);
 
@@ -64,6 +68,49 @@ const FoodJournalPage: React.FC = () => {
       console.error('Failed to load daily nutrition:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRecentFoods = async () => {
+    if (!user) return;
+    
+    try {
+      const recent = await foodService.getRecentFoods(user.id, 10);
+      setRecentFoods(recent.map(f => f.description));
+    } catch (error) {
+      console.error('Failed to load recent foods:', error);
+    }
+  };
+
+  const handleQuickFoodEntry = async (mealType: MealType, description: string) => {
+    if (!user) return;
+    
+    setAnalyzingFood(mealType);
+    try {
+      const analysisResult = await geminiService.analyzeFoodText({ 
+        text: description, 
+        mealType,
+        userId: user.id
+      });
+      
+      if (analysisResult.nutritionData && analysisResult.nutritionData.length > 0) {
+        await foodService.createFoodEntry(
+          {
+            date: currentDate,
+            mealType
+          },
+          analysisResult.nutritionData,
+          user.id
+        );
+        
+        await loadDailyNutrition();
+        await loadRecentFoods();
+      }
+    } catch (error) {
+      console.error('Failed to analyze food:', error);
+      alert('Failed to analyze food. Please try again.');
+    } finally {
+      setAnalyzingFood(null);
     }
   };
 
@@ -461,17 +508,33 @@ const FoodJournalPage: React.FC = () => {
                                   </span>
                                 )}
                               </CardTitle>
-                              <motion.button
-                                onClick={() => setShowAddForm(true)}
-                                className="text-green-600 hover:text-green-700 text-sm font-medium bg-green-50 hover:bg-green-100 px-3 py-1 rounded-full transition-colors"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                              >
-                                + Add Food
-                              </motion.button>
+                              <div className="flex items-center space-x-2">
+                                {mealNutrition?.totalCalories && (
+                                  <span className="text-xs text-gray-500">
+                                    {mealEntries.length} items
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </CardHeader>
                           <CardContent>
+                            {/* Quick Food Entry */}
+                            <div className="mb-4">
+                              {analyzingFood === mealType ? (
+                                <div className="flex items-center justify-center py-3 bg-gray-50 rounded-xl">
+                                  <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin mr-2" />
+                                  <span className="text-sm text-gray-600">Analyzing...</span>
+                                </div>
+                              ) : (
+                                <QuickFoodEntry
+                                  mealType={mealType}
+                                  onSubmit={(description) => handleQuickFoodEntry(mealType, description)}
+                                  recentFoods={recentFoods}
+                                  placeholder={`Add ${mealType}...`}
+                                />
+                              )}
+                            </div>
+
                             {mealEntries.length > 0 ? (
                               <div className="space-y-4">
                                 {mealEntries.map(entry => (

@@ -1,6 +1,17 @@
 import React from 'react';
 import { motion, MotionProps } from 'framer-motion';
 import { cn } from '../../utils/cn';
+import { isCardUIEnabled } from '../../config/features';
+
+// Import new card components
+import { BaseCard, BaseCardProps } from './cards/BaseCard';
+import { 
+  CardHeader as NewCardHeader,
+  CardTitle as NewCardTitle,
+  CardDescription as NewCardDescription,
+  CardContent as NewCardContent,
+  CardFooter as NewCardFooter
+} from './cards/BaseCard';
 
 interface WellnessCardProps extends MotionProps {
   children: React.ReactNode;
@@ -11,7 +22,57 @@ interface WellnessCardProps extends MotionProps {
   interactive?: boolean;
 }
 
-export const WellnessCard: React.FC<WellnessCardProps> = ({
+export const WellnessCard: React.FC<WellnessCardProps> = (props) => {
+  // Use new card system if feature flag is enabled
+  if (isCardUIEnabled()) {
+    return <NewWellnessCard {...props} />;
+  }
+  
+  // Fall back to legacy implementation
+  return <LegacyWellnessCard {...props} />;
+};
+
+// New card implementation using BaseCard
+const NewWellnessCard: React.FC<WellnessCardProps> = ({
+  children,
+  variant = 'primary',
+  padding = 'md',
+  className,
+  onClick,
+  interactive = false,
+  ...motionProps
+}) => {
+  // Map legacy variants to new variants
+  const variantMapping = {
+    primary: 'default' as const,
+    secondary: 'outline' as const,
+    glass: 'glass' as const,
+    gradient: 'gradient' as const
+  };
+
+  // Map legacy padding to new sizes
+  const sizeMapping = {
+    sm: 'sm' as const,
+    md: 'md' as const,
+    lg: 'lg' as const
+  };
+
+  return (
+    <BaseCard
+      variant={variantMapping[variant]}
+      size={sizeMapping[padding]}
+      className={className}
+      onClick={onClick}
+      interactive={interactive}
+      {...motionProps}
+    >
+      {children}
+    </BaseCard>
+  );
+};
+
+// Legacy implementation (preserved for rollback)
+const LegacyWellnessCard: React.FC<WellnessCardProps> = ({
   children,
   variant = 'primary',
   padding = 'md',
@@ -58,48 +119,78 @@ export const WellnessCard: React.FC<WellnessCardProps> = ({
   );
 };
 
-// Compound components for card sections
+// Compound components - use feature flag to determine which implementation
 export const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
   children, 
   className 
-}) => (
-  <div className={cn('mb-4', className)}>
-    {children}
-  </div>
-);
+}) => {
+  if (isCardUIEnabled()) {
+    return <NewCardHeader className={className}>{children}</NewCardHeader>;
+  }
+  
+  return (
+    <div className={cn('mb-4', className)}>
+      {children}
+    </div>
+  );
+};
 
 export const CardTitle: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
   children, 
   className 
-}) => (
-  <h3 className={cn('text-xl font-semibold text-gray-900', className)}>
-    {children}
-  </h3>
-);
+}) => {
+  if (isCardUIEnabled()) {
+    return <NewCardTitle className={className}>{children}</NewCardTitle>;
+  }
+  
+  return (
+    <h3 className={cn('text-xl font-semibold text-gray-900', className)}>
+      {children}
+    </h3>
+  );
+};
 
 export const CardDescription: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
   children, 
   className 
-}) => (
-  <p className={cn('text-sm text-gray-600 mt-1', className)}>
-    {children}
-  </p>
-);
+}) => {
+  if (isCardUIEnabled()) {
+    return <NewCardDescription className={className}>{children}</NewCardDescription>;
+  }
+  
+  return (
+    <p className={cn('text-sm text-gray-600 mt-1', className)}>
+      {children}
+    </p>
+  );
+};
 
 export const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
   children, 
   className 
-}) => (
-  <div className={cn('', className)}>
-    {children}
-  </div>
-);
+}) => {
+  if (isCardUIEnabled()) {
+    return <NewCardContent className={className}>{children}</NewCardContent>;
+  }
+  
+  return (
+    <div className={cn('', className)}>
+      {children}
+    </div>
+  );
+};
 
 export const CardFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ 
   children, 
   className 
-}) => (
-  <div className={cn('mt-4 pt-4 border-t border-gray-100', className)}>
-    {children}
-  </div>
-);
+}) => {
+  if (isCardUIEnabled()) {
+    return <NewCardFooter className={className}>{children}</NewCardFooter>;
+  }
+  
+  return (
+    <div className={cn('mt-4 pt-4 border-t border-gray-100', className)}>
+      {children}
+    </div>
+  );
+};

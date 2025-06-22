@@ -17,10 +17,13 @@ import { foodService } from '../../services/foodService';
 import { GeminiAnalysisResponse, NutritionData, geminiService } from '../../services/geminiService';
 import { rdaService } from '../../services/rdaService';
 import { FoodEntry, DailyNutrition, MealType } from '../../types/food';
+import MobileFoodJournalPage from './MobileFoodJournalPage';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const FoodJournalPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   
   const [currentView, setCurrentView] = useState<'daily' | 'dashboard' | 'reports' | 'goals'>('daily');
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
@@ -161,6 +164,11 @@ const FoodJournalPage: React.FC = () => {
         </WellnessCard>
       </div>
     );
+  }
+
+  // Show mobile version on small screens
+  if (isMobile) {
+    return <MobileFoodJournalPage />;
   }
 
   return (

@@ -214,6 +214,18 @@ class FoodService {
         totalCalories: totalNutrition.calories,
         totalMacros: totalNutrition.macros,
         totalMicros: totalNutrition.micros,
+        totals: {
+          calories: totalNutrition.calories,
+          protein: totalNutrition.macros.protein,
+          carbs: totalNutrition.macros.carbohydrates,
+          fat: totalNutrition.macros.fat
+        },
+        foodEntries: entries.map(entry => ({
+          ...entry,
+          name: entry.foods[0]?.foodItem || '',
+          quantity: '1 serving',
+          calories: entry.foods.reduce((sum, food) => sum + (food.calories || 0), 0)
+        })),
         mealBreakdown,
         entries
       };
@@ -232,6 +244,8 @@ class FoodService {
           sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
           vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
         },
+        totals: { calories: 0, protein: 0, carbs: 0, fat: 0 },
+        foodEntries: [],
         mealBreakdown: {
           breakfast: {},
           lunch: {},
@@ -369,6 +383,43 @@ class FoodService {
         context: 'FoodService.searchFoodEntries',
         userId,
         query
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Get recent unique food items
+   */
+  async getRecentFoods(userId: string, limit: number = 10): Promise<Array<{ description: string; lastEaten: string }>> {
+    try {
+      const allEntries = await this.getFoodEntries(userId);
+      const recentFoods = new Map<string, string>();
+
+      // Sort entries by date (most recent first)
+      const sortedEntries = allEntries.sort((a, b) => 
+        new Date(b.timestamp || b.date).getTime() - new Date(a.timestamp || a.date).getTime()
+      );
+
+      // Extract unique food items
+      for (const entry of sortedEntries) {
+        if (recentFoods.size >= limit) break;
+        
+        const description = entry.name || entry.description || '';
+        if (description && !recentFoods.has(description.toLowerCase())) {
+          recentFoods.set(description.toLowerCase(), description);
+        }
+      }
+
+      return Array.from(recentFoods.values()).map(description => ({
+        description,
+        lastEaten: new Date().toISOString()
+      }));
+    } catch (error) {
+      errorService.logError(error as Error, { 
+        context: 'FoodService.getRecentFoods',
+        userId,
+        limit
       });
       return [];
     }

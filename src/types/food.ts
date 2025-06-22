@@ -15,6 +15,11 @@ export interface FoodEntry {
   createdAt: Date;
   updatedAt: Date;
   synced: boolean;
+  name?: string;
+  description?: string;
+  quantity?: string;
+  calories?: number;
+  timestamp?: string;
 }
 
 export interface DailyNutrition {
@@ -27,6 +32,13 @@ export interface DailyNutrition {
     fiber: number;
     sugar: number;
   };
+  totals?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  foodEntries?: FoodEntry[];
   totalMicros: {
     // Minerals
     sodium: number;

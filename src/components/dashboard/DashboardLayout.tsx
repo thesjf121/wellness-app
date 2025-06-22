@@ -8,6 +8,7 @@ import { WellnessCard, CardHeader, CardTitle, CardContent } from '../ui/Wellness
 import { BottomNavigation } from '../ui/BottomNavigation';
 import { DailyGreeting } from '../ui/DailyGreeting';
 import { ProgressSummary, createProgressItem } from '../ui/ProgressSummary';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../ui/ParallaxContainer';
 
 // Import widgets
 import StepTrendsWidget from './StepTrendsWidget';
@@ -430,11 +431,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {effectiveLayout === 'member' && renderMemberDashboard()}
-        {effectiveLayout === 'admin' && renderAdminDashboard()}
-        {effectiveLayout === 'super_admin' && renderSuperAdminDashboard()}
-      </div>
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.dashboard.backgroundGradient}
+        className="min-h-screen"
+      >
+        <ParallaxLayer speed={0.3} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {effectiveLayout === 'member' && renderMemberDashboard()}
+          {effectiveLayout === 'admin' && renderAdminDashboard()}
+          {effectiveLayout === 'super_admin' && renderSuperAdminDashboard()}
+        </ParallaxLayer>
+      </ParallaxContainer>
       
       {/* Bottom Navigation for Mobile */}
       <BottomNavigation />

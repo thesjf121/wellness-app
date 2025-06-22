@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ROUTES } from '../utils/constants';
 import { WellnessCard, CardContent } from '../components/ui/WellnessCard';
 import { BottomNavigation } from '../components/ui/BottomNavigation';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../components/ui/ParallaxContainer';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,8 +27,11 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      {/* Hero Section */}
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+      {/* Hero Section with Parallax */}
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.homepage.backgroundGradient}
+        className="relative"
+      >
         {/* Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/30 rounded-full blur-xl"></div>
@@ -35,8 +39,8 @@ const HomePage: React.FC = () => {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sage-200/20 rounded-full blur-2xl"></div>
         </div>
 
-        {/* Main Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
+        {/* Main Content with Parallax Layers */}
+        <ParallaxLayer speed={0.2} className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
           <motion.div
             className="text-center"
             variants={containerVariants}
@@ -98,11 +102,11 @@ const HomePage: React.FC = () => {
               </motion.button>
             </motion.div>
           </motion.div>
-        </div>
-      </div>
+        </ParallaxLayer>
+      </ParallaxContainer>
 
       {/* Features Section */}
-      <div className="py-24 bg-white">
+      <ParallaxLayer speed={0.5} className="py-24 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-16"
@@ -180,10 +184,10 @@ const HomePage: React.FC = () => {
             </motion.div>
           </div>
         </div>
-      </div>
+      </ParallaxLayer>
 
       {/* Additional Features Section */}
-      <div className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+      <ParallaxLayer speed={0.8} className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -252,7 +256,7 @@ const HomePage: React.FC = () => {
             </motion.div>
           </div>
         </div>
-      </div>
+      </ParallaxLayer>
       
       {/* Bottom Navigation for Mobile */}
       <BottomNavigation />

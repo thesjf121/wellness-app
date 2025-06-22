@@ -6,6 +6,7 @@ import { TrainingModuleNavigation } from '../../components/training/TrainingModu
 import { ModuleViewer } from '../../components/training/ModuleViewer';
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 
 const TrainingPage: React.FC = () => {
   const { user } = useUser();
@@ -67,7 +68,11 @@ const TrainingPage: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.training.backgroundGradient}
+        className="min-h-screen"
+      >
+        <ParallaxLayer speed={0.35} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -141,7 +146,8 @@ const TrainingPage: React.FC = () => {
             </motion.div>
           )}
         </motion.div>
-      </div>
+        </ParallaxLayer>
+      </ParallaxContainer>
       
       <BottomNavigation />
     </>

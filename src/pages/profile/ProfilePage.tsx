@@ -8,6 +8,7 @@ import { TwoFactorAuth } from '../../components/security/TwoFactorAuth';
 import { updateUserMetadata } from '../../utils/clerkHelpers';
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 
 const ProfilePage: React.FC = () => {
   const { user } = useUser();
@@ -258,7 +259,11 @@ const ProfilePage: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.profile.backgroundGradient}
+        className="min-h-screen"
+      >
+        <ParallaxLayer speed={0.2} className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -871,7 +876,8 @@ const ProfilePage: React.FC = () => {
             </WellnessCard>
           </motion.div>
         </div>
-      </div>
+        </ParallaxLayer>
+      </ParallaxContainer>
       
       <BottomNavigation />
     </>

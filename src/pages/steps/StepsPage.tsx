@@ -8,6 +8,7 @@ import { NotificationPreferences } from '../../components/notifications/Notifica
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { CircularProgress } from '../../components/ui/CircularProgress';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 
 type ViewMode = 'today' | 'history' | 'notifications';
 
@@ -354,7 +355,11 @@ const StepsPage: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.steps.backgroundGradient}
+        className="min-h-screen"
+      >
+        <ParallaxLayer speed={0.3} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -439,7 +444,8 @@ const StepsPage: React.FC = () => {
             </div>
           )}
         </motion.div>
-      </div>
+        </ParallaxLayer>
+      </ParallaxContainer>
       
       <BottomNavigation />
     </>

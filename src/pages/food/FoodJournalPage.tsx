@@ -12,6 +12,7 @@ import { GoalProgress } from '../../components/food/GoalProgress';
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { CircularProgress } from '../../components/ui/CircularProgress';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 import { foodService } from '../../services/foodService';
 import { GeminiAnalysisResponse, NutritionData, geminiService } from '../../services/geminiService';
 import { rdaService } from '../../services/rdaService';
@@ -164,7 +165,11 @@ const FoodJournalPage: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.food.backgroundGradient}
+        className="min-h-screen"
+      >
+        <ParallaxLayer speed={0.25} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         {/* AI Configuration Warning */}
         {!geminiService.isConfigured() && (
           <motion.div
@@ -561,7 +566,8 @@ const FoodJournalPage: React.FC = () => {
             </div>
           )}
         </motion.div>
-      </div>
+        </ParallaxLayer>
+      </ParallaxContainer>
       
       <BottomNavigation />
     </>

@@ -12,6 +12,7 @@ import { LeaveGroupModal } from '../../components/groups/LeaveGroupModal';
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { CircularProgress } from '../../components/ui/CircularProgress';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 import { groupService } from '../../services/groupService';
 import { Group, GroupMember, EligibilityCheck } from '../../types/groups';
 
@@ -145,7 +146,11 @@ const GroupsPage: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+      <ParallaxContainer
+        backgroundGradient={parallaxPresets.groups.backgroundGradient}
+        className="min-h-screen"
+      >
+        <ParallaxLayer speed={0.4} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -579,7 +584,8 @@ const GroupsPage: React.FC = () => {
             onGroupLeft={handleLeaveGroup}
           />
         )}
-      </div>
+        </ParallaxLayer>
+      </ParallaxContainer>
       
       <BottomNavigation />
     </>

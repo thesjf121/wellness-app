@@ -47,6 +47,11 @@ export const ParallaxContainer: React.FC<ParallaxContainerProps> = ({
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Reset mouse position when component mounts (new page)
+  useEffect(() => {
+    setMousePosition({ x: 0, y: 0 });
+  }, []);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (containerRef.current) {

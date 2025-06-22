@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { Layout } from './components/layout/Layout';
 import { OfflineIndicator } from './components/common/OfflineIndicator';
+import ScrollToTop from './components/ui/ScrollToTop';
 import OnboardingManager from './components/welcome/OnboardingManager';
 import { TutorialProvider } from './components/navigation/TutorialProvider';
 import { ROUTES } from './utils/constants';
@@ -41,6 +42,7 @@ function App() {
         publishableKey={clerkPublishableKey}
       >
         <Router>
+          <ScrollToTop />
           <TutorialProvider autoStart={true}>
             <Layout>
               <Routes>

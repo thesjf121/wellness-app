@@ -99,49 +99,11 @@ class GeminiService {
   }
 
   /**
-   * Analyze food from text description - uses ONLY Perplexity for real-time nutrition data
+   * Analyze food from text description - uses Gemini 2.5 Flash for fast results
    */
   async analyzeFoodText(request: GeminiAnalysisRequest): Promise<GeminiAnalysisResponse> {
-    // Use Perplexity for ALL food lookups
-    if (perplexityService.isConfigured()) {
-      console.log('🔍 Using Perplexity for real-time nutrition lookup...');
-      try {
-        const perplexityResult = await perplexityService.analyzeFoodText(request);
-        console.log('🔍 Perplexity Result:', {
-          success: perplexityResult.success,
-          error: perplexityResult.error,
-          hasData: !!perplexityResult.nutritionData,
-          dataLength: perplexityResult.nutritionData?.length
-        });
-        if (perplexityResult.success) {
-          console.log('✅ Perplexity succeeded with real-time data');
-          return perplexityResult;
-        }
-        console.log('❌ Perplexity failed:', perplexityResult.error);
-        
-        // Return the error instead of falling back
-        return {
-          success: false,
-          error: `Perplexity lookup failed: ${perplexityResult.error}`,
-          nutritionData: []
-        };
-      } catch (error) {
-        console.log('❌ Perplexity error:', error);
-        return {
-          success: false,
-          error: `Perplexity error: ${(error as Error).message}`,
-          nutritionData: []
-        };
-      }
-    }
-    
-    // If Perplexity not configured, return error
-    console.log('❌ Perplexity not configured');
-    return {
-      success: false,
-      error: 'Perplexity API not configured',
-      nutritionData: []
-    };
+    console.log('🧠 Using Gemini 2.5 Flash...');
+    return this.analyzeWithGemini(request);
   }
 
   /**
@@ -176,7 +138,7 @@ class GeminiService {
           tools: [{
             function_declarations: [{
               name: 'get_nutrition_facts',
-              description: 'Get accurate nutrition facts for food items including branded products',
+              description: 'Get nutrition facts for food items',
               parameters: {
                 type: 'object',
                 properties: {
@@ -375,70 +337,14 @@ class GeminiService {
    * Build nutrition analysis prompt for text input
    */
   private buildNutritionPrompt(foodText: string, mealType?: string): string {
-    return `${foodText} nutrition facts`;
+    return `What is the nutritional value of ${foodText}`;
   }
 
   /**
    * Build nutrition analysis prompt for image input
    */
   private buildImageAnalysisPrompt(mealType?: string): string {
-    return `
-Analyze the food in this image and provide detailed nutrition information in JSON format.
-
-${mealType ? `This appears to be a ${mealType} meal.` : ''}
-
-Please identify each food item visible and provide nutrition information. Return ONLY a valid JSON array with this exact structure:
-
-[
-  {
-    "foodItem": "name of food item",
-    "calories": number,
-    "macronutrients": {
-      "protein": number (grams),
-      "carbohydrates": number (grams),
-      "fat": number (grams),
-      "fiber": number (grams),
-      "sugar": number (grams)
-    },
-    "micronutrients": {
-      "sodium": number (mg),
-      "potassium": number (mg),
-      "calcium": number (mg),
-      "iron": number (mg),
-      "magnesium": number (mg),
-      "phosphorus": number (mg),
-      "zinc": number (mg),
-      "copper": number (mg),
-      "manganese": number (mg),
-      "selenium": number (mcg),
-      "iodine": number (mcg),
-      "vitaminA": number (IU),
-      "vitaminD": number (IU),
-      "vitaminE": number (mg),
-      "vitaminK": number (mcg),
-      "vitaminC": number (mg),
-      "thiamine": number (mg),
-      "riboflavin": number (mg),
-      "niacin": number (mg),
-      "pantothenicAcid": number (mg),
-      "vitaminB6": number (mg),
-      "biotin": number (mcg),
-      "folate": number (mcg),
-      "vitaminB12": number (mcg),
-      "choline": number (mg)
-    },
-    "servingSize": "estimated serving size",
-    "confidence": number (0-1 scale based on image clarity)
-  }
-]
-
-Important notes:
-- Estimate serving sizes based on visual portion assessment
-- Include all identifiable food items
-- Use standard USDA nutrition values when possible
-- Set confidence based on image quality and food visibility
-- Return ONLY the JSON array, no additional text
-`;
+    return `What is the nutritional value of the food in this image?`;
   }
 
   /**

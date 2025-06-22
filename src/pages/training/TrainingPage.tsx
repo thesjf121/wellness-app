@@ -10,6 +10,18 @@ import { BottomNavigation } from '../../components/ui/BottomNavigation';
 const TrainingPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  
+  // TEMPORARY DEMO MODE - Remove after testing
+  const isDemoMode = true;
+  const demoUser = {
+    id: 'demo_user_123',
+    firstName: 'Demo',
+    lastName: 'User',
+    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
+  };
+  
+  const effectiveUser = user || (isDemoMode ? demoUser : null);
+  const effectiveSignedIn = isSignedIn || isDemoMode;
   const { moduleId } = useParams();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(moduleId || null);
 
@@ -25,17 +37,7 @@ const TrainingPage: React.FC = () => {
 
   console.log('TrainingPage render: selectedModuleId =', selectedModuleId);
 
-  // Create a mock user if not signed in but accessing module directly
-  const effectiveUser = user || {
-    id: 'mock_user_123',
-    email: 'test@example.com',
-    firstName: 'Test',
-    lastName: 'User',
-    role: 'member' as const,
-    createdAt: new Date().toISOString()
-  };
-
-  if (!isSignedIn && !moduleId) {
+  if (!effectiveSignedIn && !moduleId) {
     return (
       <>
         <div className="max-w-4xl mx-auto px-4 py-8 pb-24">

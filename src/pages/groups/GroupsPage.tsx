@@ -18,6 +18,18 @@ import { Group, GroupMember, EligibilityCheck } from '../../types/groups';
 const GroupsPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  
+  // TEMPORARY DEMO MODE - Remove after testing
+  const isDemoMode = true;
+  const demoUser = {
+    id: 'demo_user_123',
+    firstName: 'Demo',
+    lastName: 'User',
+    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
+  };
+  
+  const effectiveUser = user || (isDemoMode ? demoUser : null);
+  const effectiveSignedIn = isSignedIn || isDemoMode;
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [userMembers, setUserMembers] = useState<GroupMember[]>([]);
   const [eligibility, setEligibility] = useState<EligibilityCheck | null>(null);
@@ -37,24 +49,24 @@ const GroupsPage: React.FC = () => {
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUserData = async () => {
-    if (!user) return;
+    if (!effectiveUser) return;
 
     setLoading(true);
     try {
-      const groups = await groupService.getUserGroups(user.id);
+      const groups = await groupService.getUserGroups(effectiveUser.id);
       setUserGroups(groups);
 
       const members: GroupMember[] = [];
       for (const group of groups) {
         const groupMembers = await groupService.getGroupMembers(group.id);
-        const userMember = groupMembers.find(m => m.userId === user.id);
+        const userMember = groupMembers.find(m => m.userId === effectiveUser.id);
         if (userMember) {
           members.push(userMember);
         }
       }
       setUserMembers(members);
 
-      const eligibilityCheck = await groupService.checkEligibility(user.id);
+      const eligibilityCheck = await groupService.checkEligibility(effectiveUser.id);
       setEligibility(eligibilityCheck);
     } catch (error) {
       console.error('Failed to load user data:', error);
@@ -99,7 +111,7 @@ const GroupsPage: React.FC = () => {
     });
   };
 
-  if (!isSignedIn || !user) {
+  if (!effectiveSignedIn || !effectiveUser) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <WellnessCard>

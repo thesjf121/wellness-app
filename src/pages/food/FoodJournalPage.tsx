@@ -20,6 +20,18 @@ import { FoodEntry, DailyNutrition, MealType } from '../../types/food';
 const FoodJournalPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  
+  // TEMPORARY DEMO MODE - Remove after testing
+  const isDemoMode = true;
+  const demoUser = {
+    id: 'demo_user_123',
+    firstName: 'Demo',
+    lastName: 'User',
+    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
+  };
+  
+  const effectiveUser = user || (isDemoMode ? demoUser : null);
+  const effectiveSignedIn = isSignedIn || isDemoMode;
   const [currentView, setCurrentView] = useState<'daily' | 'dashboard' | 'reports' | 'goals'>('daily');
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -49,11 +61,11 @@ const FoodJournalPage: React.FC = () => {
   }, []);
 
   const loadDailyNutrition = async () => {
-    if (!user) return;
+    if (!effectiveUser) return;
     
     setLoading(true);
     try {
-      const nutrition = await foodService.getDailyNutrition(user.id, currentDate);
+      const nutrition = await foodService.getDailyNutrition(effectiveUser.id, currentDate);
       setDailyNutrition(nutrition);
     } catch (error) {
       console.error('Failed to load daily nutrition:', error);
@@ -83,7 +95,7 @@ const FoodJournalPage: React.FC = () => {
           textDescription: 'AI analyzed food'
         },
         nutritionData,
-        user.id
+        effectiveUser.id
       );
 
       setAnalysisResult(null);
@@ -145,7 +157,7 @@ const FoodJournalPage: React.FC = () => {
     </WellnessCard>
   );
 
-  if (!isSignedIn || !user) {
+  if (!effectiveSignedIn || !effectiveUser) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <WellnessCard>

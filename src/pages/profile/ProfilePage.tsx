@@ -12,6 +12,17 @@ import { BottomNavigation } from '../../components/ui/BottomNavigation';
 const ProfilePage: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
+  
+  // TEMPORARY DEMO MODE - Remove after testing
+  const isDemoMode = true;
+  const demoUser = {
+    id: 'demo_user_123',
+    firstName: 'Demo',
+    lastName: 'User',
+    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
+  };
+  
+  const effectiveUser = user || (isDemoMode ? demoUser : null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string>('');
@@ -66,7 +77,7 @@ const ProfilePage: React.FC = () => {
 
   const loadProfile = () => {
     // Load from localStorage for now (would be from backend in production)
-    const savedProfile = localStorage.getItem(`profile_${user?.id}`);
+    const savedProfile = localStorage.getItem(`profile_${effectiveUser?.id}`);
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
     } else if (user) {
@@ -85,7 +96,7 @@ const ProfilePage: React.FC = () => {
 
   const loadProfilePicture = () => {
     // Load profile picture from localStorage
-    const savedPicture = localStorage.getItem(`profile_picture_${user?.id}`);
+    const savedPicture = localStorage.getItem(`profile_picture_${effectiveUser?.id}`);
     if (savedPicture) {
       setProfilePicture(savedPicture);
     // No default profile image for mock user
@@ -93,15 +104,15 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!effectiveUser) return;
     
     setSaving(true);
     try {
       // Save to localStorage (in production, this would save to backend)
-      localStorage.setItem(`profile_${user.id}`, JSON.stringify(profile));
+      localStorage.setItem(`profile_${effectiveUser.id}`, JSON.stringify(profile));
       
       // Update Clerk metadata (in production, this would be done via backend API)
-      await updateUserMetadata(user.id, {
+      await updateUserMetadata(effectiveUser.id, {
         profile: {
           dailyStepGoal: profile.dailyStepGoal,
           dailyCalorieGoal: profile.dailyCalorieGoal,
@@ -159,7 +170,7 @@ const ProfilePage: React.FC = () => {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setProfilePicture(base64String);
-        localStorage.setItem(`profile_picture_${user.id}`, base64String);
+        localStorage.setItem(`profile_picture_${effectiveUser.id}`, base64String);
         alert('Profile picture updated successfully!');
       };
       reader.readAsDataURL(file);
@@ -172,17 +183,17 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleRemoveProfilePicture = () => {
-    if (!user) return;
+    if (!effectiveUser) return;
     
     if (window.confirm('Are you sure you want to remove your profile picture?')) {
       setProfilePicture('');
-      localStorage.removeItem(`profile_picture_${user.id}`);
+      localStorage.removeItem(`profile_picture_${effectiveUser.id}`);
       alert('Profile picture removed');
     }
   };
 
   const handleDeactivateAccount = async () => {
-    if (!user) return;
+    if (!effectiveUser) return;
     
     if (window.confirm('Are you sure you want to deactivate your account? You can reactivate it by signing in again.')) {
       try {
@@ -190,8 +201,8 @@ const ProfilePage: React.FC = () => {
         // For now, just clear local data and sign out
         
         // Clear all local data
-        localStorage.removeItem(`profile_${user.id}`);
-        localStorage.removeItem(`profile_picture_${user.id}`);
+        localStorage.removeItem(`profile_${effectiveUser.id}`);
+        localStorage.removeItem(`profile_picture_${effectiveUser.id}`);
         localStorage.removeItem('wellness-steps');
         localStorage.removeItem('step_entries');
         localStorage.removeItem('step_goal');
@@ -221,7 +232,7 @@ const ProfilePage: React.FC = () => {
       
       // Clear all local data
       Object.keys(localStorage).forEach(key => {
-        if (key.includes(user.id) || key.startsWith('wellness_') || key.startsWith('step_') || key.startsWith('notification_')) {
+        if (key.includes(effectiveUser.id) || key.startsWith('wellness_') || key.startsWith('step_') || key.startsWith('notification_')) {
           localStorage.removeItem(key);
         }
       });
@@ -236,7 +247,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  if (!user) {
+  if (!effectiveUser) {
     return (
       <>
         <div className="max-w-4xl mx-auto px-4 py-8 pb-24">

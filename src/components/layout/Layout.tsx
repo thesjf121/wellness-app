@@ -65,9 +65,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             <div className="flex items-center">
               <button 
                 onClick={() => navigate(ROUTES.HOME)}
-                className="text-2xl font-bold text-blue-600 hover:text-blue-700"
+                className="flex flex-col items-start group"
               >
-                WellnessApp
+                <span className="text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+                  WellnessApp
+                </span>
+                <span className="text-xs text-gray-400 group-hover:text-gray-500 transition-colors tracking-wide">
+                  powered by CalerieLife
+                </span>
               </button>
             </div>
             <div className="flex items-center space-x-4">

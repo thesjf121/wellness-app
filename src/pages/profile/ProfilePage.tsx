@@ -469,7 +469,7 @@ const ProfilePage: React.FC = () => {
                     </label>
                     <input
                       type="email"
-                      value={user.primaryEmailAddress?.emailAddress || ''}
+                      value={effectiveUser.primaryEmailAddress?.emailAddress || ''}
                       disabled
                       className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 bg-gray-50"
                     />

@@ -344,7 +344,41 @@ class GeminiService {
    * Build nutrition analysis prompt for image input
    */
   private buildImageAnalysisPrompt(mealType?: string): string {
-    return `What is the nutritional value of the food in this image?`;
+    return `Analyze the food in this image and provide nutritional information in the following JSON format ONLY. Do not include any explanatory text, just the JSON array:
+
+[
+  {
+    "foodItem": "food name",
+    "calories": 0,
+    "macronutrients": {
+      "protein": 0,
+      "carbohydrates": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sugar": 0
+    },
+    "micronutrients": {
+      "sodium": 0,
+      "potassium": 0,
+      "calcium": 0,
+      "iron": 0,
+      "vitaminA": 0,
+      "vitaminC": 0,
+      "vitaminD": 0,
+      "vitaminE": 0,
+      "vitaminK": 0,
+      "vitaminB6": 0,
+      "vitaminB12": 0,
+      "folate": 0
+    },
+    "serving": {
+      "size": 0,
+      "unit": "grams"
+    }
+  }
+]
+
+Analyze each distinct food item separately. Provide your best estimates based on typical serving sizes visible in the image.`;
   }
 
   /**

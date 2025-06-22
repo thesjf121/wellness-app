@@ -31,8 +31,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   const ref = React.useRef(null);
   const isInView = useInView(ref, { 
     once: true, 
-    amount: 0.1,
-    margin: "-50px 0px -50px 0px"
+    amount: 0.1
   });
   const baseClasses = 'rounded-lg md:rounded-xl transition-all duration-300 relative overflow-hidden';
   
@@ -59,27 +58,6 @@ export const BaseCard: React.FC<BaseCardProps> = ({
     ? 'opacity-50 cursor-not-allowed'
     : '';
 
-  // Animation variants for scroll-triggered animations
-  const scrollAnimationVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 30,
-      scale: 0.95,
-      filter: 'blur(4px)'
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      scale: 1,
-      filter: 'blur(0px)',
-      transition: {
-        duration: 0.6,
-        delay: animationDelay,
-        ease: [0.25, 0.46, 0.45, 0.94]
-      }
-    }
-  };
-
   return (
     <motion.div
       ref={ref}
@@ -92,9 +70,13 @@ export const BaseCard: React.FC<BaseCardProps> = ({
         className
       )}
       onClick={disabled ? undefined : onClick}
-      initial={disableScrollAnimation ? { opacity: 1, y: 0 } : "hidden"}
-      animate={disableScrollAnimation || isInView ? "visible" : "hidden"}
-      variants={disableScrollAnimation ? undefined : scrollAnimationVariants}
+      initial={disableScrollAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 30, scale: 0.95 }}
+      animate={disableScrollAnimation || isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.95 }}
+      transition={{
+        duration: 0.6,
+        delay: animationDelay,
+        ease: "easeOut"
+      }}
       whileHover={interactive && !disabled ? { y: -4, scale: 1.02 } : {}}
       whileTap={interactive && !disabled ? { scale: 0.98 } : {}}
       {...motionProps}

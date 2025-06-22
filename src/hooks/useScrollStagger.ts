@@ -24,8 +24,7 @@ export const useScrollStagger = (
   const ref = useRef(null);
   const isInView = useInView(ref, {
     once,
-    amount: threshold,
-    margin
+    amount: threshold
   });
 
   const delay = index * staggerDelay;
@@ -34,18 +33,16 @@ export const useScrollStagger = (
     hidden: {
       opacity: 0,
       y: 30,
-      scale: 0.95,
-      filter: 'blur(4px)'
+      scale: 0.95
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      filter: 'blur(0px)',
       transition: {
         duration: 0.6,
         delay,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: "easeOut"
       }
     }
   };
@@ -81,25 +78,22 @@ export const useScrollReveal = (options: Omit<StaggerOptions, 'staggerDelay' | '
   const ref = useRef(null);
   const isInView = useInView(ref, {
     once,
-    amount: threshold,
-    margin
+    amount: threshold
   });
 
   const variants = {
     hidden: {
       opacity: 0,
       y: 40,
-      scale: 0.95,
-      filter: 'blur(4px)'
+      scale: 0.95
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      filter: 'blur(0px)',
       transition: {
         duration: 0.8,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: "easeOut"
       }
     }
   };

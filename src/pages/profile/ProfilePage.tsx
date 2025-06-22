@@ -25,6 +25,15 @@ const ProfilePage: React.FC = () => {
   
   const effectiveUser = user || (isDemoMode ? demoUser : null);
   const effectiveSignedIn = isSignedIn || isDemoMode;
+  
+  // DEBUG: Log the values
+  console.log('ProfilePage DEBUG:', {
+    user: !!user,
+    isSignedIn,
+    isDemoMode,
+    effectiveUser: !!effectiveUser,
+    effectiveSignedIn
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string>('');

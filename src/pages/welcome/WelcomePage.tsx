@@ -1,11 +1,17 @@
 import React from 'react';
 import WelcomeSection from '../../components/welcome/WelcomeSection';
+import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 
 const WelcomePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <WelcomeSection />
-    </div>
+    <ParallaxContainer
+      backgroundGradient={parallaxPresets.homepage.backgroundGradient}
+      className="min-h-screen"
+    >
+      <ParallaxLayer speed={0.3} className="min-h-screen">
+        <WelcomeSection />
+      </ParallaxLayer>
+    </ParallaxContainer>
   );
 };
 

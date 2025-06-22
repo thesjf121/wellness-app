@@ -869,7 +869,6 @@ const ProfilePage: React.FC = () => {
             </WellnessCard>
           </motion.div>
         </div>
-        </div>
       </div>
       
       <BottomNavigation />

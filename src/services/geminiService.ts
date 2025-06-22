@@ -306,9 +306,12 @@ class GeminiService {
       }
 
       const data = await response.json();
+      console.log('📦 Gemini Vision raw response:', JSON.stringify(data, null, 2));
+      
       const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!analysisText) {
+        console.error('❌ No analysis text in response. Full data:', data);
         throw new Error('No analysis text received from Gemini Vision');
       }
 
@@ -344,41 +347,19 @@ class GeminiService {
    * Build nutrition analysis prompt for image input
    */
   private buildImageAnalysisPrompt(mealType?: string): string {
-    return `Analyze the food in this image and provide nutritional information in the following JSON format ONLY. Do not include any explanatory text, just the JSON array:
+    // Simpler prompt that Gemini handles better
+    return `Analyze this food image and provide nutrition estimates. For each food item you see, list:
+- Food name
+- Calories
+- Protein (g)
+- Carbohydrates (g) 
+- Fat (g)
+- Fiber (g)
+- Sugar (g)
+- Sodium (mg)
 
-[
-  {
-    "foodItem": "food name",
-    "calories": 0,
-    "macronutrients": {
-      "protein": 0,
-      "carbohydrates": 0,
-      "fat": 0,
-      "fiber": 0,
-      "sugar": 0
-    },
-    "micronutrients": {
-      "sodium": 0,
-      "potassium": 0,
-      "calcium": 0,
-      "iron": 0,
-      "vitaminA": 0,
-      "vitaminC": 0,
-      "vitaminD": 0,
-      "vitaminE": 0,
-      "vitaminK": 0,
-      "vitaminB6": 0,
-      "vitaminB12": 0,
-      "folate": 0
-    },
-    "serving": {
-      "size": 0,
-      "unit": "grams"
-    }
-  }
-]
-
-Analyze each distinct food item separately. Provide your best estimates based on typical serving sizes visible in the image.`;
+Format your response as a JSON array like this example:
+[{"foodItem": "chicken breast", "calories": 165, "macronutrients": {"protein": 31, "carbohydrates": 0, "fat": 3.6, "fiber": 0, "sugar": 0}, "micronutrients": {"sodium": 74}}]`;
   }
 
   /**

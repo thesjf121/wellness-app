@@ -41,7 +41,6 @@ function App() {
     <ClerkErrorBoundary>
       <ClerkProvider 
         publishableKey={clerkPublishableKey}
-        navigate={(to) => window.history.pushState(null, '', to)}
       >
         <Router>
           <ScrollToTop />

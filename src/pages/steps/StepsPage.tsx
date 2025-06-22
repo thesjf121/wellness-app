@@ -15,17 +15,6 @@ const StepsPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
   
-  // TEMPORARY DEMO MODE - Remove after testing
-  const isDemoMode = true;
-  const demoUser = {
-    id: 'demo_user_123',
-    firstName: 'Demo',
-    lastName: 'User',
-    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
-  };
-  
-  const effectiveUser = user || (isDemoMode ? demoUser : null);
-  const effectiveSignedIn = isSignedIn || isDemoMode;
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [manualSteps, setManualSteps] = useState('');
   const [stepList, setStepList] = useState<Array<{id: string, steps: number, date: string}>>([]);
@@ -333,7 +322,7 @@ const StepsPage: React.FC = () => {
     );
   };
 
-  if (!effectiveSignedIn || !effectiveUser) {
+  if (!isSignedIn || !user) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <WellnessCard>

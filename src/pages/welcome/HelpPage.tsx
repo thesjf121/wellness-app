@@ -1,24 +1,9 @@
 import React from 'react';
-import { useUser, useAuth } from '@clerk/clerk-react';
 import HelpCenter from '../../components/welcome/HelpCenter';
 import { TutorialMenu, TutorialProgress } from '../../components/navigation/TutorialProvider';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
 
 const HelpPage: React.FC = () => {
-  const { user } = useUser();
-  const { isSignedIn } = useAuth();
-  
-  // TEMPORARY DEMO MODE - Remove after testing
-  const isDemoMode = true;
-  const demoUser = {
-    id: 'demo_user_123',
-    firstName: 'Demo',
-    lastName: 'User',
-    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
-  };
-  
-  const effectiveUser = user || (isDemoMode ? demoUser : null);
-  const effectiveSignedIn = isSignedIn || isDemoMode;
 
   return (
     <>

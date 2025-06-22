@@ -19,17 +19,6 @@ const GroupsPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
   
-  // TEMPORARY DEMO MODE - Remove after testing
-  const isDemoMode = true;
-  const demoUser = {
-    id: 'demo_user_123',
-    firstName: 'Demo',
-    lastName: 'User',
-    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
-  };
-  
-  const effectiveUser = user || (isDemoMode ? demoUser : null);
-  const effectiveSignedIn = isSignedIn || isDemoMode;
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [userMembers, setUserMembers] = useState<GroupMember[]>([]);
   const [eligibility, setEligibility] = useState<EligibilityCheck | null>(null);
@@ -49,24 +38,24 @@ const GroupsPage: React.FC = () => {
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUserData = async () => {
-    if (!effectiveUser) return;
+    if (!user) return;
 
     setLoading(true);
     try {
-      const groups = await groupService.getUserGroups(effectiveUser.id);
+      const groups = await groupService.getUserGroups(user.id);
       setUserGroups(groups);
 
       const members: GroupMember[] = [];
       for (const group of groups) {
         const groupMembers = await groupService.getGroupMembers(group.id);
-        const userMember = groupMembers.find(m => m.userId === effectiveUser.id);
+        const userMember = groupMembers.find(m => m.userId === user.id);
         if (userMember) {
           members.push(userMember);
         }
       }
       setUserMembers(members);
 
-      const eligibilityCheck = await groupService.checkEligibility(effectiveUser.id);
+      const eligibilityCheck = await groupService.checkEligibility(user.id);
       setEligibility(eligibilityCheck);
     } catch (error) {
       console.error('Failed to load user data:', error);
@@ -111,7 +100,7 @@ const GroupsPage: React.FC = () => {
     });
   };
 
-  if (!effectiveSignedIn || !effectiveUser) {
+  if (!isSignedIn || !user) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <WellnessCard>

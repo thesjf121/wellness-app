@@ -27,27 +27,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   const { isSignedIn } = useAuth();
   const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
 
-  // TEMPORARY DEMO MODE - Remove after testing
-  const isDemoMode = true;
-  const demoUser = {
-    id: 'demo_user_123',
-    firstName: 'Demo',
-    lastName: 'User',
-    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' },
-    publicMetadata: { role: 'member' }
-  };
-  
-  const effectiveUser = user || (isDemoMode ? demoUser : null);
-  const effectiveSignedIn = isSignedIn || isDemoMode;
 
   // Determine layout based on user role if not specified
   const effectiveLayout = layout || (
-    effectiveUser?.publicMetadata?.role === 'super_admin' ? 'super_admin' :
-    effectiveUser?.publicMetadata?.role === 'team_sponsor' ? 'admin' :
+    user?.publicMetadata?.role === 'super_admin' ? 'super_admin' :
+    user?.publicMetadata?.role === 'team_sponsor' ? 'admin' :
     'member'
   );
 
-  if (!effectiveSignedIn || !effectiveUser) {
+  if (!isSignedIn || !user) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-8 text-center">
@@ -75,7 +63,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   const renderMemberDashboard = () => (
     <div className="space-y-8 pb-20">
       {/* Daily Greeting */}
-      <DailyGreeting userName={effectiveUser.firstName || 'there'} />
+      <DailyGreeting userName={user.firstName || 'there'} />
 
       {/* Headspace-style Quick Actions */}
       <motion.div

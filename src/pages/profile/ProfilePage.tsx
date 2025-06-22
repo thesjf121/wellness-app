@@ -14,26 +14,6 @@ const ProfilePage: React.FC = () => {
   const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   
-  // TEMPORARY DEMO MODE - Remove after testing
-  const isDemoMode = true;
-  const demoUser = {
-    id: 'demo_user_123',
-    firstName: 'Demo',
-    lastName: 'User',
-    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
-  };
-  
-  const effectiveUser = user || (isDemoMode ? demoUser : null);
-  const effectiveSignedIn = isSignedIn || isDemoMode;
-  
-  // DEBUG: Log the values
-  console.log('ProfilePage DEBUG:', {
-    user: !!user,
-    isSignedIn,
-    isDemoMode,
-    effectiveUser: !!effectiveUser,
-    effectiveSignedIn
-  });
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string>('');
@@ -80,26 +60,26 @@ const ProfilePage: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (effectiveUser) {
+    if (user) {
       loadProfile();
       loadProfilePicture();
     }
-  }, [effectiveUser]);
+  }, [user]);
 
   const loadProfile = () => {
     // Load from localStorage for now (would be from backend in production)
-    const savedProfile = localStorage.getItem(`profile_${effectiveUser?.id}`);
+    const savedProfile = localStorage.getItem(`profile_${user?.id}`);
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
-    } else if (effectiveUser) {
+    } else if (user) {
       // Initialize with user data (real or demo)
       const clerkProfile = (user?.publicMetadata as any)?.profile || {};
       setProfile(prev => ({
         ...prev,
-        firstName: effectiveUser.firstName || '',
-        lastName: effectiveUser.lastName || '',
-        email: effectiveUser.primaryEmailAddress?.emailAddress || '',
-        displayName: `${effectiveUser.firstName} ${effectiveUser.lastName}`.trim(),
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.primaryEmailAddress?.emailAddress || '',
+        displayName: `${user.firstName} ${user.lastName}`.trim(),
         ...clerkProfile
       }));
     }
@@ -107,7 +87,7 @@ const ProfilePage: React.FC = () => {
 
   const loadProfilePicture = () => {
     // Load profile picture from localStorage
-    const savedPicture = localStorage.getItem(`profile_picture_${effectiveUser?.id}`);
+    const savedPicture = localStorage.getItem(`profile_picture_${user?.id}`);
     if (savedPicture) {
       setProfilePicture(savedPicture);
     // No default profile image for mock user
@@ -115,15 +95,15 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!effectiveUser) return;
+    if (!user) return;
     
     setSaving(true);
     try {
       // Save to localStorage (in production, this would save to backend)
-      localStorage.setItem(`profile_${effectiveUser.id}`, JSON.stringify(profile));
+      localStorage.setItem(`profile_${user.id}`, JSON.stringify(profile));
       
       // Update Clerk metadata (in production, this would be done via backend API)
-      await updateUserMetadata(effectiveUser.id, {
+      await updateUserMetadata(user.id, {
         profile: {
           dailyStepGoal: profile.dailyStepGoal,
           dailyCalorieGoal: profile.dailyCalorieGoal,
@@ -159,7 +139,7 @@ const ProfilePage: React.FC = () => {
 
   const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !effectiveUser) return;
+    if (!file || !user) return;
 
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -181,7 +161,7 @@ const ProfilePage: React.FC = () => {
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setProfilePicture(base64String);
-        localStorage.setItem(`profile_picture_${effectiveUser.id}`, base64String);
+        localStorage.setItem(`profile_picture_${user.id}`, base64String);
         alert('Profile picture updated successfully!');
       };
       reader.readAsDataURL(file);
@@ -194,17 +174,17 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleRemoveProfilePicture = () => {
-    if (!effectiveUser) return;
+    if (!user) return;
     
     if (window.confirm('Are you sure you want to remove your profile picture?')) {
       setProfilePicture('');
-      localStorage.removeItem(`profile_picture_${effectiveUser.id}`);
+      localStorage.removeItem(`profile_picture_${user.id}`);
       alert('Profile picture removed');
     }
   };
 
   const handleDeactivateAccount = async () => {
-    if (!effectiveUser) return;
+    if (!user) return;
     
     if (window.confirm('Are you sure you want to deactivate your account? You can reactivate it by signing in again.')) {
       try {
@@ -212,8 +192,8 @@ const ProfilePage: React.FC = () => {
         // For now, just clear local data and sign out
         
         // Clear all local data
-        localStorage.removeItem(`profile_${effectiveUser.id}`);
-        localStorage.removeItem(`profile_picture_${effectiveUser.id}`);
+        localStorage.removeItem(`profile_${user.id}`);
+        localStorage.removeItem(`profile_picture_${user.id}`);
         localStorage.removeItem('wellness-steps');
         localStorage.removeItem('step_entries');
         localStorage.removeItem('step_goal');
@@ -232,7 +212,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!effectiveUser || deleteConfirmText !== 'DELETE') {
+    if (!user || deleteConfirmText !== 'DELETE') {
       alert('Please type "DELETE" to confirm account deletion.');
       return;
     }
@@ -243,7 +223,7 @@ const ProfilePage: React.FC = () => {
       
       // Clear all local data
       Object.keys(localStorage).forEach(key => {
-        if (key.includes(effectiveUser.id) || key.startsWith('wellness_') || key.startsWith('step_') || key.startsWith('notification_')) {
+        if (key.includes(user.id) || key.startsWith('wellness_') || key.startsWith('step_') || key.startsWith('notification_')) {
           localStorage.removeItem(key);
         }
       });
@@ -258,7 +238,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  if (!effectiveSignedIn) {
+  if (!isSignedIn || !user) {
     return (
       <>
         <div className="max-w-4xl mx-auto px-4 py-8 pb-24">
@@ -469,7 +449,7 @@ const ProfilePage: React.FC = () => {
                     </label>
                     <input
                       type="email"
-                      value={effectiveUser.primaryEmailAddress?.emailAddress || ''}
+                      value={user.primaryEmailAddress?.emailAddress || ''}
                       disabled
                       className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 bg-gray-50"
                     />

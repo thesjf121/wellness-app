@@ -11,17 +11,6 @@ const TrainingPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
   
-  // TEMPORARY DEMO MODE - Remove after testing
-  const isDemoMode = true;
-  const demoUser = {
-    id: 'demo_user_123',
-    firstName: 'Demo',
-    lastName: 'User',
-    primaryEmailAddress: { emailAddress: 'demo@calerielife.com' }
-  };
-  
-  const effectiveUser = user || (isDemoMode ? demoUser : null);
-  const effectiveSignedIn = isSignedIn || isDemoMode;
   const { moduleId } = useParams();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(moduleId || null);
 
@@ -37,7 +26,7 @@ const TrainingPage: React.FC = () => {
 
   console.log('TrainingPage render: selectedModuleId =', selectedModuleId);
 
-  if (!effectiveSignedIn && !moduleId) {
+  if (!isSignedIn && !moduleId) {
     return (
       <>
         <div className="max-w-4xl mx-auto px-4 py-8 pb-24">
@@ -121,7 +110,7 @@ const TrainingPage: React.FC = () => {
             <WellnessCard className="h-full">
               <CardContent className="p-0">
                 <TrainingModuleNavigation
-                  userId={effectiveUser.id}
+                  userId={user.id}
                   currentModuleId={selectedModuleId || undefined}
                   onModuleSelect={setSelectedModuleId}
                 />
@@ -140,7 +129,7 @@ const TrainingPage: React.FC = () => {
               <WellnessCard className="h-full">
                 <CardContent className="p-0">
                   <ModuleViewer
-                    userId={effectiveUser.id}
+                    userId={user.id}
                     moduleId={selectedModuleId}
                     onProgressUpdate={() => {
                       // Force re-render of navigation to update progress

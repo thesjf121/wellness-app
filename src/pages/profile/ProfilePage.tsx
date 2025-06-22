@@ -249,7 +249,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  if (!effectiveSignedIn || !effectiveUser) {
+  if (!effectiveSignedIn) {
     return (
       <>
         <div className="max-w-4xl mx-auto px-4 py-8 pb-24">

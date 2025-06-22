@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, MotionProps } from 'framer-motion';
+import { motion, MotionProps, useInView } from 'framer-motion';
 import { cn } from '../../../utils/cn';
 
 export interface BaseCardProps extends MotionProps {
@@ -11,6 +11,8 @@ export interface BaseCardProps extends MotionProps {
   interactive?: boolean;
   loading?: boolean;
   disabled?: boolean;
+  disableScrollAnimation?: boolean;
+  animationDelay?: number;
 }
 
 export const BaseCard: React.FC<BaseCardProps> = ({
@@ -22,8 +24,16 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   interactive = false,
   loading = false,
   disabled = false,
+  disableScrollAnimation = false,
+  animationDelay = 0,
   ...motionProps
 }) => {
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { 
+    once: true, 
+    amount: 0.1,
+    margin: "-50px 0px -50px 0px"
+  });
   const baseClasses = 'rounded-lg md:rounded-xl transition-all duration-300 relative overflow-hidden';
   
   const variantClasses = {
@@ -49,8 +59,30 @@ export const BaseCard: React.FC<BaseCardProps> = ({
     ? 'opacity-50 cursor-not-allowed'
     : '';
 
+  // Animation variants for scroll-triggered animations
+  const scrollAnimationVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 30,
+      scale: 0.95,
+      filter: 'blur(4px)'
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      filter: 'blur(0px)',
+      transition: {
+        duration: 0.6,
+        delay: animationDelay,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }
+    }
+  };
+
   return (
     <motion.div
+      ref={ref}
       className={cn(
         baseClasses,
         variantClasses[variant],
@@ -60,10 +92,10 @@ export const BaseCard: React.FC<BaseCardProps> = ({
         className
       )}
       onClick={disabled ? undefined : onClick}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      whileHover={interactive && !disabled ? { y: -4 } : {}}
+      initial={disableScrollAnimation ? { opacity: 1, y: 0 } : "hidden"}
+      animate={disableScrollAnimation || isInView ? "visible" : "hidden"}
+      variants={disableScrollAnimation ? undefined : scrollAnimationVariants}
+      whileHover={interactive && !disabled ? { y: -4, scale: 1.02 } : {}}
       whileTap={interactive && !disabled ? { scale: 0.98 } : {}}
       {...motionProps}
     >

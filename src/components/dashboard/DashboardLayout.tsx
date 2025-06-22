@@ -183,27 +183,85 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
       {/* Detailed Widgets */}
       {viewMode === 'detailed' && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.15,
+                delayChildren: 0.2
+              }
+            }
+          }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6"
         >
-          <StepTrendsWidget compact={false} />
-          <NutritionSummaryWidget compact={false} />
-          <TrainingProgressWidget compact={false} />
-          <StreakCounterWidget compact={false} />
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.95 },
+              visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
+            }}
+          >
+            <StepTrendsWidget compact={false} />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.95 },
+              visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
+            }}
+          >
+            <NutritionSummaryWidget compact={false} />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.95 },
+              visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
+            }}
+          >
+            <TrainingProgressWidget compact={false} />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 30, scale: 0.95 },
+              visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
+            }}
+          >
+            <StreakCounterWidget compact={false} />
+          </motion.div>
         </motion.div>
       )}
 
       {/* Additional Insights */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.2,
+              delayChildren: 0.3
+            }
+          }
+        }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6"
       >
-        <GroupActivityWidget />
-        <RecentActivityWidget />
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 30, scale: 0.95 },
+            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
+          }}
+        >
+          <GroupActivityWidget />
+        </motion.div>
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 30, scale: 0.95 },
+            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
+          }}
+        >
+          <RecentActivityWidget />
+        </motion.div>
       </motion.div>
     </div>
   );

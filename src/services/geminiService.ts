@@ -131,8 +131,10 @@ class GeminiService {
       //   };
       // }
 
-      const prompt = `Analyze the nutrition information for: ${request.text}`;
-      console.log('📝 Using Gemini Tools for:', request.text);
+      const prompt = `What is the nutrition value of ${request.text}? Only provide values in your answer. Format as JSON array:
+[{"foodItem": "food name", "calories": 0, "macronutrients": {"protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0, "sugar": 0}, "micronutrients": {"sodium": 0, "potassium": 0, "calcium": 0, "iron": 0, "magnesium": 0, "phosphorus": 0, "zinc": 0, "vitaminA": 0, "vitaminC": 0, "vitaminD": 0}, "servingSize": "100g", "confidence": 0.9}]`;
+      
+      console.log('📝 Simple Gemini prompt for:', request.text);
       
       const url = `${this.BASE_URL}?key=${this.API_KEY}`;
       console.log('🌐 Making request to:', url.replace(this.API_KEY, 'API_KEY_HIDDEN'));
@@ -147,53 +149,7 @@ class GeminiService {
             parts: [{
               text: prompt
             }]
-          }],
-          tools: [{
-            function_declarations: [{
-              name: 'get_nutrition_facts',
-              description: 'Get nutrition facts for food items',
-              parameters: {
-                type: 'object',
-                properties: {
-                  food_items: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        food_name: { type: 'string', description: 'Name of the food item' },
-                        serving_size: { type: 'string', description: 'Serving size from product label' },
-                        calories: { type: 'number', description: 'Calories per serving' },
-                        protein_g: { type: 'number', description: 'Protein in grams' },
-                        carbohydrates_g: { type: 'number', description: 'Carbohydrates in grams' },
-                        fat_g: { type: 'number', description: 'Fat in grams' },
-                        fiber_g: { type: 'number', description: 'Fiber in grams' },
-                        sugar_g: { type: 'number', description: 'Sugar in grams' },
-                        sodium_mg: { type: 'number', description: 'Sodium in milligrams' },
-                        potassium_mg: { type: 'number', description: 'Potassium in milligrams' },
-                        calcium_mg: { type: 'number', description: 'Calcium in milligrams' },
-                        iron_mg: { type: 'number', description: 'Iron in milligrams' },
-                        magnesium_mg: { type: 'number', description: 'Magnesium in milligrams' },
-                        phosphorus_mg: { type: 'number', description: 'Phosphorus in milligrams' },
-                        zinc_mg: { type: 'number', description: 'Zinc in milligrams' },
-                        vitamin_c_mg: { type: 'number', description: 'Vitamin C in milligrams' },
-                        vitamin_d_iu: { type: 'number', description: 'Vitamin D in IU' },
-                        vitamin_a_iu: { type: 'number', description: 'Vitamin A in IU' },
-                        confidence: { type: 'number', description: 'Confidence score 0-1' }
-                      },
-                      required: ['food_name', 'serving_size', 'calories', 'protein_g', 'carbohydrates_g', 'fat_g']
-                    }
-                  }
-                },
-                required: ['food_items']
-              }
-            }]
-          }],
-          tool_config: {
-            function_calling_config: {
-              mode: 'ANY',
-              allowed_function_names: ['get_nutrition_facts']
-            }
-          }
+          }]
         })
       });
 
@@ -201,84 +157,37 @@ class GeminiService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🚨 Gemini API Error Details:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorBody: errorText,
-          apiKeyLength: this.API_KEY.length,
-          apiKeyConfigured: this.isConfigured()
-        });
-        
-        // Handle specific API errors
-        if (response.status === 429) {
-          console.warn('Gemini API rate limit reached, using offline mode');
-          return this.getOfflineNutritionData(request.text || 'unknown food');
-        }
-        if (response.status === 401 || response.status === 403) {
-          console.error('🚨 Invalid/Missing Gemini API key - Status:', response.status);
-          return this.getOfflineNutritionData(request.text || 'unknown food');
-        }
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+        console.error('🚨 Gemini API Error:', response.status, errorText);
+        throw new Error(`Gemini API failed: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('🔍 Raw Gemini Tools Response:', JSON.stringify(data, null, 2));
+      console.log('🔍 Raw Gemini Response:', JSON.stringify(data, null, 2));
       
-      // Extract function call response
-      const functionCall = data.candidates?.[0]?.content?.parts?.[0]?.functionCall;
-      if (functionCall && functionCall.name === 'get_nutrition_facts') {
-        const nutritionData = this.parseToolsResponse(functionCall.args);
-        console.log('✅ Parsed Tools Nutrition Data:', nutritionData);
-        
-        // TEMPORARILY DISABLE CACHE FOR DEBUGGING
-        // const cacheKey = `nutrition_${request.text?.toLowerCase().trim()}`;
-        // localStorage.setItem(cacheKey, JSON.stringify(nutritionData));
-        // console.log('💾 Cached nutrition data for:', request.text);
-        
-        return {
-          success: true,
-          nutritionData,
-          rawResponse: JSON.stringify(functionCall.args)
-        };
-      }
-
-      // Fallback to text parsing if no function call
+      // Extract text response
       const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (analysisText) {
-        console.log('📝 Fallback to text parsing:', analysisText);
-        const nutritionData = this.parseNutritionResponse(analysisText);
-        
-        // TEMPORARILY DISABLE CACHE FOR DEBUGGING
-        // const cacheKey = `nutrition_${request.text?.toLowerCase().trim()}`;
-        // localStorage.setItem(cacheKey, JSON.stringify(nutritionData));
-        // console.log('💾 Cached nutrition data for:', request.text);
-        
-        return {
-          success: true,
-          nutritionData,
-          rawResponse: analysisText
-        };
+      if (!analysisText) {
+        throw new Error('No text response received from Gemini');
       }
       
-      throw new Error('No function call or text response received from Gemini');
+      console.log('📝 Gemini response text:', analysisText);
+      const nutritionData = this.parseNutritionResponse(analysisText);
+      
+      return {
+        success: true,
+        nutritionData,
+        rawResponse: analysisText
+      };
 
     } catch (error) {
-      console.error('🚨 GEMINI TOOLS API CALL FAILED:', error);
-      console.error('🚨 Error details:', {
-        message: (error as Error).message,
-        stack: (error as Error).stack,
-        requestText: request.text,
-        apiKeyLength: this.API_KEY.length
-      });
-      
+      console.error('🚨 GEMINI API CALL FAILED:', error);
       errorService.logError(error as Error, { 
         context: 'GeminiService.analyzeFoodText',
         request 
       });
-
-      // Fallback to offline mode on any error
-      console.warn('🔄 Falling back to offline mode due to error:', error);
-      return this.getOfflineNutritionData(request.text || 'unknown food');
+      
+      // NO MORE FAKE DATA - throw the actual error
+      throw error;
     }
   }
 

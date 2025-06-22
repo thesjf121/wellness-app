@@ -3,11 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { ROUTES } from '../../utils/constants';
-import { cn } from '../../utils/cn';
-
 // Import new UI components
-import { WellnessCard, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/WellnessCard';
-import { CircularProgress } from '../ui/CircularProgress';
+import { WellnessCard, CardHeader, CardTitle, CardContent } from '../ui/WellnessCard';
 import { BottomNavigation } from '../ui/BottomNavigation';
 import { DailyGreeting } from '../ui/DailyGreeting';
 import { ProgressSummary, createProgressItem } from '../ui/ProgressSummary';
@@ -30,33 +27,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   const { isSignedIn } = useAuth();
   const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
 
-  // Get time-based greeting
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  // Get current date formatted nicely
-  const getCurrentDate = () => {
-    return new Date().toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  // Daily wellness quotes
-  const dailyQuotes = [
-    "Every small step counts on your wellness journey.",
-    "Progress, not perfection, is the goal.",
-    "Your health is an investment, not an expense.",
-    "Wellness is not a destination, it's a way of life.",
-    "Small changes lead to big transformations."
-  ];
-  
-  const todaysQuote = dailyQuotes[new Date().getDate() % dailyQuotes.length];
 
   // Determine layout based on user role if not specified
   const effectiveLayout = layout || (
@@ -99,7 +69,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.1 }}
       >
         <WellnessCard>
           <CardHeader>
@@ -214,7 +184,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           <StepTrendsWidget compact={false} />
@@ -228,7 +198,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.6, delay: 0.4 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         <GroupActivityWidget />

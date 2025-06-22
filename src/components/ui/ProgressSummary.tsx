@@ -38,18 +38,14 @@ export const ProgressSummary: React.FC<ProgressSummaryProps> = ({
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: 'easeOut' }
-    }
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.6, delay: 0.2 }}
       className={className}
     >
       <WellnessCard variant="primary">
@@ -89,4 +85,39 @@ export const ProgressSummary: React.FC<ProgressSummaryProps> = ({
                       {item.max > 0 && (
                         <div className="text-xs text-gray-500">
                           of {item.max.toLocaleString()}
-                        </div>\n                      )}\n                    </div>\n                  </CircularProgress>\n                </div>\n                <div>\n                  <p className="text-sm font-medium text-gray-900">{item.label}</p>\n                  {item.subtitle && (\n                    <p className="text-xs text-gray-500">{item.subtitle}</p>\n                  )}\n                </div>\n              </motion.div>\n            ))}\n          </motion.div>\n        </CardContent>\n      </WellnessCard>\n    </motion.div>\n  );\n};\n\n// Helper function to create progress items\nexport const createProgressItem = (\n  label: string,\n  value: number,\n  max: number,\n  colors: string[],\n  icon: string,\n  subtitle?: string\n): ProgressItem => ({\n  label,\n  value,\n  max,\n  colors,\n  icon,\n  subtitle\n});
+                        </div>
+                      )}
+                    </div>
+                  </CircularProgress>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                  {item.subtitle && (
+                    <p className="text-xs text-gray-500">{item.subtitle}</p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </CardContent>
+      </WellnessCard>
+    </motion.div>
+  );
+};
+
+// Helper function to create progress items
+export const createProgressItem = (
+  label: string,
+  value: number,
+  max: number,
+  colors: string[],
+  icon: string,
+  subtitle?: string
+): ProgressItem => ({
+  label,
+  value,
+  max,
+  colors,
+  icon,
+  subtitle
+});

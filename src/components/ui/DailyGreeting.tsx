@@ -61,7 +61,7 @@ export const DailyGreeting: React.FC<DailyGreetingProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6 }}
       className={className}
     >
       <WellnessCard 
@@ -73,7 +73,7 @@ export const DailyGreeting: React.FC<DailyGreetingProps> = ({
             className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.4, ease: 'easeOut' }}
+            transition={{ delay: 0.2, duration: 0.4 }}
           >
             <span className="text-2xl">{getGreetingEmoji()}</span>
           </motion.div>

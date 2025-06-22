@@ -49,7 +49,7 @@ export const WellnessCard: React.FC<WellnessCardProps> = ({
       onClick={onClick}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+      transition={{ duration: 0.4 }}
       whileHover={interactive ? { y: -2 } : {}}
       {...motionProps}
     >

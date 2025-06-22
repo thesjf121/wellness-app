@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { UserProfile, ActivityLevel, WellnessGoal } from '../../types/user';
@@ -11,6 +11,7 @@ import { BottomNavigation } from '../../components/ui/BottomNavigation';
 
 const ProfilePage: React.FC = () => {
   const { user } = useUser();
+  const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   
   // TEMPORARY DEMO MODE - Remove after testing
@@ -23,6 +24,7 @@ const ProfilePage: React.FC = () => {
   };
   
   const effectiveUser = user || (isDemoMode ? demoUser : null);
+  const effectiveSignedIn = isSignedIn || isDemoMode;
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string>('');
@@ -69,26 +71,26 @@ const ProfilePage: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (user) {
+    if (effectiveUser) {
       loadProfile();
       loadProfilePicture();
     }
-  }, [user]);
+  }, [effectiveUser]);
 
   const loadProfile = () => {
     // Load from localStorage for now (would be from backend in production)
     const savedProfile = localStorage.getItem(`profile_${effectiveUser?.id}`);
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
-    } else if (user) {
-      // Initialize with Clerk user data
+    } else if (effectiveUser) {
+      // Initialize with user data (real or demo)
       const clerkProfile = (user?.publicMetadata as any)?.profile || {};
       setProfile(prev => ({
         ...prev,
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.primaryEmailAddress?.emailAddress || '',
-        displayName: `${user.firstName} ${user.lastName}`.trim(),
+        firstName: effectiveUser.firstName || '',
+        lastName: effectiveUser.lastName || '',
+        email: effectiveUser.primaryEmailAddress?.emailAddress || '',
+        displayName: `${effectiveUser.firstName} ${effectiveUser.lastName}`.trim(),
         ...clerkProfile
       }));
     }
@@ -148,7 +150,7 @@ const ProfilePage: React.FC = () => {
 
   const handleProfilePictureChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !effectiveUser) return;
 
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -221,7 +223,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user || deleteConfirmText !== 'DELETE') {
+    if (!effectiveUser || deleteConfirmText !== 'DELETE') {
       alert('Please type "DELETE" to confirm account deletion.');
       return;
     }
@@ -247,7 +249,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  if (!effectiveUser) {
+  if (!effectiveSignedIn || !effectiveUser) {
     return (
       <>
         <div className="max-w-4xl mx-auto px-4 py-8 pb-24">

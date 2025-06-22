@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
+import { motion } from 'framer-motion';
 import { ROUTES } from '../../utils/constants';
+import { cn } from '../../utils/cn';
+
+// Import new UI components
+import { WellnessCard, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/WellnessCard';
+import { CircularProgress } from '../ui/CircularProgress';
+import { BottomNavigation } from '../ui/BottomNavigation';
+import { DailyGreeting } from '../ui/DailyGreeting';
+import { ProgressSummary, createProgressItem } from '../ui/ProgressSummary';
 
 // Import widgets
 import StepTrendsWidget from './StepTrendsWidget';
@@ -20,6 +29,34 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
   const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
+
+  // Get time-based greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  // Get current date formatted nicely
+  const getCurrentDate = () => {
+    return new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Daily wellness quotes
+  const dailyQuotes = [
+    "Every small step counts on your wellness journey.",
+    "Progress, not perfection, is the goal.",
+    "Your health is an investment, not an expense.",
+    "Wellness is not a destination, it's a way of life.",
+    "Small changes lead to big transformations."
+  ];
+  
+  const todaysQuote = dailyQuotes[new Date().getDate() % dailyQuotes.length];
 
   // Determine layout based on user role if not specified
   const effectiveLayout = layout || (
@@ -54,100 +91,149 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   }
 
   const renderMemberDashboard = () => (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {user.firstName}! 👋
-            </h1>
-            <p className="text-blue-100">
-              Keep up the great work on your wellness journey
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold">Day {Math.floor(Math.random() * 30) + 1}</div>
-            <div className="text-blue-100 text-sm">of your journey</div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8 pb-20">
+      {/* Daily Greeting */}
+      <DailyGreeting userName={user.firstName || 'there'} />
 
-      {/* Quick Actions Bar */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">Quick Actions</h2>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setViewMode(viewMode === 'overview' ? 'detailed' : 'overview')}
-              className="text-sm text-blue-600 hover:text-blue-700"
-            >
-              {viewMode === 'overview' ? 'Detailed View' : 'Overview'}
-            </button>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-          <button 
-            onClick={() => navigate(ROUTES.FOOD_JOURNAL)}
-            className="bg-green-50 hover:bg-green-100 text-green-700 py-3 px-4 rounded-lg text-left transition-colors"
-          >
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">🥗</span>
-              <span className="text-sm font-medium">Log Food</span>
+      {/* Headspace-style Quick Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
+      >
+        <WellnessCard>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Today's Focus</CardTitle>
+              <button
+                onClick={() => setViewMode(viewMode === 'overview' ? 'detailed' : 'overview')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                {viewMode === 'overview' ? '📊 Details' : '📋 Overview'}
+              </button>
             </div>
-          </button>
-          <button 
-            onClick={() => navigate(ROUTES.STEP_COUNTER)}
-            className="bg-blue-50 hover:bg-blue-100 text-blue-700 py-3 px-4 rounded-lg text-left transition-colors"
-          >
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">👟</span>
-              <span className="text-sm font-medium">View Steps</span>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <motion.button 
+                onClick={() => navigate(ROUTES.FOOD_JOURNAL)}
+                className="group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <WellnessCard 
+                  variant="gradient" 
+                  padding="sm" 
+                  className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 group-hover:shadow-md transition-all duration-200"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="w-12 h-12 mx-auto bg-green-100 rounded-2xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                      <span className="text-2xl">🥗</span>
+                    </div>
+                    <span className="text-sm font-medium text-green-700">Nourish</span>
+                  </div>
+                </WellnessCard>
+              </motion.button>
+              
+              <motion.button 
+                onClick={() => navigate(ROUTES.STEP_COUNTER)}
+                className="group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <WellnessCard 
+                  variant="gradient" 
+                  padding="sm" 
+                  className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 group-hover:shadow-md transition-all duration-200"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="w-12 h-12 mx-auto bg-blue-100 rounded-2xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                      <span className="text-2xl">👟</span>
+                    </div>
+                    <span className="text-sm font-medium text-blue-700">Move</span>
+                  </div>
+                </WellnessCard>
+              </motion.button>
+              
+              <motion.button 
+                onClick={() => navigate(ROUTES.TRAINING)}
+                className="group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <WellnessCard 
+                  variant="gradient" 
+                  padding="sm" 
+                  className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 group-hover:shadow-md transition-all duration-200"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="w-12 h-12 mx-auto bg-purple-100 rounded-2xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <span className="text-2xl">🧠</span>
+                    </div>
+                    <span className="text-sm font-medium text-purple-700">Learn</span>
+                  </div>
+                </WellnessCard>
+              </motion.button>
+              
+              <motion.button 
+                onClick={() => navigate(ROUTES.GROUPS)}
+                className="group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <WellnessCard 
+                  variant="gradient" 
+                  padding="sm" 
+                  className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 group-hover:shadow-md transition-all duration-200"
+                >
+                  <div className="text-center space-y-2">
+                    <div className="w-12 h-12 mx-auto bg-orange-100 rounded-2xl flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                      <span className="text-2xl">👥</span>
+                    </div>
+                    <span className="text-sm font-medium text-orange-700">Connect</span>
+                  </div>
+                </WellnessCard>
+              </motion.button>
             </div>
-          </button>
-          <button 
-            onClick={() => navigate(ROUTES.TRAINING)}
-            className="bg-purple-50 hover:bg-purple-100 text-purple-700 py-3 px-4 rounded-lg text-left transition-colors"
-          >
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">🎓</span>
-              <span className="text-sm font-medium">Continue Learning</span>
-            </div>
-          </button>
-          <button 
-            onClick={() => navigate(ROUTES.GROUPS)}
-            className="bg-orange-50 hover:bg-orange-100 text-orange-700 py-3 px-4 rounded-lg text-left transition-colors"
-          >
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">👥</span>
-              <span className="text-sm font-medium">View Groups</span>
-            </div>
-          </button>
-        </div>
-      </div>
+          </CardContent>
+        </WellnessCard>
+      </motion.div>
 
-      {/* Main Widgets Grid */}
-      {viewMode === 'overview' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StepTrendsWidget compact={true} />
-          <NutritionSummaryWidget compact={true} />
-          <TrainingProgressWidget compact={true} />
-          <StreakCounterWidget compact={true} />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Progress Summary */}
+      <ProgressSummary 
+        items={[
+          createProgressItem('Steps', 7500, 10000, ['#3B82F6', '#8B5CF6'], '👟', 'daily goal'),
+          createProgressItem('Nutrition', 1800, 2000, ['#10B981', '#34D399'], '🥗', 'calories logged'),
+          createProgressItem('Learning', 3, 10, ['#8B5CF6', '#A855F7'], '🧠', 'modules done'),
+          createProgressItem('Social', 9, 10, ['#F59E0B', '#F97316'], '👥', 'group active')
+        ]}
+      />
+
+      {/* Detailed Widgets */}
+      {viewMode === 'detailed' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
           <StepTrendsWidget compact={false} />
           <NutritionSummaryWidget compact={false} />
           <TrainingProgressWidget compact={false} />
           <StreakCounterWidget compact={false} />
-        </div>
+        </motion.div>
       )}
 
-      {/* Additional Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Additional Insights */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
         <GroupActivityWidget />
         <RecentActivityWidget />
-      </div>
+      </motion.div>
     </div>
   );
 
@@ -373,11 +459,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {effectiveLayout === 'member' && renderMemberDashboard()}
-      {effectiveLayout === 'admin' && renderAdminDashboard()}
-      {effectiveLayout === 'super_admin' && renderSuperAdminDashboard()}
-    </div>
+    <>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {effectiveLayout === 'member' && renderMemberDashboard()}
+        {effectiveLayout === 'admin' && renderAdminDashboard()}
+        {effectiveLayout === 'super_admin' && renderSuperAdminDashboard()}
+      </div>
+      
+      {/* Bottom Navigation for Mobile */}
+      <BottomNavigation />
+    </>
   );
 };
 

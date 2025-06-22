@@ -45,10 +45,14 @@ const HomePage: React.FC = () => {
           >
             {/* Logo/Icon */}
             <motion.div 
-              className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg"
+              className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg p-4"
               variants={itemVariants}
             >
-              <span className="text-4xl">🌱</span>
+              <img 
+                src="/calerielife-logo.svg" 
+                alt="CalerieLife Logo" 
+                className="w-full h-full object-contain"
+              />
             </motion.div>
 
             {/* Main Headline */}

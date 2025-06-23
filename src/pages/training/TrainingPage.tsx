@@ -8,105 +8,7 @@ import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../componen
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
 import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { TrainingModule, UserModuleProgress } from '../../types/training';
-import { wellnessTrainingService } from '../../services/wellnessTrainingService';
 
-// Compact module selector for mobile modal
-interface CompactModuleSelectorProps {
-  userId: string;
-  currentModuleId?: string;
-  onModuleSelect: (moduleId: string) => void;
-}
-
-const CompactModuleSelector: React.FC<CompactModuleSelectorProps> = ({
-  userId,
-  currentModuleId,
-  onModuleSelect
-}) => {
-  const [modules, setModules] = useState<TrainingModule[]>([]);
-  const [userProgress, setUserProgress] = useState<UserModuleProgress[]>([]);
-
-  useEffect(() => {
-    const modulesList = wellnessTrainingService.getTrainingModules();
-    const progressList = wellnessTrainingService.getUserProgress(userId);
-    setModules(modulesList);
-    setUserProgress(progressList);
-  }, [userId]);
-
-  const getModuleProgress = (moduleId: string): UserModuleProgress | null => {
-    return userProgress.find(p => p.moduleId === moduleId) || null;
-  };
-
-  const getProgressPercentage = (moduleId: string): number => {
-    const progress = getModuleProgress(moduleId);
-    return progress?.progressPercentage || 0;
-  };
-
-  const getModuleStatus = (moduleId: string): 'not_started' | 'in_progress' | 'completed' => {
-    const progress = getModuleProgress(moduleId);
-    return progress?.status || 'not_started';
-  };
-
-  const getStatusIcon = (status: string): string => {
-    switch (status) {
-      case 'completed': return '✅';
-      case 'in_progress': return '🔄';
-      default: return '⭕';
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      {modules.map((module) => {
-        const status = getModuleStatus(module.id);
-        const progress = getProgressPercentage(module.id);
-        const isCurrent = currentModuleId === module.id;
-
-        return (
-          <button
-            key={module.id}
-            onClick={() => onModuleSelect(module.id)}
-            className={`w-full text-left p-4 rounded-xl border transition-all ${
-              isCurrent 
-                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
-                : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-3">
-                <span className="text-xl">{getStatusIcon(status)}</span>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">
-                    Module {module.number}: {module.title}
-                  </h3>
-                  <p className="text-xs text-gray-600">{module.estimatedDuration} min</p>
-                </div>
-              </div>
-              {isCurrent && (
-                <span className="text-blue-600 text-sm font-medium">Current</span>
-              )}
-            </div>
-            {status !== 'not_started' && (
-              <div className="mt-2">
-                <div className="w-full bg-gray-200 rounded-full h-1">
-                  <div 
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
-                    }`}
-                    style={{ width: `${progress}%` }}
-                  ></div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {Math.round(progress)}% complete
-                </div>
-              </div>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
 
 const TrainingPage: React.FC = () => {
   const { user } = useUser();
@@ -115,7 +17,6 @@ const TrainingPage: React.FC = () => {
   
   const { moduleId } = useParams();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(moduleId || null);
-  const [showModuleSelector, setShowModuleSelector] = useState(false);
 
   useEffect(() => {
     console.log('TrainingPage: moduleId from URL:', moduleId);
@@ -216,23 +117,22 @@ const TrainingPage: React.FC = () => {
           >
             {selectedModuleId ? (
               <>
-                {/* Floating Module Switcher */}
+                {/* Simple Module Dropdown */}
                 <div className="sticky top-4 z-40 bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-                  <button
-                    onClick={() => setShowModuleSelector(true)}
-                    className="w-full flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                  <div className="text-xs text-gray-500 mb-2">Current Module</div>
+                  <select
+                    value={selectedModuleId || ''}
+                    onChange={(e) => setSelectedModuleId(e.target.value)}
+                    className="w-full p-3 bg-white border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">🎓</span>
-                      <div className="text-left">
-                        <div className="font-semibold text-gray-900 text-sm">Current Module</div>
-                        <div className="text-xs text-gray-600">Tap to switch modules</div>
-                      </div>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                    <option value="">Select a module...</option>
+                    <option value="module_1">Module 1: Wellness Foundation</option>
+                    <option value="module_2">Module 2: Movement & Energy</option>
+                    <option value="module_3">Module 3: Nutrition & Mindful Eating</option>
+                    <option value="module_4">Module 4: Mental Health & Mindfulness</option>
+                    <option value="module_5">Module 5: Habit Formation</option>
+                    <option value="module_6">Module 6: Integration & Sustainability</option>
+                  </select>
                 </div>
 
                 {/* Module Content */}
@@ -255,50 +155,12 @@ const TrainingPage: React.FC = () => {
                   <TrainingModuleNavigation
                     userId={user.id}
                     currentModuleId={selectedModuleId || undefined}
-                    onModuleSelect={(moduleId) => {
-                      setSelectedModuleId(moduleId);
-                      setShowModuleSelector(false);
-                    }}
+                    onModuleSelect={setSelectedModuleId}
                   />
                 </CardContent>
               </WellnessCard>
             )}
 
-            {/* Mobile Module Selector Modal */}
-            {showModuleSelector && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  className="bg-white w-full max-w-md rounded-2xl max-h-[70vh] overflow-hidden shadow-2xl"
-                >
-                  <div className="bg-white border-b border-gray-200 p-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold text-gray-900">Switch Module</h2>
-                      <button
-                        onClick={() => setShowModuleSelector(false)}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-4 overflow-y-auto">
-                    <CompactModuleSelector
-                      userId={user.id}
-                      currentModuleId={selectedModuleId || undefined}
-                      onModuleSelect={(moduleId) => {
-                        setSelectedModuleId(moduleId);
-                        setShowModuleSelector(false);
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            )}
           </motion.div>
         ) : (
           /* Desktop Layout */

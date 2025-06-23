@@ -16,6 +16,8 @@ import { healthKitService } from './healthKitService';
 import { googleFitService } from './googleFitService';
 import { healthConnectService } from './healthConnectService';
 import { notificationService } from './notificationService';
+import { groupActivityFeedService } from './groupActivityFeedService';
+import { groupService } from './groupService';
 
 // Health plugin - graceful fallback when not available
 let CapacitorHealth: any = null;
@@ -427,9 +429,91 @@ class HealthService {
       const filtered = existing.filter((e: StepEntry) => new Date(e.date) >= cutoffDate);
 
       localStorage.setItem(storageKey, JSON.stringify(filtered));
+
+      // Check for step milestones and log group activity
+      await this.checkStepMilestones(entry);
     } catch (error) {
       errorService.logError(error as Error, { context: 'HealthService.saveStepEntryLocally' });
     }
+  }
+
+  /**
+   * Check for step milestones and log group activity
+   */
+  private async checkStepMilestones(entry: StepEntry): Promise<void> {
+    try {
+      // Only check for today's entries
+      const today = new Date().toISOString().split('T')[0];
+      if (entry.date !== today) return;
+
+      const stepCount = entry.stepCount;
+      
+      // Check if user is in any groups
+      if (typeof window !== 'undefined' && (window as any).Clerk?.user?.id) {
+        const userId = (window as any).Clerk.user.id;
+        const userGroups = await groupService.getUserGroups(userId);
+        
+        if (userGroups.length > 0) {
+          // Log milestone activity for each group the user is in
+          for (const group of userGroups) {
+            // Check for common step milestones
+            if (stepCount >= 10000 && !await this.hasLoggedMilestoneToday(userId, group.id, 'steps_10k')) {
+              await groupActivityFeedService.logMilestoneActivity(
+                group.id,
+                userId,
+                'daily_steps',
+                stepCount,
+                { milestone: '10k_steps', date: today }
+              );
+              await this.markMilestoneLogged(userId, group.id, 'steps_10k', today);
+            }
+            
+            // Additional milestones
+            if (stepCount >= 15000 && !await this.hasLoggedMilestoneToday(userId, group.id, 'steps_15k')) {
+              await groupActivityFeedService.logMilestoneActivity(
+                group.id,
+                userId,
+                'daily_steps',
+                stepCount,
+                { milestone: '15k_steps', date: today }
+              );
+              await this.markMilestoneLogged(userId, group.id, 'steps_15k', today);
+            }
+            
+            if (stepCount >= 20000 && !await this.hasLoggedMilestoneToday(userId, group.id, 'steps_20k')) {
+              await groupActivityFeedService.logMilestoneActivity(
+                group.id,
+                userId,
+                'daily_steps',
+                stepCount,
+                { milestone: '20k_steps', date: today }
+              );
+              await this.markMilestoneLogged(userId, group.id, 'steps_20k', today);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking step milestones:', error);
+      // Don't throw - milestone logging shouldn't break step saving
+    }
+  }
+
+  /**
+   * Check if milestone was already logged today to prevent duplicates
+   */
+  private async hasLoggedMilestoneToday(userId: string, groupId: string, milestone: string): Promise<boolean> {
+    const today = new Date().toISOString().split('T')[0];
+    const key = `milestone_logged_${userId}_${groupId}_${milestone}_${today}`;
+    return localStorage.getItem(key) === 'true';
+  }
+
+  /**
+   * Mark milestone as logged for today
+   */
+  private async markMilestoneLogged(userId: string, groupId: string, milestone: string, date: string): Promise<void> {
+    const key = `milestone_logged_${userId}_${groupId}_${milestone}_${date}`;
+    localStorage.setItem(key, 'true');
   }
 
   /**

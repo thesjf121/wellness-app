@@ -114,7 +114,7 @@ const NutritionDashboardPage: React.FC = () => {
 
   const macronutrients = [
     { key: 'protein', name: 'Protein', icon: '🥩', unit: 'g' },
-    { key: 'carbohydrates', name: 'Carbohydrates', icon: '🍞', unit: 'g' },
+    { key: 'carbs', name: 'Carbohydrates', icon: '🍞', unit: 'g' },
     { key: 'fat', name: 'Fat', icon: '🥑', unit: 'g' },
     { key: 'fiber', name: 'Fiber', icon: '🌾', unit: 'g' },
     { key: 'sugar', name: 'Sugar', icon: '🍯', unit: 'g' }
@@ -247,18 +247,18 @@ const NutritionDashboardPage: React.FC = () => {
                   <CardContent>
                     <div className="flex items-center justify-center">
                       <CircularProgress
-                        value={Math.min((nutritionData.totalCalories / 2000) * 100, 100)}
+                        value={Math.min(((nutritionData.totals?.calories || 0) / 2000) * 100, 100)}
                         size="md"
                         strokeWidth={8}
                         className="mr-8"
                       />
                       <div>
                         <div className="text-3xl font-bold text-gray-900">
-                          {Math.round(nutritionData.totalCalories)}
+                          {Math.round(nutritionData.totals?.calories || 0)}
                         </div>
                         <div className="text-gray-500">/ 2000 calories</div>
                         <div className="text-sm text-gray-600 mt-1">
-                          {Math.round((nutritionData.totalCalories / 2000) * 100)}% of goal
+                          {Math.round(((nutritionData.totals?.calories || 0) / 2000) * 100)}% of goal
                         </div>
                       </div>
                     </div>
@@ -279,7 +279,15 @@ const NutritionDashboardPage: React.FC = () => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                   {macronutrients.map((nutrient) => {
-                    const value = (nutritionData.totalMacros as any)[nutrient.key] || 0;
+                    // Use totals for main macros (protein, carbs, fat) and totalMacros for others (fiber, sugar)
+                    let value = 0;
+                    if (nutrient.key === 'protein' || nutrient.key === 'carbs' || nutrient.key === 'fat') {
+                      value = (nutritionData.totals as any)?.[nutrient.key] || 0;
+                    } else {
+                      // For fiber and sugar, use totalMacros
+                      const macroKey = nutrient.key === 'carbs' ? 'carbohydrates' : nutrient.key;
+                      value = (nutritionData.totalMacros as any)?.[macroKey] || 0;
+                    }
                     return renderNutrientCard(
                       nutrient.name,
                       value,

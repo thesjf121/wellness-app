@@ -132,7 +132,11 @@ const HomePage: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <WellnessCard variant="gradient" className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 text-center h-full">
+              <WellnessCard 
+                variant="gradient" 
+                className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 text-center h-full cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                onClick={() => navigate(ROUTES.STEP_COUNTER)}
+              >
                 <CardContent>
                   <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                     <span className="text-3xl">👟</span>
@@ -151,7 +155,11 @@ const HomePage: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <WellnessCard variant="gradient" className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 text-center h-full">
+              <WellnessCard 
+                variant="gradient" 
+                className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 text-center h-full cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                onClick={() => navigate(ROUTES.FOOD_JOURNAL)}
+              >
                 <CardContent>
                   <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                     <span className="text-3xl">🥗</span>
@@ -170,7 +178,11 @@ const HomePage: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <WellnessCard variant="gradient" className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 text-center h-full">
+              <WellnessCard 
+                variant="gradient" 
+                className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 text-center h-full cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                onClick={() => navigate(ROUTES.GROUPS)}
+              >
                 <CardContent>
                   <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                     <span className="text-3xl">🤝</span>

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WellnessCard, CardContent } from '../../components/ui/WellnessCard';
 import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
-import { ChevronDownIcon, ChevronUpIcon, PlayIcon, BookOpenIcon, UserGroupIcon, TrophyIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronUpIcon, PlayIcon, BookOpenIcon, UserGroupIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 const CoachingPage: React.FC = () => {
   const [expandedModule, setExpandedModule] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const whyCoachingReasons = [
     {
@@ -323,13 +325,7 @@ const CoachingPage: React.FC = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mb-1">
                               {module.title}
                             </h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600">
-                              <span className="flex items-center">
-                                <TrophyIcon className="w-4 h-4 mr-1" />
-                                {module.duration}
-                              </span>
-                              <span>{module.description}</span>
-                            </div>
+                            <p className="text-sm text-gray-600">{module.description}</p>
                           </div>
                         </div>
                         {expandedModule === module.number ? (
@@ -380,6 +376,18 @@ const CoachingPage: React.FC = () => {
                                   ))}
                                 </ul>
                               </div>
+                            </div>
+                            
+                            <div className="mt-6 flex justify-center">
+                              <motion.button
+                                onClick={() => navigate(`/coaching/module/${module.number}`)}
+                                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all flex items-center"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                              >
+                                <span>Go to Module</span>
+                                <ArrowRightIcon className="w-4 h-4 ml-2" />
+                              </motion.button>
                             </div>
                           </div>
                         </motion.div>

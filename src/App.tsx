@@ -21,6 +21,10 @@ import FoodJournalPage from './pages/food/FoodJournalPage';
 import NutritionDashboardPage from './pages/food/NutritionDashboardPage';
 import TrainingPage from './pages/training/TrainingPage';
 import CoachingPage from './pages/coaching/CoachingPage';
+import Module1Page from './pages/coaching/modules/Module1Page';
+import Module2Page from './pages/coaching/modules/Module2Page';
+import Module3Page from './pages/coaching/modules/Module3Page';
+import Module4Page from './pages/coaching/modules/Module4Page';
 import GroupsPage from './pages/groups/GroupsPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import SessionsPage from './pages/profile/SessionsPage';
@@ -69,6 +73,10 @@ function App() {
                 <Route path={ROUTES.TRAINING} element={<TrainingPage />} />
                 <Route path="/training/:moduleId" element={<TrainingPage />} />
                 <Route path={ROUTES.COACHING} element={<CoachingPage />} />
+                <Route path="/coaching/module/1" element={<Module1Page />} />
+                <Route path="/coaching/module/2" element={<Module2Page />} />
+                <Route path="/coaching/module/3" element={<Module3Page />} />
+                <Route path="/coaching/module/4" element={<Module4Page />} />
                 <Route path={ROUTES.GROUPS} element={<GroupsPage />} />
                 <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
                 <Route path={`${ROUTES.PROFILE}/sessions`} element={<SessionsPage />} />

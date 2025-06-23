@@ -2,25 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
-
-interface GroupMember {
-  id: string;
-  name: string;
-  avatar?: string;
-  stepCount: number;
-  lastActive: Date;
-  isOnline: boolean;
-  streak: number;
-}
-
-interface GroupActivity {
-  id: string;
-  type: 'step_goal' | 'food_log' | 'training' | 'achievement' | 'joined';
-  memberName: string;
-  description: string;
-  timestamp: Date;
-  icon: string;
-}
+import { groupService } from '../../services/groupService';
+import { groupActivityFeedService } from '../../services/groupActivityFeedService';
+import { Group, GroupMember, GroupActivity } from '../../types/groups';
 
 interface GroupActivityWidgetProps {
   showAdminView?: boolean;
@@ -33,6 +17,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
 }) => {
   const navigate = useNavigate();
   const { user } = useUser();
+  const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
   const [recentActivity, setRecentActivity] = useState<GroupActivity[]>([]);
   const [isInGroup, setIsInGroup] = useState(false);
@@ -42,111 +27,70 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
     loadGroupData();
   }, []);
 
-  const loadGroupData = () => {
+  const loadGroupData = async () => {
+    if (!user) return;
+    
     setLoading(true);
-    
-    // Check if user is in a group or has created one
-    const groupsData = localStorage.getItem('user_groups');
-    const userGroups = groupsData ? JSON.parse(groupsData) : [];
-    const userHasGroup = userGroups.length > 0;
-    
-    setIsInGroup(userHasGroup);
-    
-    if (userHasGroup) {
-      // Generate mock group members
-      const mockMembers: GroupMember[] = [
-        {
-          id: '1',
-          name: 'Alex Chen',
-          stepCount: 8432,
-          lastActive: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
-          isOnline: true,
-          streak: 5
-        },
-        {
-          id: '2',
-          name: 'Sarah Johnson',
-          stepCount: 12156,
-          lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-          isOnline: false,
-          streak: 12
-        },
-        {
-          id: '3',
-          name: 'Mike Rodriguez',
-          stepCount: 6543,
-          lastActive: new Date(Date.now() - 1000 * 60 * 15), // 15 min ago
-          isOnline: true,
-          streak: 3
-        },
-        {
-          id: '4',
-          name: 'Emily Davis',
-          stepCount: 9876,
-          lastActive: new Date(Date.now() - 1000 * 60 * 60 * 4), // 4 hours ago
-          isOnline: false,
-          streak: 8
-        },
-        {
-          id: '5',
-          name: user?.firstName || 'You',
-          stepCount: Math.floor(Math.random() * 5000) + 5000,
-          lastActive: new Date(),
-          isOnline: true,
-          streak: 7
-        }
-      ];
+    try {
+      // Get user's groups
+      const groups = await groupService.getUserGroups(user.id);
+      setUserGroups(groups);
+      setIsInGroup(groups.length > 0);
       
-      setGroupMembers(mockMembers);
-      
-      // Generate recent activity
-      const activities: GroupActivity[] = [
-        {
-          id: '1',
-          type: 'step_goal',
-          memberName: 'Sarah Johnson',
-          description: 'reached her daily step goal!',
-          timestamp: new Date(Date.now() - 1000 * 60 * 45),
-          icon: '🎯'
-        },
-        {
-          id: '2',
-          type: 'food_log',
-          memberName: 'Alex Chen',
-          description: 'logged a healthy breakfast',
-          timestamp: new Date(Date.now() - 1000 * 60 * 90),
-          icon: '🥗'
-        },
-        {
-          id: '3',
-          type: 'training',
-          memberName: 'Mike Rodriguez',
-          description: 'completed Module 3: Nutrition',
-          timestamp: new Date(Date.now() - 1000 * 60 * 120),
-          icon: '🎓'
-        },
-        {
-          id: '4',
-          type: 'achievement',
-          memberName: 'Emily Davis',
-          description: 'achieved a 7-day streak!',
-          timestamp: new Date(Date.now() - 1000 * 60 * 180),
-          icon: '🔥'
-        },
-        {
-          id: '5',
-          type: 'joined',
-          memberName: 'Jordan Kim',
-          description: 'joined the group',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6),
-          icon: '👋'
-        }
-      ];
-      
-      setRecentActivity(activities);
+      if (groups.length > 0) {
+        // Get members from the first group (or all groups if user is super admin)
+        const primaryGroup = groups[0];
+        const members = await groupService.getGroupMembers(primaryGroup.id);
+        setGroupMembers(members);
+        
+        // Get recent activity for the group
+        const activities = await groupActivityFeedService.getGroupFeedActivities(primaryGroup.id, 10);
+        // Convert GroupFeedActivity to GroupActivity format
+        const convertedActivities: GroupActivity[] = activities.map(activity => {
+          let activityType: GroupActivity['activityType'];
+          switch (activity.activityType) {
+            case 'steps_milestone':
+              activityType = 'goal_reached';
+              break;
+            case 'food_streak':
+              activityType = 'milestone_hit';
+              break;
+            case 'training_complete':
+              activityType = 'challenge_completed';
+              break;
+            case 'member_joined':
+              activityType = 'member_joined';
+              break;
+            default:
+              activityType = 'achievement_earned';
+          }
+          
+          return {
+            id: activity.id,
+            groupId: activity.groupId,
+            userId: activity.userId,
+            activityType,
+            content: activity.description,
+            metadata: {
+              achievement: undefined,
+              milestone: undefined,
+              stats: activity.metadata
+            },
+            createdAt: activity.createdAt,
+            reactions: []
+          };
+        });
+        setRecentActivity(convertedActivities);
+      }
+    } catch (error) {
+      console.error('Error loading group data:', error);
+      // Fallback to checking localStorage for basic group status
+      const groupsData = localStorage.getItem('user_groups');
+      const localGroups = groupsData ? JSON.parse(groupsData) : [];
+      setIsInGroup(localGroups.length > 0);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const getTimeAgo = (date: Date) => {
@@ -162,14 +106,36 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
     return `${diffDays}d ago`;
   };
 
+  const isRecentlyActive = (lastActiveAt: Date) => {
+    const now = new Date();
+    const diffHours = (now.getTime() - new Date(lastActiveAt).getTime()) / (1000 * 60 * 60);
+    return diffHours < 24; // Active if last seen within 24 hours
+  };
+
+  const getMemberDisplayName = async (userId: string) => {
+    // Try to get user name from Clerk or fallback to userId
+    return `Member ${userId.slice(-4)}`; // Show last 4 chars of user ID as fallback
+  };
+
   const getActivityColor = (type: string) => {
     switch (type) {
-      case 'step_goal': return 'text-blue-600';
-      case 'food_log': return 'text-green-600';
-      case 'training': return 'text-purple-600';
-      case 'achievement': return 'text-orange-600';
-      case 'joined': return 'text-indigo-600';
+      case 'member_joined': return 'text-indigo-600';
+      case 'achievement_earned': return 'text-orange-600';
+      case 'goal_reached': return 'text-blue-600';
+      case 'milestone_hit': return 'text-green-600';
+      case 'challenge_completed': return 'text-purple-600';
       default: return 'text-gray-600';
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'member_joined': return '👋';
+      case 'achievement_earned': return '🏆';
+      case 'goal_reached': return '🎯';
+      case 'milestone_hit': return '🎉';
+      case 'challenge_completed': return '💪';
+      default: return '📈';
     }
   };
 
@@ -226,12 +192,12 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
         <div className="space-y-2">
           {recentActivity.slice(0, 3).map(activity => (
             <div key={activity.id} className="flex items-center space-x-2">
-              <span className="text-sm">{activity.icon}</span>
+              <span className="text-sm">{getActivityIcon(activity.activityType)}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-600 truncate">
-                  <span className="font-medium">{activity.memberName}</span> {activity.description}
+                  <span className="font-medium">Member {activity.userId.slice(-4)}</span> {activity.content}
                 </p>
-                <p className="text-xs text-gray-400">{getTimeAgo(activity.timestamp)}</p>
+                <p className="text-xs text-gray-400">{getTimeAgo(activity.createdAt)}</p>
               </div>
             </div>
           ))}
@@ -266,19 +232,19 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
             </div>
             <div className="text-center">
               <div className="text-xl font-bold text-green-600">
-                {groupMembers.filter(m => m.isOnline).length}
+                {groupMembers.filter(m => m.activityStats?.last7DaysActive || isRecentlyActive(m.lastActiveAt)).length}
               </div>
-              <div className="text-xs text-gray-500">Online</div>
+              <div className="text-xs text-gray-500">Active</div>
             </div>
             <div className="text-center">
               <div className="text-xl font-bold text-orange-600">
-                {Math.round(groupMembers.reduce((sum, m) => sum + m.stepCount, 0) / groupMembers.length).toLocaleString()}
+                {groupMembers.length > 0 ? Math.round(groupMembers.reduce((sum, m) => sum + (m.activityStats?.totalStepsLogged || 0), 0) / groupMembers.length).toLocaleString() : '0'}
               </div>
               <div className="text-xs text-gray-500">Avg Steps</div>
             </div>
             <div className="text-center">
               <div className="text-xl font-bold text-purple-600">
-                {Math.round(groupMembers.reduce((sum, m) => sum + m.streak, 0) / groupMembers.length)}
+                {groupMembers.length > 0 ? Math.round(groupMembers.reduce((sum, m) => sum + (m.activityStats?.weeklyStreaks?.currentStreak || 0), 0) / groupMembers.length) : 0}
               </div>
               <div className="text-xs text-gray-500">Avg Streak</div>
             </div>
@@ -288,29 +254,41 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
           <div className="mb-6">
             <h4 className="font-medium text-gray-900 mb-3">Group Members</h4>
             <div className="space-y-2">
-              {groupMembers.slice(0, 5).map(member => (
-                <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      member.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {member.name.charAt(0)}
+              {groupMembers.slice(0, 5).map(member => {
+                const isActive = member.activityStats?.last7DaysActive || isRecentlyActive(member.lastActiveAt);
+                const displayName = member.userId === user?.id ? 'You' : `Member ${member.userId.slice(-4)}`;
+                return (
+                  <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {displayName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">{displayName}</p>
+                        <p className="text-xs text-gray-500">
+                          Last active {getTimeAgo(member.lastActiveAt)}
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          {member.role === 'sponsor' ? '👑 Sponsor' : member.role === 'super_admin' ? '⚡ Admin' : '👤 Member'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">{member.name}</p>
-                      <p className="text-xs text-gray-500">
-                        Last active {getTimeAgo(member.lastActive)}
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">
+                        {(member.activityStats?.totalStepsLogged || 0).toLocaleString()} steps
+                      </p>
+                      <p className="text-xs text-orange-600">
+                        {member.activityStats?.weeklyStreaks?.currentStreak || 0} day streak
+                      </p>
+                      <p className="text-xs text-purple-600">
+                        {member.activityStats?.trainingModulesCompleted || 0}/8 modules
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {member.stepCount.toLocaleString()} steps
-                    </p>
-                    <p className="text-xs text-orange-600">{member.streak} day streak</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </>
@@ -322,17 +300,29 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
         <div className="space-y-3">
           {recentActivity.slice(0, showAdminView ? 8 : 6).map(activity => (
             <div key={activity.id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-              <span className="text-lg">{activity.icon}</span>
+              <span className="text-lg">{getActivityIcon(activity.activityType)}</span>
               <div className="flex-1">
                 <p className="text-sm text-gray-900">
-                  <span className={`font-medium ${getActivityColor(activity.type)}`}>
-                    {activity.memberName}
+                  <span className={`font-medium ${getActivityColor(activity.activityType)}`}>
+                    {activity.userId === user?.id ? 'You' : `Member ${activity.userId.slice(-4)}`}
                   </span>{' '}
-                  {activity.description}
+                  {activity.content}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {getTimeAgo(activity.timestamp)}
+                  {getTimeAgo(activity.createdAt)}
                 </p>
+                {activity.reactions && activity.reactions.length > 0 && (
+                  <div className="flex space-x-1 mt-2">
+                    {activity.reactions.slice(0, 3).map((reaction) => (
+                      <span key={reaction.id} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+                        {reaction.emoji}
+                      </span>
+                    ))}
+                    {activity.reactions.length > 3 && (
+                      <span className="text-xs text-gray-500">+{activity.reactions.length - 3}</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}

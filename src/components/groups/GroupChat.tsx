@@ -5,6 +5,7 @@ import { groupService } from '../../services/groupService';
 import { GroupMessage, GroupMember } from '../../types/groups';
 import { MessageInput } from './MessageInput';
 import { MessageThread } from './MessageThread';
+import { getUsernameOrDisplayName } from '../../utils/clerkHelpers';
 
 interface GroupChatProps {
   groupId: string;
@@ -186,8 +187,7 @@ export const GroupChat: React.FC<GroupChatProps> = ({ groupId }) => {
 
   const getMemberName = (userId: string): string => {
     if (userId === 'system') return 'System';
-    const member = members.find(m => m.userId === userId);
-    return member ? `User ${userId.slice(-8)}` : 'Unknown User';
+    return getUsernameOrDisplayName(userId);
   };
 
   const getMemberRole = (userId: string): string => {

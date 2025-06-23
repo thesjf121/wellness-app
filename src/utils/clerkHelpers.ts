@@ -87,3 +87,33 @@ export const getUserDisplayName = (user: UserResource | null | undefined): strin
   
   return 'User';
 };
+
+/**
+ * Get username or fallback display name for user (for group contexts)
+ */
+export const getUsernameOrDisplayName = (userId: string): string => {
+  // Try to get username from localStorage profile first
+  const profileData = localStorage.getItem(`profile_${userId}`);
+  if (profileData) {
+    try {
+      const profile = JSON.parse(profileData);
+      if (profile.username) {
+        return `@${profile.username}`;
+      }
+      if (profile.displayName) {
+        return profile.displayName;
+      }
+      if (profile.firstName && profile.lastName) {
+        return `${profile.firstName} ${profile.lastName}`;
+      }
+      if (profile.firstName) {
+        return profile.firstName;
+      }
+    } catch (error) {
+      console.error('Error parsing profile data:', error);
+    }
+  }
+  
+  // Fallback to User with last 4 chars of ID
+  return `User ${userId.slice(-4)}`;
+};

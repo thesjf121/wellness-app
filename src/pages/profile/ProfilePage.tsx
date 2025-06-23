@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { UserProfile, ActivityLevel, WellnessGoal } from '../../types/user';
+import { UserProfile, ActivityLevel, WellnessGoal, USER_VALIDATION_RULES } from '../../types/user';
 import { ROUTES } from '../../utils/constants';
 import { TwoFactorAuth } from '../../components/security/TwoFactorAuth';
 import { updateUserMetadata } from '../../utils/clerkHelpers';
@@ -21,10 +21,12 @@ const ProfilePage: React.FC = () => {
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [usernameError, setUsernameError] = useState<string>('');
   const [profile, setProfile] = useState<Partial<UserProfile>>({
     firstName: '',
     lastName: '',
     displayName: '',
+    username: '',
     bio: '',
     phoneNumber: '',
     dateOfBirth: undefined,
@@ -59,6 +61,29 @@ const ProfilePage: React.FC = () => {
     { value: 'nutrition', label: 'Improve Nutrition' },
     { value: 'general_health', label: 'General Health' }
   ];
+
+  const validateUsername = (username: string): string => {
+    if (!username) return '';
+    
+    if (username.length < USER_VALIDATION_RULES.username.minLength) {
+      return `Username must be at least ${USER_VALIDATION_RULES.username.minLength} characters`;
+    }
+    
+    if (username.length > USER_VALIDATION_RULES.username.maxLength) {
+      return `Username must be no more than ${USER_VALIDATION_RULES.username.maxLength} characters`;
+    }
+    
+    if (!USER_VALIDATION_RULES.username.pattern.test(username)) {
+      return USER_VALIDATION_RULES.username.description;
+    }
+    
+    return '';
+  };
+
+  const handleUsernameChange = (newUsername: string) => {
+    setProfile({ ...profile, username: newUsername });
+    setUsernameError(validateUsername(newUsername));
+  };
 
   useEffect(() => {
     if (user) {
@@ -97,6 +122,16 @@ const ProfilePage: React.FC = () => {
 
   const handleSave = async () => {
     if (!user) return;
+    
+    // Validate username before saving
+    if (profile.username) {
+      const usernameValidationError = validateUsername(profile.username);
+      if (usernameValidationError) {
+        setUsernameError(usernameValidationError);
+        alert('Please fix the username error before saving.');
+        return;
+      }
+    }
     
     setSaving(true);
     try {
@@ -446,6 +481,33 @@ const ProfilePage: React.FC = () => {
                       disabled={!isEditing}
                       className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 disabled:bg-gray-50 focus:border-purple-400 focus:ring-0 transition-colors"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
+                      <input
+                        type="text"
+                        value={profile.username || ''}
+                        onChange={(e) => handleUsernameChange(e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="your_username"
+                        className={`w-full border-2 rounded-xl pl-8 pr-4 py-3 disabled:bg-gray-50 focus:ring-0 transition-colors ${
+                          usernameError 
+                            ? 'border-red-300 focus:border-red-400' 
+                            : 'border-gray-200 focus:border-purple-400'
+                        }`}
+                      />
+                    </div>
+                    {usernameError && (
+                      <p className="mt-1 text-sm text-red-600">{usernameError}</p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500">
+                      3-30 characters, letters, numbers, and underscores only
+                    </p>
                   </div>
 
                   <div>

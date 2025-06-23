@@ -15,6 +15,7 @@ export interface UserProfile {
   lastName: string;
   profileImageUrl?: string;
   displayName?: string;
+  username?: string;
   bio?: string;
   phoneNumber?: string;
   
@@ -254,6 +255,13 @@ export const USER_VALIDATION_RULES = {
     required: true,
     minLength: 2,
     maxLength: 50
+  },
+  username: {
+    required: false,
+    minLength: 3,
+    maxLength: 30,
+    pattern: /^[a-zA-Z0-9_]+$/,
+    description: 'Username must be 3-30 characters, letters, numbers, and underscores only'
   },
   email: {
     required: true,

@@ -5,6 +5,7 @@ import { ROUTES } from '../../utils/constants';
 import { groupService } from '../../services/groupService';
 import { groupActivityFeedService } from '../../services/groupActivityFeedService';
 import { Group, GroupMember, GroupActivity } from '../../types/groups';
+import { getUsernameOrDisplayName } from '../../utils/clerkHelpers';
 
 interface GroupActivityWidgetProps {
   showAdminView?: boolean;
@@ -209,7 +210,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
               <span className="text-sm">{getActivityIcon(activity.activityType)}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-600 truncate">
-                  <span className="font-medium">Member {activity.userId.slice(-4)}</span> {activity.content}
+                  <span className="font-medium">{getUsernameOrDisplayName(activity.userId)}</span> {activity.content}
                 </p>
                 <p className="text-xs text-gray-400">{getTimeAgo(activity.createdAt)}</p>
               </div>
@@ -274,7 +275,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
             <div className="space-y-2">
               {groupMembers.slice(0, 5).map(member => {
                 const isActive = member.activityStats?.last7DaysActive || isRecentlyActive(member.lastActiveAt);
-                const displayName = member.userId === user?.id ? 'You' : `Member ${member.userId.slice(-4)}`;
+                const displayName = member.userId === user?.id ? 'You' : getUsernameOrDisplayName(member.userId);
                 return (
                   <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
@@ -322,7 +323,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
               <div className="flex-1">
                 <p className="text-sm text-gray-900">
                   <span className={`font-medium ${getActivityColor(activity.activityType)}`}>
-                    {activity.userId === user?.id ? 'You' : `Member ${activity.userId.slice(-4)}`}
+                    {activity.userId === user?.id ? 'You' : getUsernameOrDisplayName(activity.userId)}
                   </span>{' '}
                   {activity.content}
                 </p>

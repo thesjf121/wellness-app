@@ -93,9 +93,16 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
     }
   };
 
-  const getTimeAgo = (date: Date) => {
+  const getTimeAgo = (date: Date | string) => {
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const targetDate = new Date(date);
+    
+    // Check if date is valid
+    if (isNaN(targetDate.getTime())) {
+      return 'unknown';
+    }
+    
+    const diffMs = now.getTime() - targetDate.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
@@ -106,9 +113,16 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
     return `${diffDays}d ago`;
   };
 
-  const isRecentlyActive = (lastActiveAt: Date) => {
+  const isRecentlyActive = (lastActiveAt: Date | string) => {
     const now = new Date();
-    const diffHours = (now.getTime() - new Date(lastActiveAt).getTime()) / (1000 * 60 * 60);
+    const lastActive = new Date(lastActiveAt);
+    
+    // Check if date is valid
+    if (isNaN(lastActive.getTime())) {
+      return false;
+    }
+    
+    const diffHours = (now.getTime() - lastActive.getTime()) / (1000 * 60 * 60);
     return diffHours < 24; // Active if last seen within 24 hours
   };
 
@@ -190,7 +204,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
         </div>
         
         <div className="space-y-2">
-          {recentActivity.slice(0, 3).map(activity => (
+          {recentActivity && recentActivity.length > 0 ? recentActivity.slice(0, 3).map(activity => (
             <div key={activity.id} className="flex items-center space-x-2">
               <span className="text-sm">{getActivityIcon(activity.activityType)}</span>
               <div className="flex-1 min-w-0">
@@ -200,7 +214,11 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
                 <p className="text-xs text-gray-400">{getTimeAgo(activity.createdAt)}</p>
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="text-center py-4 text-gray-500">
+              <p className="text-xs">No activity yet</p>
+            </div>
+          )}
         </div>
         
         <button
@@ -298,7 +316,7 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
       <div>
         <h4 className="font-medium text-gray-900 mb-3">Recent Activity</h4>
         <div className="space-y-3">
-          {recentActivity.slice(0, showAdminView ? 8 : 6).map(activity => (
+          {recentActivity && recentActivity.length > 0 ? recentActivity.slice(0, showAdminView ? 8 : 6).map(activity => (
             <div key={activity.id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
               <span className="text-lg">{getActivityIcon(activity.activityType)}</span>
               <div className="flex-1">
@@ -325,7 +343,12 @@ const GroupActivityWidget: React.FC<GroupActivityWidgetProps> = ({
                 )}
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="text-center py-8 text-gray-500">
+              <p className="text-sm">No recent activity to show</p>
+              <p className="text-xs mt-1">Member activity will appear here</p>
+            </div>
+          )}
         </div>
       </div>
 

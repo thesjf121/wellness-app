@@ -4,6 +4,7 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 import { sessionService } from '../../services/sessionService';
 import { getUserRole, getUserDisplayName, isAdmin } from '../../utils/clerkHelpers';
+import { BottomNavigation } from '../ui/BottomNavigation';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -153,7 +154,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 pb-20">
         {title && (
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
@@ -162,13 +163,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         {children}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-auto">
+      <footer className="bg-white border-t border-gray-200 mt-auto pb-16">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm">
             © 2024 WellnessApp. Creating wellness through movement, nutrition, and social connection.
           </p>
         </div>
       </footer>
+      
+      <BottomNavigation />
     </div>
   );
 };

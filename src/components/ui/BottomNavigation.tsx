@@ -6,14 +6,16 @@ import {
   ChartBarIcon, 
   HeartIcon, 
   UserGroupIcon, 
-  UserIcon 
+  UserIcon,
+  AcademicCapIcon 
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
   ChartBarIcon as ChartBarIconSolid,
   HeartIcon as HeartIconSolid,
   UserGroupIcon as UserGroupIconSolid,
-  UserIcon as UserIconSolid
+  UserIcon as UserIconSolid,
+  AcademicCapIcon as AcademicCapIconSolid
 } from '@heroicons/react/24/solid';
 
 interface NavItem {
@@ -41,6 +43,12 @@ const navItems: NavItem[] = [
     label: 'Nourish',
     icon: HeartIcon,
     activeIcon: HeartIconSolid
+  },
+  {
+    path: '/training',
+    label: 'Learn',
+    icon: AcademicCapIcon,
+    activeIcon: AcademicCapIconSolid
   },
   {
     path: '/groups',

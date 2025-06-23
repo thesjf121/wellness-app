@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 import { FoodEntryForm } from '../../components/food/FoodEntryForm';
 import { NutritionAnalysisResult } from '../../components/food/NutritionAnalysisResult';
 import { QuickFoodEntry } from '../../components/food/QuickFoodEntry';
@@ -37,6 +38,7 @@ const FoodJournalPage: React.FC = () => {
   const [offlineStatus, setOfflineStatus] = useState({ count: 0, isOnline: true });
   const [analyzingFood, setAnalyzingFood] = useState<MealType | null>(null);
   const [recentFoods, setRecentFoods] = useState<string[]>([]);
+  const [selectedEntry, setSelectedEntry] = useState<FoodEntry | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -538,7 +540,7 @@ const FoodJournalPage: React.FC = () => {
                             {mealEntries.length > 0 ? (
                               <div className="space-y-4">
                                 {mealEntries.map(entry => (
-                                  <WellnessCard key={entry.id} variant="secondary" className="p-4">
+                                  <WellnessCard key={entry.id} variant="secondary" className="p-4 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedEntry(entry)}>
                                     <div className="flex items-start justify-between mb-3">
                                       <div className="flex-1">
                                         <div className="flex flex-wrap gap-2 mb-2">
@@ -641,6 +643,165 @@ const FoodJournalPage: React.FC = () => {
       </ParallaxContainer>
       
       <BottomNavigation />
+
+      {/* Food Entry Detail Modal */}
+      <AnimatePresence>
+        {selectedEntry && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedEntry(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="sticky top-0 bg-white/90 backdrop-blur-md p-6 border-b border-gray-100 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">{selectedEntry.name || selectedEntry.foods.map(f => f.foodItem).join(', ')}</h3>
+                    <p className="text-sm text-gray-500 capitalize">
+                      {selectedEntry.mealType} • {selectedEntry.quantity || '1 serving'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedEntry(null)}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Nutrition Content */}
+              <div className="p-6 space-y-6">
+                {/* Calories */}
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-gray-900 mb-2">
+                    {selectedEntry.foods.reduce((sum, food) => sum + food.calories, 0)} cal
+                  </div>
+                  <p className="text-sm text-gray-500">Total Calories</p>
+                </div>
+
+                {/* Macronutrients */}
+                {selectedEntry.foods && selectedEntry.foods.length > 0 && (
+                  <div className="space-y-6">
+                    <h4 className="text-lg font-semibold text-gray-900">Nutrition Breakdown</h4>
+                    {selectedEntry.foods.map((food, index) => (
+                      <div key={index} className="bg-gray-50 rounded-xl p-4">
+                        <h5 className="font-medium text-gray-900 mb-2">{food.foodItem}</h5>
+                        {food.servingSize && (
+                          <p className="text-sm text-blue-600 mb-4 italic">
+                            Based on: {food.servingSize}
+                          </p>
+                        )}
+                        
+                        {/* Macros Grid */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="bg-white rounded-lg p-3">
+                            <div className="text-lg font-bold text-blue-600">{Math.round(food.macronutrients.protein)}g</div>
+                            <div className="text-xs text-gray-600">Protein</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3">
+                            <div className="text-lg font-bold text-orange-600">{Math.round(food.macronutrients.carbohydrates)}g</div>
+                            <div className="text-xs text-gray-600">Carbs</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3">
+                            <div className="text-lg font-bold text-green-600">{Math.round(food.macronutrients.fat)}g</div>
+                            <div className="text-xs text-gray-600">Fat</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3">
+                            <div className="text-lg font-bold text-purple-600">{Math.round(food.macronutrients.fiber)}g</div>
+                            <div className="text-xs text-gray-600">Fiber</div>
+                          </div>
+                        </div>
+                        
+                        {/* Key Micronutrients */}
+                        <div className="border-t border-gray-200 pt-4">
+                          <h6 className="text-sm font-medium text-gray-900 mb-3">Key Vitamins & Minerals</h6>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Iron</span>
+                              <span className="font-medium">{Math.round(food.micronutrients.iron)}mg</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Calcium</span>
+                              <span className="font-medium">{Math.round(food.micronutrients.calcium)}mg</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Vitamin C</span>
+                              <span className="font-medium">{Math.round(food.micronutrients.vitaminC)}mg</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Sodium</span>
+                              <span className="font-medium">{Math.round(food.micronutrients.sodium)}mg</span>
+                            </div>
+                            {food.micronutrients.potassium > 0 && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Potassium</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.potassium)}mg</span>
+                              </div>
+                            )}
+                            {food.micronutrients.vitaminA > 0 && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin A</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminA)}IU</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Entry Notes */}
+                {selectedEntry.notes && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Notes</h4>
+                    <p className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
+                      {selectedEntry.notes}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-4 border-t border-gray-100">
+                  <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-medium transition-colors">
+                    Edit Entry
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (window.confirm('Are you sure you want to delete this food entry?')) {
+                        const success = await foodService.deleteFoodEntry(selectedEntry.id);
+                        if (success) {
+                          setSelectedEntry(null);
+                          await loadDailyNutrition();
+                        }
+                      }
+                    }}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-xl font-medium transition-colors"
+                  >
+                    Delete Entry
+                  </button>
+                </div>
+
+                {/* Entry Time */}
+                <div className="text-center text-xs text-gray-400">
+                  Added {selectedEntry.createdAt ? new Date(selectedEntry.createdAt).toLocaleString() : 'Recently'}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

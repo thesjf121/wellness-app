@@ -508,6 +508,27 @@ const MobileFoodJournalPage: React.FC = () => {
                   </div>
                 )}
 
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-4 border-t border-gray-100">
+                  <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl font-medium transition-colors">
+                    Edit Entry
+                  </button>
+                  <button 
+                    onClick={async () => {
+                      if (window.confirm('Are you sure you want to delete this food entry?')) {
+                        const success = await foodService.deleteFoodEntry(selectedEntry.id);
+                        if (success) {
+                          setSelectedEntry(null);
+                          await loadDailyNutrition();
+                        }
+                      }
+                    }}
+                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-xl font-medium transition-colors"
+                  >
+                    Delete Entry
+                  </button>
+                </div>
+
                 {/* Entry Time */}
                 <div className="text-center text-xs text-gray-400">
                   Added {selectedEntry.createdAt ? new Date(selectedEntry.createdAt).toLocaleString() : 'Recently'}

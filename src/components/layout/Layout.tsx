@@ -23,7 +23,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     { name: 'Dashboard', path: ROUTES.DASHBOARD, requiresAuth: true },
     { name: 'Steps', path: ROUTES.STEP_COUNTER, requiresAuth: true },
     { name: 'Food', path: ROUTES.FOOD_JOURNAL, requiresAuth: true },
-    { name: 'Training', path: ROUTES.TRAINING, requiresAuth: true },
     { name: 'Coaching', path: ROUTES.COACHING },
     { name: 'Groups', path: ROUTES.GROUPS, requiresAuth: true },
     { name: 'Help', path: ROUTES.HELP },

@@ -45,7 +45,7 @@ const navItems: NavItem[] = [
     activeIcon: HeartIconSolid
   },
   {
-    path: '/training',
+    path: '/coaching',
     label: 'Learn',
     icon: AcademicCapIcon,
     activeIcon: AcademicCapIconSolid

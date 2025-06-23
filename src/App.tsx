@@ -20,6 +20,7 @@ import StepsPage from './pages/steps/StepsPage';
 import FoodJournalPage from './pages/food/FoodJournalPage';
 import NutritionDashboardPage from './pages/food/NutritionDashboardPage';
 import TrainingPage from './pages/training/TrainingPage';
+import CoachingPage from './pages/coaching/CoachingPage';
 import GroupsPage from './pages/groups/GroupsPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import SessionsPage from './pages/profile/SessionsPage';
@@ -67,6 +68,7 @@ function App() {
                 <Route path={ROUTES.NUTRITION_ANALYSIS} element={<NutritionDashboardPage />} />
                 <Route path={ROUTES.TRAINING} element={<TrainingPage />} />
                 <Route path="/training/:moduleId" element={<TrainingPage />} />
+                <Route path={ROUTES.COACHING} element={<CoachingPage />} />
                 <Route path={ROUTES.GROUPS} element={<GroupsPage />} />
                 <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
                 <Route path={`${ROUTES.PROFILE}/sessions`} element={<SessionsPage />} />

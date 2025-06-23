@@ -18,6 +18,7 @@ export const ROUTES = {
   NUTRITION_ANALYSIS: '/nutrition-analysis',
   STEP_COUNTER: '/steps',
   TRAINING: '/training',
+  COACHING: '/coaching',
   WELCOME: '/welcome',
   HELP: '/help',
   ADMIN_VIDEOS: '/admin/videos',

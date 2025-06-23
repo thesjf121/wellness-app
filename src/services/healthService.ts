@@ -18,6 +18,7 @@ import { healthConnectService } from './healthConnectService';
 import { notificationService } from './notificationService';
 import { groupActivityFeedService } from './groupActivityFeedService';
 import { groupService } from './groupService';
+import { supabaseHealthService } from './supabaseHealthService';
 
 // Health plugin - graceful fallback when not available
 let CapacitorHealth: any = null;
@@ -66,6 +67,9 @@ class HealthService {
       // Initialize notification service
       await notificationService.initialize();
 
+      // Migrate existing localStorage data to Supabase
+      await this.migrateToSupabase();
+
       // Check if we're on a supported platform
       if (!Capacitor.isNativePlatform()) {
         console.log('Health service: Running on web, using mock data');
@@ -87,6 +91,29 @@ class HealthService {
     } catch (error) {
       errorService.logError(error as Error, { context: 'HealthService.initialize' });
       throw error;
+    }
+  }
+
+  /**
+   * Migrate existing localStorage data to Supabase
+   */
+  private async migrateToSupabase(): Promise<void> {
+    try {
+      // Check if migration has already been done
+      const migrationKey = 'health_data_migrated_to_supabase';
+      if (localStorage.getItem(migrationKey) === 'true') {
+        return;
+      }
+
+      console.log('Migrating health data from localStorage to Supabase...');
+      await supabaseHealthService.migrateFromLocalStorage();
+      
+      // Mark migration as complete
+      localStorage.setItem(migrationKey, 'true');
+      console.log('Health data migration completed');
+    } catch (error) {
+      console.error('Error during health data migration:', error);
+      // Don't throw - migration failure shouldn't break app initialization
     }
   }
 
@@ -136,6 +163,12 @@ class HealthService {
    */
   async getStepData(startDate: Date, endDate: Date): Promise<StepEntry[]> {
     try {
+      // Try to get data from Supabase first
+      const supabaseData = await supabaseHealthService.getStepData(startDate, endDate);
+      if (supabaseData.length > 0) {
+        return supabaseData;
+      }
+
       const platform = Capacitor.getPlatform();
       
       // Use platform-specific services
@@ -172,6 +205,20 @@ class HealthService {
    */
   async addManualStepEntry(entry: CreateStepEntryRequest): Promise<StepEntry> {
     try {
+      // Save to Supabase first (primary storage)
+      const supabaseEntry = await supabaseHealthService.addManualStepEntry(entry);
+      
+      // Also save to localStorage as backup/offline cache
+      await this.saveStepEntryLocally(supabaseEntry);
+
+      return supabaseEntry;
+    } catch (error) {
+      errorService.logError(error as Error, { 
+        context: 'HealthService.addManualStepEntry',
+        entry 
+      });
+      
+      // Fallback to localStorage-only if Supabase fails
       const stepEntry: StepEntry = {
         id: `${entry.date}_manual_${Date.now()}`,
         userId: 'current_user',
@@ -190,19 +237,8 @@ class HealthService {
         hourlyData: entry.hourlyData
       };
 
-      // Save to localStorage
       await this.saveStepEntryLocally(stepEntry);
-
-      // TODO: Sync to backend
-      // await this.syncStepEntry(stepEntry);
-
       return stepEntry;
-    } catch (error) {
-      errorService.logError(error as Error, { 
-        context: 'HealthService.addManualStepEntry',
-        entry 
-      });
-      throw error;
     }
   }
 
@@ -211,6 +247,20 @@ class HealthService {
    */
   async setDailyStepGoal(target: number): Promise<StepGoal> {
     try {
+      // Save to Supabase first
+      const supabaseGoal = await supabaseHealthService.setDailyStepGoal(target);
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('step_goal', JSON.stringify(supabaseGoal));
+
+      return supabaseGoal;
+    } catch (error) {
+      errorService.logError(error as Error, { 
+        context: 'HealthService.setDailyStepGoal',
+        target 
+      });
+      
+      // Fallback to localStorage-only if Supabase fails
       const goal: StepGoal = {
         id: `goal_${Date.now()}`,
         userId: 'current_user',
@@ -220,16 +270,8 @@ class HealthService {
         createdAt: new Date()
       };
 
-      // Save to localStorage
       localStorage.setItem('step_goal', JSON.stringify(goal));
-
       return goal;
-    } catch (error) {
-      errorService.logError(error as Error, { 
-        context: 'HealthService.setDailyStepGoal',
-        target 
-      });
-      throw error;
     }
   }
 
@@ -238,6 +280,13 @@ class HealthService {
    */
   async getCurrentStepGoal(): Promise<StepGoal | null> {
     try {
+      // Try Supabase first
+      const supabaseGoal = await supabaseHealthService.getCurrentStepGoal();
+      if (supabaseGoal) {
+        return supabaseGoal;
+      }
+
+      // Fallback to localStorage
       const stored = localStorage.getItem('step_goal');
       if (!stored) return null;
 

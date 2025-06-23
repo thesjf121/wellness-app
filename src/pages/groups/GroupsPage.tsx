@@ -9,11 +9,13 @@ import { GroupCapacityIndicator } from '../../components/groups/GroupCapacityInd
 import { GroupManagement } from '../../components/groups/GroupManagement';
 import { GroupActivityFeed } from '../../components/groups/GroupActivityFeed';
 import { LeaveGroupModal } from '../../components/groups/LeaveGroupModal';
+import { GroupChat } from '../../components/groups/GroupChat';
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { CircularProgress } from '../../components/ui/CircularProgress';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
 import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 import { groupService } from '../../services/groupService';
+import { groupMessagingService } from '../../services/groupMessagingService';
 import { Group, GroupMember, EligibilityCheck } from '../../types/groups';
 
 const GroupsPage: React.FC = () => {
@@ -27,6 +29,8 @@ const GroupsPage: React.FC = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedChats, setExpandedChats] = useState<Set<string>>(new Set());
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [leaveGroupModal, setLeaveGroupModal] = useState<{ isOpen: boolean; group: Group | null }>({
     isOpen: false,
     group: null
@@ -58,6 +62,12 @@ const GroupsPage: React.FC = () => {
 
       const eligibilityCheck = await groupService.checkEligibility(user.id);
       setEligibility(eligibilityCheck);
+
+      // Load unread message counts for all groups
+      if (groups.length > 0) {
+        const unreadData = await groupMessagingService.getUnreadMessageCount(user.id);
+        setUnreadCounts(unreadData.byGroup);
+      }
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -81,6 +91,21 @@ const GroupsPage: React.FC = () => {
       newExpanded.add(groupId);
     }
     setExpandedGroups(newExpanded);
+  };
+
+  const toggleChatExpansion = async (groupId: string) => {
+    const newExpanded = new Set(expandedChats);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
+    } else {
+      newExpanded.add(groupId);
+      // Mark messages as read when chat is opened
+      if (user) {
+        await groupMessagingService.markMessagesAsRead(user.id, groupId);
+        setUnreadCounts(prev => ({ ...prev, [groupId]: 0 }));
+      }
+    }
+    setExpandedChats(newExpanded);
   };
 
   const handleLeaveGroup = () => {
@@ -421,6 +446,44 @@ const GroupsPage: React.FC = () => {
                             Recent Activity
                           </h4>
                           <GroupActivityFeed groupId={group.id} maxItems={3} />
+                        </div>
+
+                        {/* Group Chat */}
+                        <div className="mb-6">
+                          <motion.button
+                            onClick={() => toggleChatExpansion(group.id)}
+                            className="flex items-center justify-between w-full text-left hover:bg-gray-50 p-3 rounded-xl transition-colors"
+                            whileHover={{ scale: 1.01 }}
+                          >
+                            <div className="flex items-center">
+                              <span className="mr-2">💬</span>
+                              <span className="font-semibold text-gray-900">Group Chat</span>
+                              {unreadCounts[group.id] > 0 && (
+                                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                  {unreadCounts[group.id]}
+                                </span>
+                              )}
+                            </div>
+                            <motion.div
+                              animate={{ rotate: expandedChats.has(group.id) ? 180 : 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </motion.div>
+                          </motion.button>
+                          
+                          {expandedChats.has(group.id) && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-4"
+                            >
+                              <GroupChat groupId={group.id} />
+                            </motion.div>
+                          )}
                         </div>
 
                         {/* Group Management for Sponsors */}

@@ -43,8 +43,8 @@ class GroupService {
       
       // Get user from Clerk
       let userRole = 'member';
-      if (typeof window !== 'undefined' && window.Clerk?.user) {
-        userRole = getUserRole(window.Clerk.user);
+      if (typeof window !== 'undefined' && (window as any).Clerk?.user) {
+        userRole = getUserRole((window as any).Clerk.user);
       }
 
       // Super admins bypass all requirements
@@ -54,8 +54,8 @@ class GroupService {
           canCreateGroup: true,
           canJoinGroup: true,
           requirements: {
-            sevenDayActivity: { met: true, daysActive: 7 },
-            trainingCompletion: { met: true, modulesCompleted: 8 }
+            sevenDayActivity: { met: true, daysActive: 7, requiredDays: 7 },
+            trainingCompletion: { met: true, modulesCompleted: 8, requiredModules: 8 }
           },
           checkedAt: new Date()
         };

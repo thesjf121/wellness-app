@@ -27,12 +27,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
   const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
+  const [adminViewMode, setAdminViewMode] = useState<'admin' | 'member'>('admin');
 
+  const userRole = user?.publicMetadata?.role as string;
+  const isSuperAdmin = userRole === 'super_admin';
 
   // Determine layout based on user role if not specified
   const effectiveLayout = layout || (
-    user?.publicMetadata?.role === 'super_admin' ? 'super_admin' :
-    user?.publicMetadata?.role === 'team_sponsor' ? 'admin' :
+    isSuperAdmin ? (adminViewMode === 'admin' ? 'super_admin' : 'member') :
+    userRole === 'team_sponsor' ? 'admin' :
     'member'
   );
 
@@ -63,8 +66,45 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
 
   const renderMemberDashboard = () => (
     <div className="space-y-6 md:space-y-8 pb-20 min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-purple-50/30 md:bg-white">
-      {/* Daily Greeting */}
-      <DailyGreeting userName={user.firstName || 'there'} />
+      {/* Dashboard Header with View Toggle for Super Admins */}
+      <div className="flex items-center justify-between">
+        {/* Daily Greeting */}
+        <div className="flex-1">
+          <DailyGreeting userName={user.firstName || 'there'} />
+        </div>
+        
+        {/* View Toggle for Super Admins */}
+        {isSuperAdmin && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="ml-4"
+          >
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-1 flex">
+              <button
+                onClick={() => setAdminViewMode('member')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  adminViewMode === 'member'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                👤 Member View
+              </button>
+              <button
+                onClick={() => setAdminViewMode('admin')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  adminViewMode === 'admin'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                ⚡ Admin View
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </div>
 
       {/* Headspace-style Quick Actions */}
       <motion.div
@@ -273,15 +313,47 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              Team Sponsor Dashboard 👨‍💼
+              {isSuperAdmin ? 'Super Admin Dashboard ⚡' : 'Team Sponsor Dashboard 👨‍💼'}
             </h1>
             <p className="text-green-100">
-              Manage your wellness group and track member progress
+              {isSuperAdmin ? 'System administration and group oversight' : 'Manage your wellness group and track member progress'}
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold">{Math.floor(Math.random() * 10) + 1}</div>
-            <div className="text-green-100 text-sm">team members</div>
+          <div className="flex items-center space-x-4">
+            {/* View Toggle for Super Admins */}
+            {isSuperAdmin && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-1 flex">
+                  <button
+                    onClick={() => setAdminViewMode('member')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                      adminViewMode === 'member'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    👤 Member View
+                  </button>
+                  <button
+                    onClick={() => setAdminViewMode('admin')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                      adminViewMode === 'admin'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    ⚡ Admin View
+                  </button>
+                </div>
+              </motion.div>
+            )}
+            <div className="text-right">
+              <div className="text-2xl font-bold">{Math.floor(Math.random() * 10) + 1}</div>
+              <div className="text-green-100 text-sm">team members</div>
+            </div>
           </div>
         </div>
       </div>
@@ -381,9 +453,39 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ layout }) => {
               Platform-wide analytics and management
             </p>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold">{Math.floor(Math.random() * 50) + 20}</div>
-            <div className="text-purple-100 text-sm">total groups</div>
+          <div className="flex items-center space-x-4">
+            {/* View Toggle for Super Admins */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-1 flex">
+                <button
+                  onClick={() => setAdminViewMode('member')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    adminViewMode === 'member'
+                      ? 'bg-white text-purple-600 shadow-sm'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  👤 Member View
+                </button>
+                <button
+                  onClick={() => setAdminViewMode('admin')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    adminViewMode === 'admin'
+                      ? 'bg-white text-purple-600 shadow-sm'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  🚀 Admin View
+                </button>
+              </div>
+            </motion.div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">{Math.floor(Math.random() * 50) + 20}</div>
+              <div className="text-purple-100 text-sm">total groups</div>
+            </div>
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { WellnessCard, CardContent } from '../../../components/ui/WellnessCard';
 import { ArrowLeftIcon, ChevronRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ModuleContent } from '../../../components/coaching/ModuleContent';
 
 const Module3Page: React.FC = () => {
   const navigate = useNavigate();
@@ -394,50 +395,64 @@ Eating Out Successfully:
                     </div>
                   </div>
                   
-                  <div className="p-6 space-y-6">
+                  <div className="p-6 md:p-8 space-y-8">
                     {/* Main Content */}
-                    <div className="prose prose-lg max-w-none">
-                      {section.content.split('\n\n').map((paragraph, idx) => (
-                        <p key={idx} className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
+                    <ModuleContent content={section.content} />
 
                     {/* Learning Outcomes */}
-                    <div className="bg-blue-50 rounded-lg p-6">
-                      <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                        <CheckCircleIcon className="w-5 h-5 mr-2 text-blue-600" />
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                      <h3 className="font-semibold text-gray-900 mb-4 text-lg flex items-center">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                          <CheckCircleIcon className="w-5 h-5 text-white" />
+                        </div>
                         Learning Outcomes
                       </h3>
-                      <ul className="space-y-2">
+                      <ul className="space-y-3">
                         {section.learningOutcomes.map((outcome, idx) => (
                           <li key={idx} className="text-gray-700 flex items-start">
-                            <span className="text-blue-600 mr-2 mt-0.5">•</span>
-                            {outcome}
+                            <span className="text-blue-600 mr-3 mt-1 text-lg">✓</span>
+                            <span className="leading-relaxed">{outcome}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
 
                     {/* Exercise */}
-                    <div className="bg-purple-50 rounded-lg p-6">
-                      <h3 className="font-semibold text-gray-900 mb-3">
-                        ✍️ {section.exercise.title}
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
+                      <h3 className="font-semibold text-gray-900 mb-4 text-lg flex items-center">
+                        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                          <span className="text-white text-lg">✍️</span>
+                        </div>
+                        {section.exercise.title}
                       </h3>
-                      <p className="text-gray-700 mb-4 whitespace-pre-line">
-                        {section.exercise.prompt}
-                      </p>
+                      <div className="bg-white rounded-lg p-4 mb-4 border border-purple-100">
+                        <div className="text-gray-700 space-y-2">
+                          {section.exercise.prompt.split('\n').map((line, idx) => (
+                            line.trim() ? (
+                              <p key={idx} className="leading-relaxed">
+                                {line}
+                              </p>
+                            ) : null
+                          ))}
+                        </div>
+                      </div>
                       <button
                         onClick={() => markSectionComplete(section.id)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        className={`px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 ${
                           completedSections.includes(section.id)
-                            ? 'bg-green-600 text-white'
-                            : 'bg-purple-600 text-white hover:bg-purple-700'
+                            ? 'bg-green-600 text-white shadow-lg'
+                            : 'bg-purple-600 text-white hover:bg-purple-700 shadow-md hover:shadow-lg'
                         }`}
                         disabled={completedSections.includes(section.id)}
                       >
-                        {completedSections.includes(section.id) ? 'Completed ✓' : 'Mark as Complete'}
+                        {completedSections.includes(section.id) ? (
+                          <span className="flex items-center">
+                            <CheckCircleIcon className="w-5 h-5 mr-2" />
+                            Completed
+                          </span>
+                        ) : (
+                          'Mark as Complete'
+                        )}
                       </button>
                     </div>
                   </div>

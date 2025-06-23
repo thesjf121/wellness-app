@@ -64,7 +64,7 @@ class RDAService {
     
     // Macronutrients (estimated for 2000 calorie diet)
     protein: 50, // 10-35% of calories (50g = 10% of 2000 calories)
-    carbohydrates: 300, // 45-65% of calories (300g = 60% of 2000 calories)
+    carbohydrates: 130, // DRI minimum requirement (130g per day)
     fat: 65, // 20-35% of calories (65g = 29% of 2000 calories)
     fiber: 28, // Average of 25g (women) and 38g (men)
     sugar: 50, // WHO recommendation: <10% of calories

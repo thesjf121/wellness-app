@@ -288,11 +288,15 @@ const NutritionDashboardPage: React.FC = () => {
                       const macroKey = nutrient.key === 'carbs' ? 'carbohydrates' : nutrient.key;
                       value = (nutritionData.totalMacros as any)?.[macroKey] || 0;
                     }
+                    
+                    // Map display key to RDA service key
+                    const rdaKey = nutrient.key === 'carbs' ? 'carbohydrates' : nutrient.key;
+                    
                     return renderNutrientCard(
                       nutrient.name,
                       value,
                       nutrient.unit,
-                      nutrient.key,
+                      rdaKey,
                       nutrient.icon
                     );
                   })}

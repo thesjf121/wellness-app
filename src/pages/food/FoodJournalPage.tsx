@@ -434,7 +434,7 @@ const FoodJournalPage: React.FC = () => {
                         </div>
 
                         {/* Nutrition Status Summary */}
-                        <WellnessCard variant="secondary" className="mb-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`${ROUTES.NUTRITION_DASHBOARD}?date=${currentDate}`)}>
+                        <WellnessCard variant="secondary" className="mb-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`${ROUTES.NUTRITION_ANALYSIS}?date=${currentDate}`)}>
                           <CardHeader>
                             <CardTitle className="text-lg">🎯 Nutrition Overview</CardTitle>
                           </CardHeader>

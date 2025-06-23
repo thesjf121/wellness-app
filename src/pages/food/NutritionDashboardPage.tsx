@@ -187,8 +187,8 @@ const NutritionDashboardPage: React.FC = () => {
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Nutrition Dashboard</h1>
-                <p className="text-gray-600">Detailed analysis vs. RDA values</p>
+                <h1 className="text-3xl font-bold text-gray-900">Nutrition Analysis</h1>
+                <p className="text-gray-600">Detailed nutrient breakdown vs. RDA values</p>
               </div>
             </div>
           </motion.div>

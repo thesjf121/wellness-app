@@ -64,7 +64,7 @@ function App() {
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
                 <Route path={ROUTES.STEP_COUNTER} element={<StepsPage />} />
                 <Route path={ROUTES.FOOD_JOURNAL} element={<FoodJournalPage />} />
-                <Route path={ROUTES.NUTRITION_DASHBOARD} element={<NutritionDashboardPage />} />
+                <Route path={ROUTES.NUTRITION_ANALYSIS} element={<NutritionDashboardPage />} />
                 <Route path={ROUTES.TRAINING} element={<TrainingPage />} />
                 <Route path="/training/:moduleId" element={<TrainingPage />} />
                 <Route path={ROUTES.GROUPS} element={<GroupsPage />} />

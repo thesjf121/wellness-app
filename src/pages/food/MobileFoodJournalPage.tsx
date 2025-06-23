@@ -320,7 +320,7 @@ const MobileFoodJournalPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mx-4 mt-6 p-4 bg-white rounded-2xl shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`${ROUTES.NUTRITION_DASHBOARD}?date=${currentDate.toISOString().split('T')[0]}`)}
+              onClick={() => navigate(`${ROUTES.NUTRITION_ANALYSIS}?date=${currentDate.toISOString().split('T')[0]}`)}
             >
               <h3 className="font-semibold text-gray-900 mb-3">Today's Summary</h3>
               <div className="grid grid-cols-4 gap-2">

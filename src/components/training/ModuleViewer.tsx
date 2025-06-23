@@ -567,59 +567,79 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
           </div>
 
           {/* Section Content */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {currentSection.content.map((content) => (
-              <div key={content.id} className="prose max-w-none">
+              <div key={content.id} className="bg-gray-50 rounded-xl p-4 md:p-6">
                 {content.title && (
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                     {content.title}
                   </h3>
                 )}
-                <div className="text-gray-700 leading-relaxed">
-                  {content.content}
+                <div className="text-gray-700 leading-loose text-base md:text-lg space-y-4">
+                  {typeof content.content === 'string' ? (
+                    content.content.split('\n\n').map((paragraph, index) => (
+                      <p key={index} className="mb-4 last:mb-0">
+                        {paragraph}
+                      </p>
+                    ))
+                  ) : (
+                    content.content
+                  )}
                 </div>
               </div>
             ))}
 
             {/* Interactive Exercises */}
             {currentSection.exercises.length > 0 && (
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Interactive Exercises</h3>
-                <div className="space-y-4">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 md:p-6 border border-blue-100">
+                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                  <span className="mr-2">🎯</span>
+                  Interactive Exercises
+                </h3>
+                <div className="space-y-4 md:space-y-6">
                   {currentSection.exercises.map((exercise) => {
                     const isCompleted = wellnessTrainingService.isExerciseCompleted(userId, moduleId, exercise.id);
                     const submissions = wellnessTrainingService.getExerciseSubmissions(userId, moduleId, exercise.id);
                     const latestSubmission = submissions[0]; // Most recent submission
                     
                     return (
-                      <div key={exercise.id} className={`p-4 rounded-lg ${isCompleted ? 'bg-green-50 border border-green-200' : 'bg-blue-50'}`}>
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h4 className="font-medium text-gray-900">
+                      <div key={exercise.id} className={`bg-white rounded-xl p-4 md:p-6 shadow-sm border ${isCompleted ? 'border-green-200' : 'border-gray-200'}`}>
+                        <div className="flex flex-col md:flex-row md:items-start justify-between space-y-4 md:space-y-0">
+                          <div className="flex-1 md:mr-6">
+                            <div className="flex items-center space-x-2 mb-3">
+                              <h4 className="font-semibold text-gray-900 text-base md:text-lg">
                                 {exercise.title}
                               </h4>
                               {isCompleted && (
-                                <span className="text-green-600 text-lg">✅</span>
+                                <span className="text-green-600 text-xl">✅</span>
                               )}
                             </div>
-                            <p className="text-gray-700 mb-3">
+                            <p className="text-gray-700 mb-4 leading-relaxed text-sm md:text-base">
                               {exercise.instructions}
                             </p>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600">
-                              <span>⏱️ {exercise.estimatedDuration} minutes</span>
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                              <span className="flex items-center">
+                                <span className="mr-1">⏱️</span>
+                                {exercise.estimatedDuration} min
+                              </span>
                               {isCompleted && latestSubmission && (
                                 <>
-                                  <span>📊 Score: {latestSubmission.score}/100</span>
-                                  <span>📅 Completed: {new Date(latestSubmission.submittedAt).toLocaleDateString()}</span>
+                                  <span className="flex items-center">
+                                    <span className="mr-1">📊</span>
+                                    {latestSubmission.score}/100
+                                  </span>
+                                  <span className="flex items-center">
+                                    <span className="mr-1">📅</span>
+                                    {new Date(latestSubmission.submittedAt).toLocaleDateString()}
+                                  </span>
                                 </>
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-col space-y-2">
+                          <div className="flex flex-col space-y-3 md:flex-shrink-0">
                             <button
                               onClick={() => handleExerciseStart(exercise)}
-                              className={`px-4 py-2 rounded-md text-white ${
+                              className={`px-6 py-3 rounded-xl text-white font-medium transition-colors ${
                                 isCompleted 
                                   ? 'bg-green-600 hover:bg-green-700' 
                                   : 'bg-blue-600 hover:bg-blue-700'
@@ -632,7 +652,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
                                 onClick={() => {
                                   alert(`Feedback: ${latestSubmission.feedback}`);
                                 }}
-                                className="px-4 py-2 text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50 text-sm"
+                                className="px-6 py-3 text-blue-600 border border-blue-300 rounded-xl hover:bg-blue-50 text-sm font-medium transition-colors"
                               >
                                 View Feedback
                               </button>

@@ -454,17 +454,17 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
   const currentSection = getCurrentSection();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
       {/* Module Header */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-start justify-between space-y-4 md:space-y-0">
+          <div className="flex-1">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
               Module {module.number}: {module.title}
             </h1>
-            <p className="text-gray-600 mb-4">{module.description}</p>
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <span>📅 {module.estimatedDuration} minutes</span>
+            <p className="text-gray-600 mb-4 text-sm md:text-base">{module.description}</p>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+              <span>📅 {module.estimatedDuration} min</span>
               <span>📚 {module.sections.length} sections</span>
               {module.isRequired && (
                 <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
@@ -474,19 +474,19 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
             </div>
           </div>
           
-          <div className="flex flex-col items-end space-y-3">
-            <div className="text-right">
+          <div className="flex flex-row md:flex-col items-center md:items-end space-x-4 md:space-x-0 md:space-y-3">
+            <div className="text-center md:text-right">
               <div className="text-sm text-gray-600 mb-1">Progress</div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-xl md:text-2xl font-bold text-blue-600">
                 {Math.round(progress?.progressPercentage || 0)}%
               </div>
             </div>
             
             <button
               onClick={() => setShowSubmissionHistory(true)}
-              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 border border-gray-300"
+              className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 border border-gray-300 whitespace-nowrap"
             >
-              📊 View Exercise History
+              📊 History
             </button>
           </div>
         </div>
@@ -505,7 +505,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
       {/* Section Navigation */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Sections</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {module.sections.map((section, index) => {
             const isCompleted = isSectionCompleted(section.id);
             const isCurrent = index === currentSectionIndex;
@@ -520,13 +520,13 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
                   }
                 }}
                 disabled={!canAccess}
-                className={`text-left p-3 rounded-lg border text-sm transition-all ${
+                className={`text-left p-4 rounded-xl border text-sm transition-all ${
                   isCurrent
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
                     : isCompleted
                       ? 'border-green-300 bg-green-50 hover:bg-green-100'
                       : canAccess
-                        ? 'border-gray-200 bg-white hover:bg-gray-50'
+                        ? 'border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300'
                         : 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
                 }`}
               >
@@ -549,9 +549,9 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
 
       {/* Current Section Content */}
       {currentSection && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+        <div className="bg-white p-4 md:p-6 rounded-lg border border-gray-200">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 space-y-2 md:space-y-0">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900">
               Section {currentSection.number}: {currentSection.title}
             </h2>
             <div className="flex items-center space-x-2">
@@ -648,7 +648,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
           </div>
 
           {/* Section Navigation */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between mt-8 pt-6 border-t space-y-3 md:space-y-0">
             <button
               onClick={() => {
                 if (currentSectionIndex > 0) {
@@ -656,12 +656,12 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
                 }
               }}
               disabled={currentSectionIndex === 0}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-3 md:py-2 border border-gray-300 rounded-xl md:rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               ← Previous Section
             </button>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center space-y-2 md:space-y-0 md:space-x-3">
               <button
                 onClick={() => {
                   // Mark section as complete if not already
@@ -678,7 +678,7 @@ export const ModuleViewer: React.FC<ModuleViewerProps> = ({
                     window.location.href = `/training/module_${nextModuleNumber}`;
                   }
                 }}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-6 py-3 md:py-2 bg-blue-600 text-white rounded-xl md:rounded-md hover:bg-blue-700 font-medium"
               >
                 {currentSectionIndex < module.sections.length - 1 ? 'Next Section →' : 'Next Module →'}
               </button>

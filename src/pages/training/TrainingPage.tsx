@@ -7,13 +7,16 @@ import { ModuleViewer } from '../../components/training/ModuleViewer';
 import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../components/ui/WellnessCard';
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
 import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 const TrainingPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   
   const { moduleId } = useParams();
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(moduleId || null);
+  const [showModuleSelector, setShowModuleSelector] = useState(false);
 
   useEffect(() => {
     console.log('TrainingPage: moduleId from URL:', moduleId);
@@ -104,48 +107,145 @@ const TrainingPage: React.FC = () => {
           )}
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8"
-        >
-          {/* Module Navigation */}
-          <div className={`${selectedModuleId ? 'lg:col-span-4' : 'lg:col-span-12'}`}>
-            <WellnessCard className="h-full">
-              <CardContent className="p-0">
-                <TrainingModuleNavigation
-                  userId={user.id}
-                  currentModuleId={selectedModuleId || undefined}
-                  onModuleSelect={setSelectedModuleId}
-                />
-              </CardContent>
-            </WellnessCard>
-          </div>
+        {/* Mobile Layout */}
+        {isMobile ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="space-y-4"
+          >
+            {selectedModuleId ? (
+              <>
+                {/* Floating Module Switcher */}
+                <div className="sticky top-4 z-40 bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+                  <button
+                    onClick={() => setShowModuleSelector(true)}
+                    className="w-full flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">🎓</span>
+                      <div className="text-left">
+                        <div className="font-semibold text-gray-900 text-sm">Current Module</div>
+                        <div className="text-xs text-gray-600">Tap to switch modules</div>
+                      </div>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
 
-          {/* Module Viewer */}
-          {selectedModuleId && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-8"
-            >
+                {/* Module Content */}
+                <WellnessCard className="h-full">
+                  <CardContent className="p-0">
+                    <ModuleViewer
+                      userId={user.id}
+                      moduleId={selectedModuleId}
+                      onProgressUpdate={() => {
+                        setSelectedModuleId(selectedModuleId);
+                      }}
+                    />
+                  </CardContent>
+                </WellnessCard>
+              </>
+            ) : (
+              /* Module Selection */
               <WellnessCard className="h-full">
                 <CardContent className="p-0">
-                  <ModuleViewer
+                  <TrainingModuleNavigation
                     userId={user.id}
-                    moduleId={selectedModuleId}
-                    onProgressUpdate={() => {
-                      // Force re-render of navigation to update progress
-                      setSelectedModuleId(selectedModuleId);
+                    currentModuleId={selectedModuleId || undefined}
+                    onModuleSelect={(moduleId) => {
+                      setSelectedModuleId(moduleId);
+                      setShowModuleSelector(false);
                     }}
                   />
                 </CardContent>
               </WellnessCard>
-            </motion.div>
-          )}
-        </motion.div>
+            )}
+
+            {/* Mobile Module Selector Modal */}
+            {showModuleSelector && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+                <motion.div
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  className="bg-white w-full rounded-t-3xl max-h-[80vh] overflow-y-auto"
+                >
+                  <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-bold text-gray-900">Select Module</h2>
+                      <button
+                        onClick={() => setShowModuleSelector(false)}
+                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-2"></div>
+                  </div>
+                  <div className="p-4">
+                    <TrainingModuleNavigation
+                      userId={user.id}
+                      currentModuleId={selectedModuleId || undefined}
+                      onModuleSelect={(moduleId) => {
+                        setSelectedModuleId(moduleId);
+                        setShowModuleSelector(false);
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          /* Desktop Layout */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+          >
+            {/* Module Navigation */}
+            <div className={`${selectedModuleId ? 'lg:col-span-4' : 'lg:col-span-12'}`}>
+              <WellnessCard className="h-full">
+                <CardContent className="p-0">
+                  <TrainingModuleNavigation
+                    userId={user.id}
+                    currentModuleId={selectedModuleId || undefined}
+                    onModuleSelect={setSelectedModuleId}
+                  />
+                </CardContent>
+              </WellnessCard>
+            </div>
+
+            {/* Module Viewer */}
+            {selectedModuleId && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="lg:col-span-8"
+              >
+                <WellnessCard className="h-full">
+                  <CardContent className="p-0">
+                    <ModuleViewer
+                      userId={user.id}
+                      moduleId={selectedModuleId}
+                      onProgressUpdate={() => {
+                        setSelectedModuleId(selectedModuleId);
+                      }}
+                    />
+                  </CardContent>
+                </WellnessCard>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
         </ParallaxLayer>
       </ParallaxContainer>
       

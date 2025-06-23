@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { FoodEntryForm } from '../../components/food/FoodEntryForm';
 import { NutritionAnalysisResult } from '../../components/food/NutritionAnalysisResult';
 import { QuickFoodEntry } from '../../components/food/QuickFoodEntry';
@@ -21,10 +22,12 @@ import { rdaService } from '../../services/rdaService';
 import { FoodEntry, DailyNutrition, MealType } from '../../types/food';
 import MobileFoodJournalPage from './MobileFoodJournalPage';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { ROUTES } from '../../utils/constants';
 
 const FoodJournalPage: React.FC = () => {
   const { user } = useUser();
   const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width: 768px)');
   
   const [currentView, setCurrentView] = useState<'daily' | 'dashboard' | 'reports' | 'goals'>('daily');
@@ -431,7 +434,7 @@ const FoodJournalPage: React.FC = () => {
                         </div>
 
                         {/* Nutrition Status Summary */}
-                        <WellnessCard variant="secondary" className="mb-6">
+                        <WellnessCard variant="secondary" className="mb-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate(`${ROUTES.NUTRITION_DASHBOARD}?date=${currentDate}`)}>
                           <CardHeader>
                             <CardTitle className="text-lg">🎯 Nutrition Overview</CardTitle>
                           </CardHeader>

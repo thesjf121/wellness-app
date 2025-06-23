@@ -15,6 +15,7 @@ export const ROUTES = {
   PROFILE: '/profile',
   GROUPS: '/groups',
   FOOD_JOURNAL: '/food',
+  NUTRITION_DASHBOARD: '/nutrition-dashboard',
   STEP_COUNTER: '/steps',
   TRAINING: '/training',
   WELCOME: '/welcome',

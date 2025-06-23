@@ -16,7 +16,7 @@ export interface NutritionData {
     sugar: number;        // grams
   };
   micronutrients: {
-    // Minerals
+    // Essential Minerals (13)
     sodium: number;       // mg
     potassium: number;    // mg
     calcium: number;      // mg
@@ -28,14 +28,23 @@ export interface NutritionData {
     manganese: number;    // mg
     selenium: number;     // mcg
     iodine: number;       // mcg
+    chromium: number;     // mcg
+    molybdenum: number;   // mcg
     
-    // Fat-soluble vitamins
+    // Additional Important Minerals (5)
+    fluoride: number;     // mg
+    chloride: number;     // mg
+    sulfur: number;       // mg
+    boron: number;        // mcg
+    cobalt: number;       // mcg
+    
+    // Fat-soluble vitamins (4)
     vitaminA: number;     // IU
     vitaminD: number;     // IU
     vitaminE: number;     // mg
     vitaminK: number;     // mcg
     
-    // Water-soluble vitamins
+    // Water-soluble vitamins (9)
     vitaminC: number;     // mg
     thiamine: number;     // mg (B1)
     riboflavin: number;   // mg (B2)
@@ -132,7 +141,7 @@ class GeminiService {
       // }
 
       const prompt = `What is the nutrition value of ${request.text}? Provide detailed serving size assumptions. Only provide values in your answer. Format as JSON array:
-[{"foodItem": "food name", "calories": 0, "macronutrients": {"protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0, "sugar": 0}, "micronutrients": {"sodium": 0, "potassium": 0, "calcium": 0, "iron": 0, "magnesium": 0, "phosphorus": 0, "zinc": 0, "vitaminA": 0, "vitaminC": 0, "vitaminD": 0}, "servingSize": "6 oz (170g) Grilled Sirloin Steak", "confidence": 0.9}]
+[{"foodItem": "food name", "calories": 0, "macronutrients": {"protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0, "sugar": 0}, "micronutrients": {"sodium": 0, "potassium": 0, "calcium": 0, "iron": 0, "magnesium": 0, "phosphorus": 0, "zinc": 0, "copper": 0, "manganese": 0, "selenium": 0, "iodine": 0, "chromium": 0, "molybdenum": 0, "fluoride": 0, "chloride": 0, "sulfur": 0, "boron": 0, "cobalt": 0, "vitaminA": 0, "vitaminD": 0, "vitaminE": 0, "vitaminK": 0, "vitaminC": 0, "thiamine": 0, "riboflavin": 0, "niacin": 0, "pantothenicAcid": 0, "vitaminB6": 0, "biotin": 0, "folate": 0, "vitaminB12": 0, "choline": 0}, "servingSize": "6 oz (170g) Grilled Sirloin Steak", "confidence": 0.9}]
 
 Be specific with serving sizes including weight, preparation method, and any assumptions made.`;
       
@@ -322,6 +331,7 @@ Format your response as a JSON array like this example:
           sugar: Math.max(0, Number(item.sugar_g) || 0),
         },
         micronutrients: {
+          // Essential Minerals
           sodium: Math.max(0, Number(item.sodium_mg) || 0),
           potassium: Math.max(0, Number(item.potassium_mg) || 0),
           calcium: Math.max(0, Number(item.calcium_mg) || 0),
@@ -329,24 +339,34 @@ Format your response as a JSON array like this example:
           magnesium: Math.max(0, Number(item.magnesium_mg) || 0),
           phosphorus: Math.max(0, Number(item.phosphorus_mg) || 0),
           zinc: Math.max(0, Number(item.zinc_mg) || 0),
-          copper: 0, // Not in schema, default to 0
-          manganese: 0,
-          selenium: 0,
-          iodine: 0,
+          copper: Math.max(0, Number(item.copper_mg) || 0),
+          manganese: Math.max(0, Number(item.manganese_mg) || 0),
+          selenium: Math.max(0, Number(item.selenium_mcg) || 0),
+          iodine: Math.max(0, Number(item.iodine_mcg) || 0),
+          chromium: Math.max(0, Number(item.chromium_mcg) || 0),
+          molybdenum: Math.max(0, Number(item.molybdenum_mcg) || 0),
+          // Additional Important Minerals
+          fluoride: Math.max(0, Number(item.fluoride_mg) || 0),
+          chloride: Math.max(0, Number(item.chloride_mg) || 0),
+          sulfur: Math.max(0, Number(item.sulfur_mg) || 0),
+          boron: Math.max(0, Number(item.boron_mcg) || 0),
+          cobalt: Math.max(0, Number(item.cobalt_mcg) || 0),
+          // Fat-soluble vitamins
           vitaminA: Math.max(0, Number(item.vitamin_a_iu) || 0),
           vitaminD: Math.max(0, Number(item.vitamin_d_iu) || 0),
-          vitaminE: 0,
-          vitaminK: 0,
+          vitaminE: Math.max(0, Number(item.vitamin_e_mg) || 0),
+          vitaminK: Math.max(0, Number(item.vitamin_k_mcg) || 0),
+          // Water-soluble vitamins
           vitaminC: Math.max(0, Number(item.vitamin_c_mg) || 0),
-          thiamine: 0,
-          riboflavin: 0,
-          niacin: 0,
-          pantothenicAcid: 0,
-          vitaminB6: 0,
-          biotin: 0,
-          folate: 0,
-          vitaminB12: 0,
-          choline: 0,
+          thiamine: Math.max(0, Number(item.thiamine_mg) || 0),
+          riboflavin: Math.max(0, Number(item.riboflavin_mg) || 0),
+          niacin: Math.max(0, Number(item.niacin_mg) || 0),
+          pantothenicAcid: Math.max(0, Number(item.pantothenic_acid_mg) || 0),
+          vitaminB6: Math.max(0, Number(item.vitamin_b6_mg) || 0),
+          biotin: Math.max(0, Number(item.biotin_mcg) || 0),
+          folate: Math.max(0, Number(item.folate_mcg) || 0),
+          vitaminB12: Math.max(0, Number(item.vitamin_b12_mcg) || 0),
+          choline: Math.max(0, Number(item.choline_mg) || 0),
         },
         servingSize: item.serving_size || '1 serving',
         confidence: Math.min(1, Math.max(0, Number(item.confidence) || 0.8))
@@ -365,10 +385,16 @@ Format your response as a JSON array like this example:
         calories: 100,
         macronutrients: { protein: 2, carbohydrates: 15, fat: 3, fiber: 1, sugar: 5 },
         micronutrients: {
+          // Essential Minerals
           sodium: 50, potassium: 100, calcium: 20, iron: 1, magnesium: 25, phosphorus: 50, zinc: 1,
-          copper: 0.1, manganese: 0.5, selenium: 10, iodine: 50, vitaminA: 100, vitaminD: 10,
-          vitaminE: 2, vitaminK: 20, vitaminC: 5, thiamine: 0.1, riboflavin: 0.1, niacin: 2,
-          pantothenicAcid: 1, vitaminB6: 0.2, biotin: 5, folate: 25, vitaminB12: 0.5, choline: 25
+          copper: 0.1, manganese: 0.5, selenium: 10, iodine: 50, chromium: 5, molybdenum: 10,
+          // Additional Important Minerals
+          fluoride: 0.1, chloride: 100, sulfur: 200, boron: 0.5, cobalt: 0.01,
+          // Fat-soluble vitamins
+          vitaminA: 100, vitaminD: 10, vitaminE: 2, vitaminK: 20,
+          // Water-soluble vitamins
+          vitaminC: 5, thiamine: 0.1, riboflavin: 0.1, niacin: 2, pantothenicAcid: 1,
+          vitaminB6: 0.2, biotin: 5, folate: 25, vitaminB12: 0.5, choline: 25
         },
         servingSize: '1 serving',
         confidence: 0.1
@@ -420,6 +446,7 @@ Format your response as a JSON array like this example:
           sugar: Math.max(0, Number(item.macronutrients?.sugar) || Number(item.macronutrients?.sugar_g) || 0),
         },
         micronutrients: {
+          // Essential Minerals
           sodium: Math.max(0, Number(item.micronutrients?.sodium) || Number(item.micronutrients?.sodium_mg) || 0),
           potassium: Math.max(0, Number(item.micronutrients?.potassium) || Number(item.micronutrients?.potassium_mg) || 0),
           calcium: Math.max(0, Number(item.micronutrients?.calcium) || Number(item.micronutrients?.calcium_mg) || 0),
@@ -431,10 +458,20 @@ Format your response as a JSON array like this example:
           manganese: Math.max(0, Number(item.micronutrients?.manganese) || 0),
           selenium: Math.max(0, Number(item.micronutrients?.selenium) || 0),
           iodine: Math.max(0, Number(item.micronutrients?.iodine) || 0),
+          chromium: Math.max(0, Number(item.micronutrients?.chromium) || 0),
+          molybdenum: Math.max(0, Number(item.micronutrients?.molybdenum) || 0),
+          // Additional Important Minerals
+          fluoride: Math.max(0, Number(item.micronutrients?.fluoride) || 0),
+          chloride: Math.max(0, Number(item.micronutrients?.chloride) || 0),
+          sulfur: Math.max(0, Number(item.micronutrients?.sulfur) || 0),
+          boron: Math.max(0, Number(item.micronutrients?.boron) || 0),
+          cobalt: Math.max(0, Number(item.micronutrients?.cobalt) || 0),
+          // Fat-soluble vitamins
           vitaminA: Math.max(0, Number(item.micronutrients?.vitaminA) || 0),
           vitaminD: Math.max(0, Number(item.micronutrients?.vitaminD) || 0),
           vitaminE: Math.max(0, Number(item.micronutrients?.vitaminE) || 0),
           vitaminK: Math.max(0, Number(item.micronutrients?.vitaminK) || 0),
+          // Water-soluble vitamins
           vitaminC: Math.max(0, Number(item.micronutrients?.vitaminC) || 0),
           thiamine: Math.max(0, Number(item.micronutrients?.thiamine) || 0),
           riboflavin: Math.max(0, Number(item.micronutrients?.riboflavin) || 0),
@@ -468,31 +505,16 @@ Format your response as a JSON array like this example:
           sugar: 5
         },
         micronutrients: {
-          sodium: 50,
-          potassium: 100,
-          calcium: 20,
-          iron: 1,
-          magnesium: 25,
-          phosphorus: 50,
-          zinc: 1,
-          copper: 0.1,
-          manganese: 0.5,
-          selenium: 10,
-          iodine: 50,
-          vitaminA: 100,
-          vitaminD: 10,
-          vitaminE: 2,
-          vitaminK: 20,
-          vitaminC: 5,
-          thiamine: 0.1,
-          riboflavin: 0.1,
-          niacin: 2,
-          pantothenicAcid: 1,
-          vitaminB6: 0.2,
-          biotin: 5,
-          folate: 25,
-          vitaminB12: 0.5,
-          choline: 25
+          // Essential Minerals
+          sodium: 50, potassium: 100, calcium: 20, iron: 1, magnesium: 25, phosphorus: 50, zinc: 1,
+          copper: 0.1, manganese: 0.5, selenium: 10, iodine: 50, chromium: 5, molybdenum: 10,
+          // Additional Important Minerals
+          fluoride: 0.1, chloride: 100, sulfur: 200, boron: 0.5, cobalt: 0.01,
+          // Fat-soluble vitamins
+          vitaminA: 100, vitaminD: 10, vitaminE: 2, vitaminK: 20,
+          // Water-soluble vitamins
+          vitaminC: 5, thiamine: 0.1, riboflavin: 0.1, niacin: 2, pantothenicAcid: 1,
+          vitaminB6: 0.2, biotin: 5, folate: 25, vitaminB12: 0.5, choline: 25
         },
         servingSize: '1 serving',
         confidence: 0.1
@@ -519,6 +541,7 @@ Format your response as a JSON array like this example:
           sugar: 5 + Math.floor(Math.random() * 15)
         },
         micronutrients: {
+          // Essential Minerals
           sodium: 50 + Math.floor(Math.random() * 500),
           potassium: 100 + Math.floor(Math.random() * 400),
           calcium: 20 + Math.floor(Math.random() * 200),
@@ -530,10 +553,20 @@ Format your response as a JSON array like this example:
           manganese: 0.5 + Math.floor(Math.random() * 3),
           selenium: 10 + Math.floor(Math.random() * 50),
           iodine: 50 + Math.floor(Math.random() * 100),
+          chromium: 5 + Math.floor(Math.random() * 30),
+          molybdenum: 10 + Math.floor(Math.random() * 40),
+          // Additional Important Minerals
+          fluoride: 0.1 + Math.floor(Math.random() * 2),
+          chloride: 100 + Math.floor(Math.random() * 500),
+          sulfur: 200 + Math.floor(Math.random() * 800),
+          boron: 0.5 + Math.floor(Math.random() * 3),
+          cobalt: 0.01 + Math.floor(Math.random() * 0.05),
+          // Fat-soluble vitamins
           vitaminA: 100 + Math.floor(Math.random() * 1000),
           vitaminD: 10 + Math.floor(Math.random() * 100),
           vitaminE: 2 + Math.floor(Math.random() * 20),
           vitaminK: 20 + Math.floor(Math.random() * 100),
+          // Water-soluble vitamins
           vitaminC: 5 + Math.floor(Math.random() * 50),
           thiamine: 0.1 + Math.floor(Math.random() * 2),
           riboflavin: 0.1 + Math.floor(Math.random() * 2),

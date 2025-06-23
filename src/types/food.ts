@@ -40,7 +40,7 @@ export interface DailyNutrition {
   };
   foodEntries?: FoodEntry[];
   totalMicros: {
-    // Minerals
+    // Essential Minerals (13)
     sodium: number;
     potassium: number;
     calcium: number;
@@ -52,14 +52,23 @@ export interface DailyNutrition {
     manganese: number;
     selenium: number;
     iodine: number;
+    chromium: number;
+    molybdenum: number;
     
-    // Fat-soluble vitamins
+    // Additional Important Minerals (5)
+    fluoride: number;
+    chloride: number;
+    sulfur: number;
+    boron: number;
+    cobalt: number;
+    
+    // Fat-soluble vitamins (4)
     vitaminA: number;
     vitaminD: number;
     vitaminE: number;
     vitaminK: number;
     
-    // Water-soluble vitamins
+    // Water-soluble vitamins (9)
     vitaminC: number;
     thiamine: number;
     riboflavin: number;
@@ -91,7 +100,7 @@ export interface NutritionGoals {
     sugar: number; // grams
   };
   microGoals: {
-    // Minerals
+    // Essential Minerals (13)
     sodium: number; // mg (usually a limit)
     potassium: number; // mg
     calcium: number; // mg
@@ -103,14 +112,23 @@ export interface NutritionGoals {
     manganese: number; // mg
     selenium: number; // mcg
     iodine: number; // mcg
+    chromium: number; // mcg
+    molybdenum: number; // mcg
     
-    // Fat-soluble vitamins
+    // Additional Important Minerals (5)
+    fluoride: number; // mg
+    chloride: number; // mg
+    sulfur: number; // mg
+    boron: number; // mcg
+    cobalt: number; // mcg
+    
+    // Fat-soluble vitamins (4)
     vitaminA: number; // IU
     vitaminD: number; // IU
     vitaminE: number; // mg
     vitaminK: number; // mcg
     
-    // Water-soluble vitamins
+    // Water-soluble vitamins (9)
     vitaminC: number; // mg
     thiamine: number; // mg
     riboflavin: number; // mg

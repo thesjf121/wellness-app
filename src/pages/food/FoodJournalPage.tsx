@@ -723,38 +723,164 @@ const FoodJournalPage: React.FC = () => {
                           </div>
                         </div>
                         
-                        {/* Key Micronutrients */}
+                        {/* Essential Micronutrients */}
                         <div className="border-t border-gray-200 pt-4">
-                          <h6 className="text-sm font-medium text-gray-900 mb-3">Key Vitamins & Minerals</h6>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Iron</span>
-                              <span className="font-medium">{Math.round(food.micronutrients.iron)}mg</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Calcium</span>
-                              <span className="font-medium">{Math.round(food.micronutrients.calcium)}mg</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Vitamin C</span>
-                              <span className="font-medium">{Math.round(food.micronutrients.vitaminC)}mg</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Sodium</span>
-                              <span className="font-medium">{Math.round(food.micronutrients.sodium)}mg</span>
-                            </div>
-                            {food.micronutrients.potassium > 0 && (
+                          <h6 className="text-sm font-medium text-gray-900 mb-4">Essential Vitamins & Minerals</h6>
+                          
+                          {/* Essential Minerals */}
+                          <div className="mb-4">
+                            <div className="text-xs font-medium text-gray-700 mb-2">Essential Minerals (13)</div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Calcium</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.calcium)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Iron</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.iron)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Magnesium</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.magnesium)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Phosphorus</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.phosphorus)}mg</span>
+                              </div>
                               <div className="flex justify-between">
                                 <span className="text-gray-600">Potassium</span>
                                 <span className="font-medium">{Math.round(food.micronutrients.potassium)}mg</span>
                               </div>
-                            )}
-                            {food.micronutrients.vitaminA > 0 && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Sodium</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.sodium)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Zinc</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.zinc)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Copper</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.copper * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Manganese</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.manganese * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Selenium</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.selenium)}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Iodine</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.iodine)}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Chromium</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.chromium)}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Molybdenum</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.molybdenum)}mcg</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Additional Important Minerals */}
+                          <div className="mb-4">
+                            <div className="text-xs font-medium text-gray-700 mb-2">Additional Minerals (5)</div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Fluoride</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.fluoride * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Chloride</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.chloride)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Sulfur</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.sulfur)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Boron</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.boron * 10) / 10}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Cobalt</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.cobalt * 100) / 100}mcg</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Fat-Soluble Vitamins */}
+                          <div className="mb-4">
+                            <div className="text-xs font-medium text-gray-700 mb-2">Fat-Soluble Vitamins (4)</div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
                               <div className="flex justify-between">
                                 <span className="text-gray-600">Vitamin A</span>
                                 <span className="font-medium">{Math.round(food.micronutrients.vitaminA)}IU</span>
                               </div>
-                            )}
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin D</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminD)}IU</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin E</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminE * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin K</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminK)}mcg</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Water-Soluble Vitamins */}
+                          <div>
+                            <div className="text-xs font-medium text-gray-700 mb-2">Water-Soluble Vitamins (9)</div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin C</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminC)}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Thiamine (B1)</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.thiamine * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Riboflavin (B2)</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.riboflavin * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Niacin (B3)</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.niacin * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Pantothenic (B5)</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.pantothenicAcid * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin B6</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminB6 * 10) / 10}mg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Biotin (B7)</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.biotin)}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Folate (B9)</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.folate)}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Vitamin B12</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.vitaminB12 * 10) / 10}mcg</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Choline</span>
+                                <span className="font-medium">{Math.round(food.micronutrients.choline)}mg</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>

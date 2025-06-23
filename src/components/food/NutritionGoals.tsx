@@ -71,31 +71,17 @@ export const NutritionGoals: React.FC<NutritionGoalsProps> = ({ onClose }) => {
           sugar: formData.sugar
         },
         microGoals: {
+          // Essential Minerals
           sodium: formData.sodium,
-          potassium: 3500, // Default values for nutrients not in form
-          calcium: 1000,
-          iron: 18,
-          magnesium: 400,
-          phosphorus: 700,
-          zinc: 11,
-          copper: 0.9,
-          manganese: 2.3,
-          selenium: 55,
-          iodine: 150,
-          vitaminA: 900,
-          vitaminD: 600,
-          vitaminE: 15,
-          vitaminK: 120,
-          vitaminC: 90,
-          thiamine: 1.2,
-          riboflavin: 1.3,
-          niacin: 16,
-          pantothenicAcid: 5,
-          vitaminB6: 1.7,
-          biotin: 30,
-          folate: 400,
-          vitaminB12: 2.4,
-          choline: 550
+          potassium: 3500, calcium: 1000, iron: 18, magnesium: 400, phosphorus: 700, zinc: 11,
+          copper: 0.9, manganese: 2.3, selenium: 55, iodine: 150, chromium: 35, molybdenum: 45,
+          // Additional Important Minerals
+          fluoride: 4, chloride: 2300, sulfur: 1000, boron: 20, cobalt: 0.001,
+          // Fat-soluble vitamins
+          vitaminA: 900, vitaminD: 600, vitaminE: 15, vitaminK: 120,
+          // Water-soluble vitamins
+          vitaminC: 90, thiamine: 1.2, riboflavin: 1.3, niacin: 16, pantothenicAcid: 5,
+          vitaminB6: 1.7, biotin: 30, folate: 400, vitaminB12: 2.4, choline: 550
         }
       };
 

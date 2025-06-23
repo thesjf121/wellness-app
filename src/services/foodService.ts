@@ -241,8 +241,14 @@ class FoodService {
         totalCalories: 0,
         totalMacros: { protein: 0, carbohydrates: 0, fat: 0, fiber: 0, sugar: 0 },
         totalMicros: { 
-          sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
-          vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
+          // Essential Minerals
+          sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0, chromium: 0, molybdenum: 0,
+          // Additional Important Minerals
+          fluoride: 0, chloride: 0, sulfur: 0, boron: 0, cobalt: 0,
+          // Fat-soluble vitamins
+          vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0,
+          // Water-soluble vitamins
+          vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
         },
         totals: { calories: 0, protein: 0, carbs: 0, fat: 0 },
         foodEntries: [],
@@ -506,8 +512,14 @@ class FoodService {
       return acc;
     }, {
       calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0,
-      sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
-      vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0
+      // Essential Minerals
+      sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0, chromium: 0, molybdenum: 0,
+      // Additional Important Minerals
+      fluoride: 0, chloride: 0, sulfur: 0, boron: 0, cobalt: 0,
+      // Fat-soluble vitamins
+      vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0,
+      // Water-soluble vitamins
+      vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0
     });
 
     return {
@@ -520,31 +532,16 @@ class FoodService {
         sugar: totals.sugar
       },
       totalMicros: {
-        sodium: totals.sodium,
-        potassium: totals.potassium,
-        calcium: totals.calcium,
-        iron: totals.iron,
-        magnesium: totals.magnesium,
-        phosphorus: totals.phosphorus,
-        zinc: totals.zinc,
-        copper: totals.copper,
-        manganese: totals.manganese,
-        selenium: totals.selenium,
-        iodine: totals.iodine,
-        vitaminA: totals.vitaminA,
-        vitaminD: totals.vitaminD,
-        vitaminE: totals.vitaminE,
-        vitaminK: totals.vitaminK,
-        vitaminC: totals.vitaminC,
-        thiamine: totals.thiamine,
-        riboflavin: totals.riboflavin,
-        niacin: totals.niacin,
-        pantothenicAcid: totals.pantothenicAcid,
-        vitaminB6: totals.vitaminB6,
-        biotin: totals.biotin,
-        folate: totals.folate,
-        vitaminB12: totals.vitaminB12,
-        choline: totals.choline
+        // Essential Minerals
+        sodium: totals.sodium, potassium: totals.potassium, calcium: totals.calcium, iron: totals.iron, magnesium: totals.magnesium, phosphorus: totals.phosphorus, zinc: totals.zinc,
+        copper: totals.copper, manganese: totals.manganese, selenium: totals.selenium, iodine: totals.iodine, chromium: totals.chromium, molybdenum: totals.molybdenum,
+        // Additional Important Minerals
+        fluoride: totals.fluoride, chloride: totals.chloride, sulfur: totals.sulfur, boron: totals.boron, cobalt: totals.cobalt,
+        // Fat-soluble vitamins
+        vitaminA: totals.vitaminA, vitaminD: totals.vitaminD, vitaminE: totals.vitaminE, vitaminK: totals.vitaminK,
+        // Water-soluble vitamins
+        vitaminC: totals.vitaminC, thiamine: totals.thiamine, riboflavin: totals.riboflavin, niacin: totals.niacin, pantothenicAcid: totals.pantothenicAcid,
+        vitaminB6: totals.vitaminB6, biotin: totals.biotin, folate: totals.folate, vitaminB12: totals.vitaminB12, choline: totals.choline
       }
     };
   }
@@ -561,6 +558,7 @@ class FoodService {
         acc.macros.fat += food.macronutrients.fat;
         acc.macros.fiber += food.macronutrients.fiber;
         acc.macros.sugar += food.macronutrients.sugar;
+        // Essential Minerals
         acc.micros.sodium += food.micronutrients.sodium;
         acc.micros.potassium += food.micronutrients.potassium;
         acc.micros.calcium += food.micronutrients.calcium;
@@ -572,10 +570,20 @@ class FoodService {
         acc.micros.manganese += food.micronutrients.manganese || 0;
         acc.micros.selenium += food.micronutrients.selenium || 0;
         acc.micros.iodine += food.micronutrients.iodine || 0;
+        acc.micros.chromium += food.micronutrients.chromium || 0;
+        acc.micros.molybdenum += food.micronutrients.molybdenum || 0;
+        // Additional Important Minerals
+        acc.micros.fluoride += food.micronutrients.fluoride || 0;
+        acc.micros.chloride += food.micronutrients.chloride || 0;
+        acc.micros.sulfur += food.micronutrients.sulfur || 0;
+        acc.micros.boron += food.micronutrients.boron || 0;
+        acc.micros.cobalt += food.micronutrients.cobalt || 0;
+        // Fat-soluble vitamins
         acc.micros.vitaminA += food.micronutrients.vitaminA;
         acc.micros.vitaminD += food.micronutrients.vitaminD || 0;
         acc.micros.vitaminE += food.micronutrients.vitaminE || 0;
         acc.micros.vitaminK += food.micronutrients.vitaminK || 0;
+        // Water-soluble vitamins
         acc.micros.vitaminC += food.micronutrients.vitaminC;
         acc.micros.thiamine += food.micronutrients.thiamine || 0;
         acc.micros.riboflavin += food.micronutrients.riboflavin || 0;
@@ -592,8 +600,14 @@ class FoodService {
       calories: 0,
       macros: { protein: 0, carbohydrates: 0, fat: 0, fiber: 0, sugar: 0 },
       micros: { 
-        sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0,
-        vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
+        // Essential Minerals
+        sodium: 0, potassium: 0, calcium: 0, iron: 0, magnesium: 0, phosphorus: 0, zinc: 0, copper: 0, manganese: 0, selenium: 0, iodine: 0, chromium: 0, molybdenum: 0,
+        // Additional Important Minerals
+        fluoride: 0, chloride: 0, sulfur: 0, boron: 0, cobalt: 0,
+        // Fat-soluble vitamins
+        vitaminA: 0, vitaminD: 0, vitaminE: 0, vitaminK: 0,
+        // Water-soluble vitamins
+        vitaminC: 0, thiamine: 0, riboflavin: 0, niacin: 0, pantothenicAcid: 0, vitaminB6: 0, biotin: 0, folate: 0, vitaminB12: 0, choline: 0 
       }
     });
 

@@ -205,31 +205,16 @@ export const FavoriteFoodManager: React.FC = () => {
         sugar: 5
       },
       micronutrients: {
-        sodium: 100,
-        potassium: 200,
-        calcium: 50,
-        iron: 1,
-        magnesium: 25,
-        phosphorus: 50,
-        zinc: 1,
-        copper: 0.1,
-        manganese: 0.5,
-        selenium: 10,
-        iodine: 50,
-        vitaminA: 100,
-        vitaminD: 10,
-        vitaminE: 2,
-        vitaminK: 20,
-        vitaminC: 5,
-        thiamine: 0.1,
-        riboflavin: 0.1,
-        niacin: 2,
-        pantothenicAcid: 1,
-        vitaminB6: 0.2,
-        biotin: 5,
-        folate: 25,
-        vitaminB12: 0.5,
-        choline: 25
+        // Essential Minerals
+        sodium: 100, potassium: 200, calcium: 50, iron: 1, magnesium: 25, phosphorus: 50, zinc: 1,
+        copper: 0.1, manganese: 0.5, selenium: 10, iodine: 50, chromium: 5, molybdenum: 10,
+        // Additional Important Minerals
+        fluoride: 0.1, chloride: 100, sulfur: 200, boron: 0.5, cobalt: 0.01,
+        // Fat-soluble vitamins
+        vitaminA: 100, vitaminD: 10, vitaminE: 2, vitaminK: 20,
+        // Water-soluble vitamins
+        vitaminC: 5, thiamine: 0.1, riboflavin: 0.1, niacin: 2, pantothenicAcid: 1,
+        vitaminB6: 0.2, biotin: 5, folate: 25, vitaminB12: 0.5, choline: 25
       },
       servingSize: '1 serving',
       confidence: 0.7

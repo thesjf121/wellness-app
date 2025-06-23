@@ -357,8 +357,8 @@ const FoodJournalPage: React.FC = () => {
         )}
 
         {showAddForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center md:justify-center">
+            <div className="bg-white w-full md:w-auto md:max-w-2xl md:rounded-2xl rounded-t-3xl max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <FoodEntryForm
                 onAnalysisComplete={handleAnalysisComplete}
                 onClose={() => setShowAddForm(false)}
@@ -369,8 +369,8 @@ const FoodJournalPage: React.FC = () => {
         )}
 
         {showSearch && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl max-w-6xl max-h-[90vh] overflow-y-auto w-full">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center md:justify-center">
+            <div className="bg-white w-full md:w-auto md:max-w-6xl md:rounded-2xl rounded-t-3xl max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <FoodSearch onClose={() => setShowSearch(false)} />
             </div>
           </div>

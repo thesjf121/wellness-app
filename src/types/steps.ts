@@ -1,6 +1,6 @@
 // Step tracking types and interfaces
 
-export type StepDataSource = 'healthkit' | 'googlefit' | 'manual' | 'device' | 'unknown';
+export type StepDataSource = 'healthkit' | 'googlefit' | 'healthconnect' | 'manual' | 'device' | 'unknown';
 
 export interface StepEntry {
   id: string;

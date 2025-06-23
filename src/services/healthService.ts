@@ -14,15 +14,25 @@ import {
 import { errorService } from './errorService';
 import { healthKitService } from './healthKitService';
 import { googleFitService } from './googleFitService';
+import { healthConnectService } from './healthConnectService';
 import { notificationService } from './notificationService';
 
 // Health plugin - graceful fallback when not available
 let CapacitorHealth: any = null;
+let HealthConnect: any = null;
 try {
   // Only attempt to load if the package exists
   if (typeof require !== 'undefined') {
     const healthModule = require('capacitor-health');
     CapacitorHealth = healthModule?.CapacitorHealth;
+    
+    // Try to load Health Connect plugin for Android
+    try {
+      const healthConnectModule = require('capacitor-health-connect');
+      HealthConnect = healthConnectModule?.HealthConnect;
+    } catch (hcError) {
+      console.warn('Health Connect plugin not available:', hcError);
+    }
   }
 } catch (error) {
   console.warn('Health plugin not available, using fallback mode:', error);
@@ -88,8 +98,13 @@ class HealthService {
       // Use platform-specific services
       if (platform === 'ios' && healthKitService.isHealthKitAvailable()) {
         return await healthKitService.requestHealthKitPermissions();
-      } else if (platform === 'android' && googleFitService.isGoogleFitAvailable()) {
-        return await googleFitService.requestGoogleFitPermissions();
+      } else if (platform === 'android') {
+        // Try Health Connect first (preferred), then fallback to Google Fit
+        if (healthConnectService.isHealthConnectAvailable()) {
+          return await healthConnectService.requestHealthConnectPermissions();
+        } else if (googleFitService.isGoogleFitAvailable()) {
+          return await googleFitService.requestGoogleFitPermissions();
+        }
       }
 
       // Fallback for web or unsupported platforms
@@ -124,8 +139,16 @@ class HealthService {
       // Use platform-specific services
       if (platform === 'ios' && healthKitService.isHealthKitAvailable()) {
         return await healthKitService.getStepCount(startDate, endDate);
-      } else if (platform === 'android' && googleFitService.isGoogleFitAvailable()) {
-        return await googleFitService.getStepCount(startDate, endDate);
+      } else if (platform === 'android') {
+        // Try Health Connect first (preferred), then fallback to Google Fit
+        if (healthConnectService.isHealthConnectAvailable()) {
+          return await healthConnectService.getStepCount(startDate, endDate);
+        } else if (googleFitService.isGoogleFitAvailable()) {
+          return await googleFitService.getStepCount(startDate, endDate);
+        } else {
+          // Return mock data for web/development
+          return this.generateMockStepData(startDate, endDate);
+        }
       } else {
         // Return mock data for web/development
         return this.generateMockStepData(startDate, endDate);

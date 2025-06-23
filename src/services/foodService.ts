@@ -4,6 +4,7 @@ import { FoodEntry, MealType, DailyNutrition, NutritionGoals, CreateFoodEntryReq
 import { NutritionData } from './geminiService';
 import { errorService } from './errorService';
 import { activityTrackingService } from './activityTrackingService';
+import { supabaseFoodService } from './supabaseFoodService';
 
 class FoodService {
   private readonly FOOD_ENTRIES_KEY = 'wellness_food_entries';
@@ -11,11 +12,53 @@ class FoodService {
   private readonly FAVORITES_KEY = 'wellness_favorite_foods';
   private readonly OFFLINE_QUEUE_KEY = 'wellness_offline_queue';
   private isOnline = navigator.onLine;
+  private isInitialized = false;
 
   constructor() {
     // Listen for online/offline events
     window.addEventListener('online', this.handleOnline.bind(this));
     window.addEventListener('offline', this.handleOffline.bind(this));
+  }
+
+  /**
+   * Initialize the food service
+   */
+  async initialize(): Promise<void> {
+    try {
+      if (this.isInitialized) return;
+
+      // Migrate existing localStorage data to Supabase
+      await this.migrateToSupabase();
+
+      this.isInitialized = true;
+      errorService.logInfo('Food service initialized successfully');
+    } catch (error) {
+      errorService.logError(error as Error, { context: 'FoodService.initialize' });
+      throw error;
+    }
+  }
+
+  /**
+   * Migrate existing localStorage data to Supabase
+   */
+  private async migrateToSupabase(): Promise<void> {
+    try {
+      // Check if migration has already been done
+      const migrationKey = 'food_data_migrated_to_supabase';
+      if (localStorage.getItem(migrationKey) === 'true') {
+        return;
+      }
+
+      console.log('Migrating food data from localStorage to Supabase...');
+      await supabaseFoodService.migrateFromLocalStorage();
+      
+      // Mark migration as complete
+      localStorage.setItem(migrationKey, 'true');
+      console.log('Food data migration completed');
+    } catch (error) {
+      console.error('Error during food data migration:', error);
+      // Don't throw - migration failure shouldn't break app initialization
+    }
   }
 
   private handleOnline() {
@@ -32,47 +75,72 @@ class FoodService {
    */
   async createFoodEntry(request: CreateFoodEntryRequest, nutritionData: NutritionData[], userId: string): Promise<FoodEntry> {
     try {
-      const entry: FoodEntry = {
-        id: `food_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        userId,
-        date: request.date,
-        mealType: request.mealType,
-        foods: nutritionData,
-        notes: request.notes,
-        imageUrl: request.imageBase64, // In production, would upload to cloud storage
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        synced: this.isOnline
-      };
+      // Try to save to Supabase first (primary storage)
+      try {
+        const supabaseEntry = await supabaseFoodService.createFoodEntry(request, nutritionData);
+        
+        // Also save to localStorage as backup/offline cache
+        await this.saveFoodEntryLocally(supabaseEntry);
 
-      // Save locally first (works both online and offline)
-      await this.saveFoodEntryLocally(entry);
-      
-      if (this.isOnline) {
-        // Process immediately when online
+        // Update favorites frequency
         await this.updateFoodFrequency(nutritionData, userId);
-      } else {
-        // Queue for later processing when offline
-        this.addToOfflineQueue({
-          type: 'create_food_entry',
-          entry,
-          userId,
-          nutritionData,
-          timestamp: new Date().toISOString()
+
+        // Track activity for group eligibility
+        await activityTrackingService.trackFoodActivity(userId, 1);
+
+        errorService.logInfo('Food entry created in Supabase', { 
+          entryId: supabaseEntry.id,
+          mealType: supabaseEntry.mealType,
+          foodCount: nutritionData.length
         });
+
+        return supabaseEntry;
+      } catch (supabaseError) {
+        console.warn('Failed to save to Supabase, using localStorage fallback:', supabaseError);
+        
+        // Fallback to localStorage-only if Supabase fails
+        const entry: FoodEntry = {
+          id: `food_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          userId,
+          date: request.date,
+          mealType: request.mealType,
+          foods: nutritionData,
+          notes: request.notes,
+          imageUrl: request.imageBase64,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          synced: false
+        };
+
+        // Save locally
+        await this.saveFoodEntryLocally(entry);
+        
+        if (this.isOnline) {
+          // Process immediately when online
+          await this.updateFoodFrequency(nutritionData, userId);
+        } else {
+          // Queue for later processing when offline
+          this.addToOfflineQueue({
+            type: 'create_food_entry',
+            entry,
+            userId,
+            nutritionData,
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        // Track activity for group eligibility
+        await activityTrackingService.trackFoodActivity(userId, 1);
+
+        errorService.logInfo('Food entry created locally', { 
+          entryId: entry.id,
+          mealType: entry.mealType,
+          foodCount: nutritionData.length,
+          offline: !this.isOnline
+        });
+
+        return entry;
       }
-
-      // Track activity for group eligibility
-      await activityTrackingService.trackFoodActivity(userId, 1);
-
-      errorService.logInfo('Food entry created', { 
-        entryId: entry.id,
-        mealType: entry.mealType,
-        foodCount: nutritionData.length,
-        offline: !this.isOnline
-      });
-
-      return entry;
     } catch (error) {
       errorService.logError(error as Error, { 
         context: 'FoodService.createFoodEntry',
@@ -88,6 +156,20 @@ class FoodService {
    */
   async getFoodEntries(userId: string, startDate?: string, endDate?: string): Promise<FoodEntry[]> {
     try {
+      // Try to get data from Supabase first
+      try {
+        const startDateObj = startDate ? new Date(startDate) : undefined;
+        const endDateObj = endDate ? new Date(endDate) : undefined;
+        
+        const supabaseEntries = await supabaseFoodService.getFoodEntries(startDateObj, endDateObj);
+        if (supabaseEntries.length > 0) {
+          return supabaseEntries;
+        }
+      } catch (supabaseError) {
+        console.warn('Failed to fetch from Supabase, using localStorage fallback:', supabaseError);
+      }
+
+      // Fallback to localStorage data
       const allEntries = this.loadFoodEntriesFromStorage();
       let userEntries = allEntries.filter(entry => entry.userId === userId);
 
@@ -268,16 +350,29 @@ class FoodService {
    */
   async setNutritionGoals(userId: string, goals: Omit<NutritionGoals, 'userId' | 'createdAt' | 'updatedAt'>): Promise<NutritionGoals> {
     try {
-      const nutritionGoals: NutritionGoals = {
-        userId,
-        ...goals,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      // Try to save to Supabase first
+      try {
+        const supabaseGoals = await supabaseFoodService.setNutritionGoals(goals);
+        
+        // Also save to localStorage as backup
+        localStorage.setItem(`${this.NUTRITION_GOALS_KEY}_${userId}`, JSON.stringify(supabaseGoals));
 
-      localStorage.setItem(`${this.NUTRITION_GOALS_KEY}_${userId}`, JSON.stringify(nutritionGoals));
-      
-      return nutritionGoals;
+        return supabaseGoals;
+      } catch (supabaseError) {
+        console.warn('Failed to save nutrition goals to Supabase, using localStorage fallback:', supabaseError);
+        
+        // Fallback to localStorage-only if Supabase fails
+        const nutritionGoals: NutritionGoals = {
+          userId,
+          ...goals,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        localStorage.setItem(`${this.NUTRITION_GOALS_KEY}_${userId}`, JSON.stringify(nutritionGoals));
+        
+        return nutritionGoals;
+      }
     } catch (error) {
       errorService.logError(error as Error, { 
         context: 'FoodService.setNutritionGoals',
@@ -293,6 +388,17 @@ class FoodService {
    */
   async getNutritionGoals(userId: string): Promise<NutritionGoals | null> {
     try {
+      // Try Supabase first
+      try {
+        const supabaseGoals = await supabaseFoodService.getNutritionGoals();
+        if (supabaseGoals) {
+          return supabaseGoals;
+        }
+      } catch (supabaseError) {
+        console.warn('Failed to fetch nutrition goals from Supabase, using localStorage fallback:', supabaseError);
+      }
+
+      // Fallback to localStorage
       const stored = localStorage.getItem(`${this.NUTRITION_GOALS_KEY}_${userId}`);
       if (!stored) return null;
 
@@ -311,6 +417,17 @@ class FoodService {
    */
   async getFavoriteFoods(userId: string): Promise<FavoriteFoodItem[]> {
     try {
+      // Try Supabase first
+      try {
+        const supabaseFavorites = await supabaseFoodService.getFavoriteFoods();
+        if (supabaseFavorites.length > 0) {
+          return supabaseFavorites;
+        }
+      } catch (supabaseError) {
+        console.warn('Failed to fetch favorite foods from Supabase, using localStorage fallback:', supabaseError);
+      }
+
+      // Fallback to localStorage
       const stored = localStorage.getItem(`${this.FAVORITES_KEY}_${userId}`);
       if (!stored) return [];
 
@@ -330,36 +447,57 @@ class FoodService {
    */
   async addToFavorites(userId: string, nutritionData: NutritionData): Promise<FavoriteFoodItem> {
     try {
-      const favorites = await this.getFavoriteFoods(userId);
-      const existingIndex = favorites.findIndex(f => f.foodName.toLowerCase() === nutritionData.foodItem.toLowerCase());
+      // Try to save to Supabase first
+      try {
+        const supabaseFavorite = await supabaseFoodService.addToFavorites(nutritionData);
+        
+        // Update localStorage with Supabase data
+        const favorites = await this.getFavoriteFoods(userId);
+        const existingIndex = favorites.findIndex(f => f.id === supabaseFavorite.id);
+        
+        if (existingIndex >= 0) {
+          favorites[existingIndex] = supabaseFavorite;
+        } else {
+          favorites.push(supabaseFavorite);
+        }
+        
+        localStorage.setItem(`${this.FAVORITES_KEY}_${userId}`, JSON.stringify(favorites));
+        return supabaseFavorite;
+      } catch (supabaseError) {
+        console.warn('Failed to save favorite to Supabase, using localStorage fallback:', supabaseError);
+        
+        // Fallback to localStorage-only logic
+        const favorites = await this.getFavoriteFoods(userId);
+        const existingIndex = favorites.findIndex(f => f.foodName.toLowerCase() === nutritionData.foodItem.toLowerCase());
 
-      let favoriteItem: FavoriteFoodItem;
+        let favoriteItem: FavoriteFoodItem;
 
-      if (existingIndex >= 0) {
-        // Update existing favorite
-        favoriteItem = {
-          ...favorites[existingIndex],
-          frequency: favorites[existingIndex].frequency + 1,
-          lastUsed: new Date(),
-          nutrition: nutritionData
-        };
-        favorites[existingIndex] = favoriteItem;
-      } else {
-        // Create new favorite
-        favoriteItem = {
-          id: `fav_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          userId,
-          foodName: nutritionData.foodItem,
-          nutrition: nutritionData,
-          frequency: 1,
-          lastUsed: new Date(),
-          createdAt: new Date()
-        };
-        favorites.push(favoriteItem);
+        if (existingIndex >= 0) {
+          // Update existing favorite
+          favoriteItem = {
+            ...favorites[existingIndex],
+            frequency: favorites[existingIndex].frequency + 1,
+            lastUsed: new Date(),
+            nutrition: nutritionData
+          };
+          favorites[existingIndex] = favoriteItem;
+        } else {
+          // Create new favorite
+          favoriteItem = {
+            id: `fav_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            userId,
+            foodName: nutritionData.foodItem,
+            nutrition: nutritionData,
+            frequency: 1,
+            lastUsed: new Date(),
+            createdAt: new Date()
+          };
+          favorites.push(favoriteItem);
+        }
+
+        localStorage.setItem(`${this.FAVORITES_KEY}_${userId}`, JSON.stringify(favorites));
+        return favoriteItem;
       }
-
-      localStorage.setItem(`${this.FAVORITES_KEY}_${userId}`, JSON.stringify(favorites));
-      return favoriteItem;
     } catch (error) {
       errorService.logError(error as Error, { 
         context: 'FoodService.addToFavorites',

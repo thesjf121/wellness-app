@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { ROUTES } from '../../utils/constants';
 import { sessionService } from '../../services/sessionService';
+import { foodService } from '../../services/foodService';
 import { getUserRole, getUserDisplayName, isAdmin } from '../../utils/clerkHelpers';
 import { BottomNavigation } from '../ui/BottomNavigation';
 
@@ -38,6 +39,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     if (isSignedIn && user) {
       sessionService.initialize(user.id);
       sessionService.updateActivity('page_view', { path: location.pathname });
+      
+      // Initialize food service for data migration and sync
+      foodService.initialize().catch(error => {
+        console.error('Failed to initialize food service:', error);
+      });
     } else if (!isSignedIn) {
       sessionService.clearAllData();
     }

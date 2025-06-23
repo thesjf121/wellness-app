@@ -21,6 +21,7 @@ import FoodJournalPage from './pages/food/FoodJournalPage';
 import NutritionDashboardPage from './pages/food/NutritionDashboardPage';
 import TrainingPage from './pages/training/TrainingPage';
 import CoachingPage from './pages/coaching/CoachingPage';
+import CourseOverviewPage from './pages/coaching/CourseOverviewPage';
 import Module1Page from './pages/coaching/modules/Module1Page';
 import Module2Page from './pages/coaching/modules/Module2Page';
 import Module3Page from './pages/coaching/modules/Module3Page';
@@ -77,6 +78,7 @@ function App() {
                 <Route path={ROUTES.TRAINING} element={<TrainingPage />} />
                 <Route path="/training/:moduleId" element={<TrainingPage />} />
                 <Route path={ROUTES.COACHING} element={<CoachingPage />} />
+                <Route path="/coaching/overview" element={<CourseOverviewPage />} />
                 <Route path="/coaching/module/1" element={<Module1Page />} />
                 <Route path="/coaching/module/2" element={<Module2Page />} />
                 <Route path="/coaching/module/3" element={<Module3Page />} />

@@ -216,6 +216,7 @@ const CoachingPage: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <motion.button
+                onClick={() => navigate('/coaching/module/1')}
                 className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -225,6 +226,7 @@ const CoachingPage: React.FC = () => {
               </motion.button>
               
               <motion.button
+                onClick={() => navigate('/coaching/overview')}
                 className="border-2 border-purple-600 text-purple-600 px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-purple-50 transition-all flex items-center"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

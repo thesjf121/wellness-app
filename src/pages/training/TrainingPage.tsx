@@ -8,6 +8,105 @@ import { WellnessCard, CardHeader, CardTitle, CardContent } from '../../componen
 import { BottomNavigation } from '../../components/ui/BottomNavigation';
 import { ParallaxContainer, ParallaxLayer, parallaxPresets } from '../../components/ui/ParallaxContainer';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { TrainingModule, UserModuleProgress } from '../../types/training';
+import { wellnessTrainingService } from '../../services/wellnessTrainingService';
+
+// Compact module selector for mobile modal
+interface CompactModuleSelectorProps {
+  userId: string;
+  currentModuleId?: string;
+  onModuleSelect: (moduleId: string) => void;
+}
+
+const CompactModuleSelector: React.FC<CompactModuleSelectorProps> = ({
+  userId,
+  currentModuleId,
+  onModuleSelect
+}) => {
+  const [modules, setModules] = useState<TrainingModule[]>([]);
+  const [userProgress, setUserProgress] = useState<UserModuleProgress[]>([]);
+
+  useEffect(() => {
+    const modulesList = wellnessTrainingService.getTrainingModules();
+    const progressList = wellnessTrainingService.getUserProgress(userId);
+    setModules(modulesList);
+    setUserProgress(progressList);
+  }, [userId]);
+
+  const getModuleProgress = (moduleId: string): UserModuleProgress | null => {
+    return userProgress.find(p => p.moduleId === moduleId) || null;
+  };
+
+  const getProgressPercentage = (moduleId: string): number => {
+    const progress = getModuleProgress(moduleId);
+    return progress?.progressPercentage || 0;
+  };
+
+  const getModuleStatus = (moduleId: string): 'not_started' | 'in_progress' | 'completed' => {
+    const progress = getModuleProgress(moduleId);
+    return progress?.status || 'not_started';
+  };
+
+  const getStatusIcon = (status: string): string => {
+    switch (status) {
+      case 'completed': return '✅';
+      case 'in_progress': return '🔄';
+      default: return '⭕';
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {modules.map((module) => {
+        const status = getModuleStatus(module.id);
+        const progress = getProgressPercentage(module.id);
+        const isCurrent = currentModuleId === module.id;
+
+        return (
+          <button
+            key={module.id}
+            onClick={() => onModuleSelect(module.id)}
+            className={`w-full text-left p-4 rounded-xl border transition-all ${
+              isCurrent 
+                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
+                : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">{getStatusIcon(status)}</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-sm">
+                    Module {module.number}: {module.title}
+                  </h3>
+                  <p className="text-xs text-gray-600">{module.estimatedDuration} min</p>
+                </div>
+              </div>
+              {isCurrent && (
+                <span className="text-blue-600 text-sm font-medium">Current</span>
+              )}
+            </div>
+            {status !== 'not_started' && (
+              <div className="mt-2">
+                <div className="w-full bg-gray-200 rounded-full h-1">
+                  <div 
+                    className={`h-1 rounded-full transition-all duration-300 ${
+                      status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {Math.round(progress)}% complete
+                </div>
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 const TrainingPage: React.FC = () => {
   const { user } = useUser();
@@ -167,16 +266,16 @@ const TrainingPage: React.FC = () => {
 
             {/* Mobile Module Selector Modal */}
             {showModuleSelector && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <motion.div
-                  initial={{ y: '100%' }}
-                  animate={{ y: 0 }}
-                  exit={{ y: '100%' }}
-                  className="bg-white w-full rounded-t-3xl max-h-[80vh] overflow-y-auto"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-white w-full max-w-md rounded-2xl max-h-[70vh] overflow-hidden shadow-2xl"
                 >
-                  <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
+                  <div className="bg-white border-b border-gray-200 p-4">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-bold text-gray-900">Select Module</h2>
+                      <h2 className="text-lg font-bold text-gray-900">Switch Module</h2>
                       <button
                         onClick={() => setShowModuleSelector(false)}
                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
@@ -186,10 +285,9 @@ const TrainingPage: React.FC = () => {
                         </svg>
                       </button>
                     </div>
-                    <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-2"></div>
                   </div>
-                  <div className="p-4">
-                    <TrainingModuleNavigation
+                  <div className="p-4 overflow-y-auto">
+                    <CompactModuleSelector
                       userId={user.id}
                       currentModuleId={selectedModuleId || undefined}
                       onModuleSelect={(moduleId) => {

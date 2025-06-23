@@ -38,15 +38,50 @@ class GroupService {
    */
   async checkEligibility(userId: string): Promise<EligibilityCheck> {
     try {
+      // Import getUserRole from clerkHelpers
+      const { getUserRole } = await import('../utils/clerkHelpers');
+      
+      // Get user from Clerk
+      let userRole = 'member';
+      if (typeof window !== 'undefined' && window.Clerk?.user) {
+        userRole = getUserRole(window.Clerk.user);
+      }
+
+      // Super admins bypass all requirements
+      if (userRole === 'super_admin') {
+        const eligibility: EligibilityCheck = {
+          userId,
+          canCreateGroup: true,
+          canJoinGroup: true,
+          requirements: {
+            sevenDayActivity: { met: true, daysActive: 7 },
+            trainingCompletion: { met: true, modulesCompleted: 8 }
+          },
+          checkedAt: new Date()
+        };
+
+        // Cache eligibility check
+        localStorage.setItem(
+          `${GROUP_STORAGE_KEYS.USER_ELIGIBILITY}_${userId}`,
+          JSON.stringify(eligibility)
+        );
+
+        return eligibility;
+      }
+
       // Check 7-day activity requirement
       const activityCheck = await this.checkSevenDayActivity(userId);
       
       // Check training completion
       const trainingCheck = await this.checkTrainingCompletion(userId);
 
+      // Team sponsors need to meet requirements, members cannot create groups
+      const canCreateGroup = userRole === 'team_sponsor' ? 
+        (activityCheck.met && trainingCheck.met) : false;
+
       const eligibility: EligibilityCheck = {
         userId,
-        canCreateGroup: activityCheck.met && trainingCheck.met, // Need both for creating groups
+        canCreateGroup,
         canJoinGroup: true, // Anyone can join with an invite code
         requirements: {
           sevenDayActivity: activityCheck,
